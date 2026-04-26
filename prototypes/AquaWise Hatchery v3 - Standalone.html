@@ -1,0 +1,2676 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AquaWise Hatchery — v3</title>
+<style>
+/* AquaWise v3 — friendly, rounded, three-column shell */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Backdrop & surfaces */
+  --aw3-canvas: #E8E9EE;       /* outer body — soft cool grey */
+  --aw3-app: #FFFFFF;          /* the main app shell card */
+  --aw3-card: #FFFFFF;          /* inner cards on app */
+  --aw3-soft: #F6F6FB;         /* tinted card / chip bg */
+  --aw3-soft-2: #EFEEFB;
+  --aw3-line: #ECECF2;
+  --aw3-line-2: #E0E0EA;
+
+  /* Ink */
+  --aw3-ink: #0D0C18;
+  --aw3-ink-2: #1F1E2C;
+  --aw3-ink-3: #4F4E62;
+  --aw3-ink-4: #75748A;
+  --aw3-ink-5: #B0AFC2;
+
+  /* Hero accent — AquaWise primary blue */
+  --aw3-hero: #004AAD;
+  --aw3-hero-2: #003A8C;
+  --aw3-hero-soft: #DCE7F7;
+  --aw3-hero-tint: #EEF3FB;
+
+  /* Pastel category tints */
+  --aw3-lav: #E2EAFB;     --aw3-lav-fg: #2A4DAB;
+  --aw3-peach: #FFE7DA;   --aw3-peach-fg: #C2542B;
+  --aw3-mint: #DEF4E8;    --aw3-mint-fg: #2B7A50;
+  --aw3-sky: #DDECFB;     --aw3-sky-fg: #1F5BB8;
+  --aw3-rose: #FDE2EB;    --aw3-rose-fg: #B83767;
+  --aw3-amber: #FBEFC9;   --aw3-amber-fg: #8C6900;
+
+  /* Status */
+  --aw3-good: #2B7A50;     --aw3-good-tint: #DEF4E8;
+  --aw3-bad:  #C2412B;     --aw3-bad-tint: #FFE0DA;
+  --aw3-warn: #B07000;     --aw3-warn-tint: #FBEFC9;
+
+  /* Type */
+  --font3-thai: 'Noto Sans Thai', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font3-en: 'Plus Jakarta Sans', 'Noto Sans Thai', system-ui, sans-serif;
+  --font3-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Radii */
+  --r-sm: 8px;
+  --r: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  /* Soft shadow */
+  --shadow-card: 0 1px 2px rgba(20,19,31,0.04);
+  --shadow-pop: 0 8px 24px rgba(20,19,31,0.08);
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: var(--font3-thai);
+  font-size: 16px; line-height: 1.6;
+  color: var(--aw3-ink);
+  background: var(--aw3-canvas);
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: var(--font3-mono); font-feature-settings: 'tnum'; }
+.eyebrow {
+  font-family: var(--font3-en);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--aw3-ink-3);
+}
+
+::selection { background: var(--aw3-hero); color: #fff; }
+
+/* Inputs */
+.aw3-input {
+  font-family: inherit; font-size: 16px;
+  background: var(--aw3-soft);
+  border: 1.5px solid var(--aw3-line-2);
+  border-radius: var(--r);
+  padding: 14px 20px;
+  outline: none; width: 100%;
+  color: var(--aw3-ink);
+  transition: all 0.15s;
+}
+.aw3-input:focus {
+  background: #fff;
+  border-color: var(--aw3-hero);
+  box-shadow: 0 0 0 4px var(--aw3-hero-soft);
+}
+
+/* Buttons */
+.aw3-btn {
+  font-family: inherit; font-weight: 700; font-size: 15px;
+  background: var(--aw3-ink); color: #fff;
+  border: 0; border-radius: var(--r);
+  padding: 13px 22px; cursor: pointer;
+  min-height: 46px;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: all 0.15s ease;
+}
+.aw3-btn:hover { background: var(--aw3-hero); }
+.aw3-btn-hero { background: var(--aw3-hero); }
+.aw3-btn-hero:hover { background: var(--aw3-hero-2); }
+.aw3-btn-ghost {
+  background: var(--aw3-soft); color: var(--aw3-ink);
+}
+.aw3-btn-ghost:hover { background: var(--aw3-soft-2); transform: none; }
+.aw3-btn-soft {
+  background: var(--aw3-hero-soft); color: var(--aw3-hero);
+}
+.aw3-btn-soft:hover { background: var(--aw3-hero); color: #fff; transform: none; }
+.aw3-btn-sm { padding: 9px 16px; font-size: 14px; min-height: 38px; }
+
+/* Card */
+.aw3-card {
+  background: var(--aw3-card);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+}
+
+/* Row hover */
+.aw3-row { transition: background 0.12s ease; cursor: pointer; }
+.aw3-row:hover { background: var(--aw3-soft); }
+
+/* Reveal — translate only, no opacity flash (older users read fades as stalls) */
+@keyframes aw3-rise {
+  from { transform: translateY(6px); }
+  to { transform: translateY(0); }
+}
+.aw3-rise { animation: aw3-rise 0.10s ease-out both; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--aw3-ink-5); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--aw3-ink-4); }
+::-webkit-scrollbar-track { background: transparent; }
+
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
+
+<script type="text/babel" data-presets="react" data-module="aw-data">
+/* global */
+// Realistic Thai mock data for AquaWise
+
+const HATCHERY = {
+  name: 'ฟ้าใส แฮทเชอรี่',
+  nameEn: 'Fasai Hatchery',
+  location: 'สมุทรสาคร',
+  locationEn: 'Samut Sakhon',
+};
+
+const CUSTOMERS = [
+  { id: 'C001', name: 'สมชาย ใจดี', farm: 'ฟาร์มกุ้งบ้านสวน', farmEn: 'Bansuan Shrimp Farm',
+    zone: 'สมุทรสาคร', batches: 8, ltv: 184000, lastBuy: '2026-04-12',
+    cycleDay: 78, expectedHarvest: '2026-06-09', d30: 84, d60: 79, restockIn: 14, status: 'active' },
+  { id: 'C002', name: 'ประยุทธ พงษ์ศรี', farm: 'พงษ์ศรีฟาร์ม', farmEn: 'Phongsri Farm',
+    zone: 'ฉะเชิงเทรา', batches: 14, ltv: 392000, lastBuy: '2026-04-22',
+    cycleDay: 24, expectedHarvest: '2026-08-04', d30: null, d60: null, restockIn: 92, status: 'active' },
+  { id: 'C003', name: 'มาลี รุ่งเรือง', farm: 'รุ่งเรืองฟาร์ม 2', farmEn: 'Rungrueang Farm 2',
+    zone: 'สมุทรสงคราม', batches: 5, ltv: 96000, lastBuy: '2026-03-30',
+    cycleDay: 92, expectedHarvest: '2026-05-26', d30: 71, d60: 64, restockIn: 4, status: 'restock-soon' },
+  { id: 'C004', name: 'อนันต์ สุขสบาย', farm: 'สุขสบายฟาร์ม', farmEn: 'Suksabai Farm',
+    zone: 'ฉะเชิงเทรา', batches: 11, ltv: 268000, lastBuy: '2026-04-19',
+    cycleDay: 35, expectedHarvest: '2026-07-22', d30: 88, d60: null, restockIn: 78, status: 'active' },
+  { id: 'C005', name: 'วิภา ทองสุข', farm: 'ทองสุขฟาร์ม', farmEn: 'Thongsuk Farm',
+    zone: 'สมุทรสาคร', batches: 3, ltv: 54000, lastBuy: '2026-04-02',
+    cycleDay: 65, expectedHarvest: '2026-06-22', d30: 42, d60: 38, restockIn: 38, status: 'concern' },
+  { id: 'C006', name: 'ธนากร เกษตรทรัพย์', farm: 'เกษตรทรัพย์ฟาร์ม', farmEn: 'Kasetsap Farm',
+    zone: 'เพชรบุรี', batches: 22, ltv: 612000, lastBuy: '2026-04-25',
+    cycleDay: 8, expectedHarvest: '2026-08-20', d30: null, d60: null, restockIn: 110, status: 'active' },
+  { id: 'C007', name: 'จันทร์เพ็ญ มั่นคง', farm: 'มั่นคงฟาร์ม', farmEn: 'Mankhong Farm',
+    zone: 'สมุทรสาคร', batches: 9, ltv: 198000, lastBuy: '2026-04-08',
+    cycleDay: 105, expectedHarvest: '2026-05-12', d30: 81, d60: 76, restockIn: 0, status: 'restock-now' },
+  { id: 'C008', name: 'พิชัย วงศ์ใหญ่', farm: 'วงศ์ใหญ่ฟาร์ม', farmEn: 'Wongyai Farm',
+    zone: 'ฉะเชิงเทรา', batches: 6, ltv: 142000, lastBuy: '2025-10-04',
+    cycleDay: null, expectedHarvest: null, d30: null, d60: null, restockIn: null, status: 'quiet' },
+  { id: 'C009', name: 'รัชนี โพธิ์ทอง', farm: 'โพธิ์ทองฟาร์ม', farmEn: 'Phothong Farm',
+    zone: 'สมุทรสงคราม', batches: 12, ltv: 304000, lastBuy: '2026-04-18',
+    cycleDay: 42, expectedHarvest: '2026-07-12', d30: 79, d60: null, restockIn: 70, status: 'active' },
+];
+
+const BATCHES = [
+  { id: 'B-2604-A', date: '2026-04-22', source: 'CP-Genetics Line A', plProduced: 2_400_000,
+    plSold: 1_820_000, farms: 6, meanD30: 84, dist: [1,2,4,7,12,18,24,16,8,3], pcr: 'clean' },
+  { id: 'B-2604-B', date: '2026-04-19', source: 'SyAqua Line 7', plProduced: 1_800_000,
+    plSold: 1_650_000, farms: 5, meanD30: 79, dist: [2,3,5,8,14,16,20,15,9,4], pcr: 'clean' },
+  { id: 'B-2604-C', date: '2026-04-12', source: 'CP-Genetics Line A', plProduced: 2_200_000,
+    plSold: 2_200_000, farms: 7, meanD30: 76, dist: [3,5,8,12,16,18,15,11,7,3], pcr: 'clean' },
+  { id: 'B-2603-D', date: '2026-03-30', source: 'Shrimp Improvement Sys.', plProduced: 1_600_000,
+    plSold: 1_600_000, farms: 4, meanD30: 68, dist: [5,8,11,14,16,15,12,9,6,3], pcr: 'flagged' },
+  { id: 'B-2603-C', date: '2026-03-22', source: 'CP-Genetics Line B', plProduced: 2_000_000,
+    plSold: 2_000_000, farms: 6, meanD30: 82, dist: [1,3,5,8,12,17,22,17,9,4], pcr: 'clean' },
+];
+
+const PRICES = {
+  date: '26 เม.ย. 2026',
+  source: 'ตลาดทะเลไทย สมุทรสาคร',
+  rows: [
+    { size: 40, price: 248, delta: +4, avg3y: 232 },
+    { size: 50, price: 215, delta: +2, avg3y: 208 },
+    { size: 60, price: 188, delta: -1, avg3y: 184 },
+    { size: 70, price: 162, delta: -3, avg3y: 168 },
+    { size: 80, price: 138, delta: 0,  avg3y: 145 },
+  ],
+};
+
+window.AW_DATA = { HATCHERY, CUSTOMERS, BATCHES, PRICES };
+
+</script>
+
+<script type="text/babel" data-presets="react" data-module="v3-primitives">
+/* global React */
+// V3 primitives — soft, rounded, friendly
+
+const V3Mark = ({ size = 28, radius }) => (
+  <img src="assets/aquawise-logo.png" alt="AquaWise"
+    width={size} height={size}
+    style={{ display: 'block', borderRadius: radius != null ? radius : Math.round(size * 0.22), objectFit: 'cover' }}/>
+);
+
+// Tonal pill / chip
+const V3Chip = ({ children, tone = 'lav', icon, size = 'sm' }) => {
+  const tones = {
+    lav: { bg: 'var(--aw3-lav)', fg: 'var(--aw3-lav-fg)' },
+    peach: { bg: 'var(--aw3-peach)', fg: 'var(--aw3-peach-fg)' },
+    mint: { bg: 'var(--aw3-mint)', fg: 'var(--aw3-mint-fg)' },
+    sky: { bg: 'var(--aw3-sky)', fg: 'var(--aw3-sky-fg)' },
+    rose: { bg: 'var(--aw3-rose)', fg: 'var(--aw3-rose-fg)' },
+    amber: { bg: 'var(--aw3-amber)', fg: 'var(--aw3-amber-fg)' },
+    soft: { bg: 'var(--aw3-soft)', fg: 'var(--aw3-ink-2)' },
+    good: { bg: 'var(--aw3-good-tint)', fg: 'var(--aw3-good)' },
+    bad: { bg: 'var(--aw3-bad-tint)', fg: 'var(--aw3-bad)' },
+    warn: { bg: 'var(--aw3-warn-tint)', fg: 'var(--aw3-warn)' },
+    solid: { bg: 'var(--aw3-ink)', fg: '#fff' },
+  };
+  const t = tones[tone] || tones.lav;
+  const s = size === 'xs' ? { fs: 11, py: 4, px: 9 } : { fs: 12, py: 5, px: 11 };
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 6,
+      padding: `${s.py}px ${s.px}px`,
+      background: t.bg, color: t.fg,
+      fontFamily: 'inherit', fontSize: s.fs, fontWeight: 600,
+      borderRadius: 'var(--r-pill)', whiteSpace: 'nowrap', lineHeight: 1.2,
+    }}>
+      {icon && <span style={{ fontSize: s.fs - 1, opacity: 0.8 }}>{icon}</span>}
+      {children}
+    </span>
+  );
+};
+
+const V3Card = ({ children, pad = 24, style, onClick, hover, accent }) => (
+  <div onClick={onClick}
+    className={`aw3-card ${onClick || hover ? 'aw3-row' : ''}`}
+    style={{
+      padding: pad,
+      cursor: onClick ? 'pointer' : 'default',
+      ...style,
+    }}>
+    {accent && <div style={{ height: 4, borderRadius: 'var(--r-sm)', background: accent, marginBottom: 16 }}/>}
+    {children}
+  </div>
+);
+
+const V3Section = ({ title, action, children, style }) => (
+  <section style={{ marginBottom: 28, ...style }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+      <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, letterSpacing: '-0.01em' }}>{title}</h2>
+      {action}
+    </div>
+    {children}
+  </section>
+);
+
+// Round arrow button
+const V3RoundBtn = ({ onClick, dir = 'right', size = 40, tone = 'soft' }) => {
+  const r = { right: 0, left: 180, up: 270, down: 90 }[dir];
+  const bg = tone === 'hero' ? 'var(--aw3-hero)' : tone === 'soft' ? 'var(--aw3-soft)' : 'var(--aw3-soft-2)';
+  const fg = tone === 'hero' ? '#fff' : 'var(--aw3-ink)';
+  return (
+    <button onClick={onClick} style={{
+      width: size, height: size, borderRadius: '50%',
+      background: bg, color: fg, border: 0, cursor: 'pointer',
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      transition: 'all 0.15s ease',
+    }}>
+      <svg width={14} height={14} viewBox="0 0 16 16" style={{ transform: `rotate(${r}deg)` }}>
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </button>
+  );
+};
+
+// Avatar with optional ring
+const V3Avatar = ({ name, size = 36, tone, ring }) => {
+  const palettes = ['lav', 'peach', 'mint', 'sky', 'rose', 'amber'];
+  const t = tone || palettes[(name || '').charCodeAt(0) % palettes.length];
+  const tones = {
+    lav: ['#A8C0E6', '#004AAD'],
+    peach: ['#FFC8A8', '#C2542B'],
+    mint: ['#A6E0BD', '#2B7A50'],
+    sky: ['#A6C9F2', '#1F5BB8'],
+    rose: ['#F5B5C8', '#B83767'],
+    amber: ['#F0D78A', '#8C6900'],
+  };
+  const [bg, fg] = tones[t];
+  const initial = (name || '?').trim()[0]?.toUpperCase() || '?';
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: '50%',
+      background: bg, color: fg,
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      fontWeight: 700, fontSize: size * 0.42,
+      boxShadow: ring ? `0 0 0 3px #fff, 0 0 0 ${3 + ring}px var(--aw3-hero)` : 'none',
+      flexShrink: 0,
+    }}>{initial}</div>
+  );
+};
+
+// Progress ring (radial)
+const V3Ring = ({ value, size = 160, stroke = 10, color = 'var(--aw3-hero)', children }) => {
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  return (
+    <div style={{ position: 'relative', width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size/2} cy={size/2} r={r} stroke="var(--aw3-soft)" strokeWidth={stroke} fill="none"/>
+        <circle cx={size/2} cy={size/2} r={r} stroke={color} strokeWidth={stroke} fill="none"
+          strokeDasharray={c} strokeDashoffset={c * (1 - value/100)} strokeLinecap="round"/>
+      </svg>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {children}
+      </div>
+    </div>
+  );
+};
+
+// Soft bar chart (lavender / hero pair)
+const V3Bars = ({ values, labels, height = 140, activeIndex }) => {
+  const max = Math.max(...values);
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, height, padding: '8px 0' }}>
+        {values.map((v, i) => (
+          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', justifyContent: 'flex-end', gap: 6 }}>
+            <div style={{
+              height: `${(v / max) * 100}%`,
+              background: activeIndex === i ? 'var(--aw3-hero)' : 'var(--aw3-hero-soft)',
+              borderRadius: 'var(--r-sm)',
+              minHeight: 4,
+            }}/>
+          </div>
+        ))}
+      </div>
+      {labels && (
+        <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+          {labels.map((l, i) => (
+            <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: 11, color: 'var(--aw3-ink-4)', fontWeight: activeIndex === i ? 700 : 500 }}>{l}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const V3Grid = ({ cols = 12, gap = 20, children, style }) => (
+  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap, ...style }}>{children}</div>
+);
+const V3Col = ({ span = 12, children, style }) => (
+  <div style={{ gridColumn: `span ${span}`, minWidth: 0, ...style }}>{children}</div>
+);
+
+// Photo placeholder — gradient + abstract shapes
+const V3Photo = ({ tone = 'lav', height = 140, label }) => {
+  const tones = {
+    lav: ['#1A66C7', '#A8C0E6'],
+    peach: ['#FF8E5A', '#FFC8A8'],
+    mint: ['#3F9B6C', '#A6E0BD'],
+    sky: ['#3578CC', '#A6C9F2'],
+    rose: ['#D04B7B', '#F5B5C8'],
+    amber: ['#C29A1F', '#F0D78A'],
+  };
+  const [a, b] = tones[tone] || tones.lav;
+  return (
+    <div style={{
+      height, borderRadius: 'var(--r)', position: 'relative', overflow: 'hidden',
+      background: `linear-gradient(135deg, ${a}, ${b})`,
+    }}>
+      <svg width="100%" height="100%" viewBox="0 0 200 140" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0 }}>
+        <circle cx="40" cy="100" r="50" fill="rgba(255,255,255,0.15)"/>
+        <circle cx="160" cy="40" r="36" fill="rgba(255,255,255,0.12)"/>
+        <path d="M0 110 Q 50 80, 100 100 T 200 95 V140 H0 Z" fill="rgba(255,255,255,0.18)"/>
+      </svg>
+      {label && (
+        <div style={{
+          position: 'absolute', bottom: 10, left: 12,
+          background: 'rgba(255,255,255,0.92)', color: 'var(--aw3-ink)',
+          padding: '4px 10px', borderRadius: 'var(--r-pill)',
+          fontSize: 11, fontWeight: 600,
+        }}>{label}</div>
+      )}
+    </div>
+  );
+};
+
+Object.assign(window, {
+  V3Mark, V3Chip, V3Card, V3Section, V3RoundBtn, V3Avatar, V3Ring, V3Bars, V3Grid, V3Col, V3Photo,
+});
+
+</script>
+
+<script type="text/babel" data-presets="react" data-module="v3-charts">
+/* global React */
+const { useState: _v3ch } = React;
+
+// =============================================================
+// V3 Charts — interactive with hover tooltips
+// =============================================================
+
+// Distribution histogram with tooltip + hover
+function V3DistChart({ values, labels, height = 180, accent = (i, v) => i >= 7 ? 'var(--aw3-good)' : i >= 5 ? 'var(--aw3-hero)' : 'var(--aw3-warn)' }) {
+  const [hover, setHover] = _v3ch(null);
+  const max = Math.max(...values, 1);
+  const total = values.reduce((a, b) => a + b, 0);
+
+  return (
+    <div>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: 6, height, padding: '8px 0' }}>
+        {/* Y-axis gridlines */}
+        <div style={{ position: 'absolute', inset: '8px 0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pointerEvents: 'none' }}>
+          {[0,1,2,3].map(i => <div key={i} style={{ borderTop: '1px dashed var(--aw3-line)', height: 1 }}/>)}
+        </div>
+        {values.map((v, i) => (
+          <div key={i}
+            onMouseEnter={() => setHover(i)}
+            onMouseLeave={() => setHover(null)}
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', position: 'relative', cursor: 'pointer' }}>
+            <div style={{
+              height: `${(v / max) * 100}%`,
+              background: hover === i ? 'var(--aw3-ink)' : accent(i, v),
+              borderRadius: 'var(--r-sm) var(--r-sm) 4px 4px',
+              minHeight: v > 0 ? 4 : 0,
+              marginTop: 'auto',
+              transition: 'background 0.12s, transform 0.12s',
+              transform: hover === i ? 'scaleY(1.04)' : 'scaleY(1)',
+              transformOrigin: 'bottom',
+              display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 4,
+              color: '#fff', fontSize: 10, fontWeight: 700,
+            }}>{v >= max * 0.4 && v}</div>
+            {hover === i && (
+              <div style={{
+                position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
+                background: 'var(--aw3-ink)', color: '#fff',
+                padding: '8px 12px', borderRadius: 'var(--r)',
+                fontSize: 12, whiteSpace: 'nowrap', marginBottom: 6,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)', zIndex: 10,
+              }}>
+                <div style={{ fontWeight: 700 }}>{labels[i]}%</div>
+                <div style={{ color: 'var(--aw3-line-2)', fontSize: 11 }}>{v} ฟาร์ม · {Math.round(v/total*100)}%</div>
+                <div style={{
+                  position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
+                  borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
+                  borderTop: '6px solid var(--aw3-ink)',
+                }}/>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+        {labels.map((l, i) => (
+          <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: 9.5, color: hover === i ? 'var(--aw3-ink)' : 'var(--aw3-ink-4)', fontWeight: hover === i ? 700 : 600 }}>{l}</div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Trend sparkline with hover dot
+function V3Sparkline({ values, height = 60, color = 'var(--aw3-hero)', fill = 'var(--aw3-hero-soft)' }) {
+  const [hover, setHover] = _v3ch(null);
+  const w = 240, h = height;
+  const max = Math.max(...values), min = Math.min(...values);
+  const pts = values.map((v, i) => ({
+    x: (i / (values.length - 1)) * w,
+    y: h - 8 - ((v - min) / (max - min || 1)) * (h - 16),
+    v,
+  }));
+  const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  const area = `${path} L ${w} ${h} L 0 ${h} Z`;
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg viewBox={`0 0 ${w} ${h}`} width="100%" height={h} style={{ display: 'block' }}
+        onMouseLeave={() => setHover(null)}
+        onMouseMove={e => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width * w;
+          const i = Math.round(x / w * (values.length - 1));
+          setHover(Math.max(0, Math.min(values.length - 1, i)));
+        }}>
+        <path d={area} fill={fill} opacity="0.5"/>
+        <path d={path} stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        {pts.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r={hover === i ? 5 : 3} fill={color}
+            stroke="#fff" strokeWidth="2"/>
+        ))}
+        {hover != null && (
+          <line x1={pts[hover].x} x2={pts[hover].x} y1={0} y2={h} stroke="var(--aw3-line-2)" strokeDasharray="3 3"/>
+        )}
+      </svg>
+      {hover != null && (
+        <div style={{
+          position: 'absolute', top: -4, left: `${(hover / (values.length - 1)) * 100}%`,
+          transform: 'translate(-50%, -100%)',
+          background: 'var(--aw3-ink)', color: '#fff',
+          padding: '6px 10px', borderRadius: 'var(--r-sm)',
+          fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap',
+        }}>{values[hover]}%</div>
+      )}
+    </div>
+  );
+}
+
+// Donut with center text and segment hover
+function V3Donut({ segs, size = 180, stroke = 22 }) {
+  const [hover, setHover] = _v3ch(null);
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const total = segs.reduce((a, s) => a + s.value, 0);
+  let acc = 0;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+      <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+        <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+          {segs.map((s, i) => {
+            const len = (s.value / total) * c;
+            const dasharray = `${len} ${c - len}`;
+            const dashoffset = -acc;
+            acc += len;
+            return (
+              <circle key={i}
+                onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}
+                cx={size/2} cy={size/2} r={r}
+                stroke={s.color} strokeWidth={hover === i ? stroke + 2 : stroke}
+                fill="none"
+                strokeDasharray={dasharray} strokeDashoffset={dashoffset}
+                style={{ cursor: 'pointer', transition: 'stroke-width 0.12s' }}/>
+            );
+          })}
+        </svg>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.02em' }}>{hover != null ? segs[hover].value : total}</div>
+          <div style={{ fontSize: 11.5, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>{hover != null ? segs[hover].label : 'ทั้งหมด'}</div>
+        </div>
+      </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {segs.map((s, i) => (
+          <div key={i}
+            onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '6px 10px', borderRadius: 'var(--r-sm)',
+              background: hover === i ? 'var(--aw3-soft)' : 'transparent',
+              cursor: 'pointer', transition: 'background 0.1s',
+            }}>
+            <span style={{ width: 10, height: 10, borderRadius: 3, background: s.color }}/>
+            <span style={{ fontSize: 13, flex: 1, fontWeight: 600 }}>{s.label}</span>
+            <span style={{ fontSize: 13, fontWeight: 800 }}>{s.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Bars with hover & label
+function V3BarsInteractive({ values, labels, height = 140, color = 'var(--aw3-hero)' }) {
+  const [hover, setHover] = _v3ch(null);
+  const max = Math.max(...values, 1);
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, height, padding: '8px 0' }}>
+        {values.map((v, i) => (
+          <div key={i}
+            onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', position: 'relative', cursor: 'pointer' }}>
+            {hover === i && (
+              <div style={{
+                position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
+                background: 'var(--aw3-ink)', color: '#fff',
+                padding: '5px 10px', borderRadius: 'var(--r-sm)',
+                fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap', marginBottom: 4,
+              }}>{v}%</div>
+            )}
+            <div style={{
+              height: `${(v / max) * 100}%`,
+              background: hover === i ? 'var(--aw3-ink)' : color,
+              borderRadius: 'var(--r-sm)',
+              minHeight: 4,
+              transition: 'background 0.12s',
+            }}/>
+          </div>
+        ))}
+      </div>
+      {labels && (
+        <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+          {labels.map((l, i) => (
+            <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: 11, color: hover === i ? 'var(--aw3-ink)' : 'var(--aw3-ink-4)', fontWeight: hover === i ? 700 : 500 }}>{l}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+window.V3DistChart = V3DistChart;
+window.V3Sparkline = V3Sparkline;
+window.V3Donut = V3Donut;
+window.V3BarsInteractive = V3BarsInteractive;
+
+</script>
+
+<script type="text/babel" data-presets="react" data-module="v3-context">
+/* global React */
+const { createContext: _v3cc, useContext: _v3uc, useState: _v3us, useReducer: _v3ur, useRef: _v3ur2, useEffect: _v3ue } = React;
+
+// =============================================================
+// V3 App Context — central store for state, modals, toasts
+// =============================================================
+
+const V3Ctx = _v3cc(null);
+window.useV3 = () => _v3uc(V3Ctx);
+
+function V3Provider({ children }) {
+  // Live-mutable copies of the seed data so forms can actually add/edit
+  const [customers, setCustomers] = _v3us(() => window.AW_DATA.CUSTOMERS.map(c => ({ ...c })));
+  const [batches, setBatches] = _v3us(() => window.AW_DATA.BATCHES.map(b => ({ ...b })));
+  const [alerts, setAlerts] = _v3us(() => [
+    { id: 'A001', sev: 'high', title: 'พบ EHP ในล็อต B-2603-D', desc: 'ฟาร์ม 2 จาก 4 ที่ซื้อล็อตนี้รายงานอัตรารอด < 60% ที่ D30',
+      batch: 'B-2603-D', date: '2 ชั่วโมงที่แล้ว', farms: ['ทองสุขฟาร์ม', 'รุ่งเรืองฟาร์ม 2'],
+      action: 'ติดต่อฟาร์มที่เหลือ + ส่ง PCR ใหม่', closed: false },
+    { id: 'A002', sev: 'medium', title: 'อัตรารอด D30 ของ B-2604-C ต่ำกว่าเป้า', desc: 'ค่าเฉลี่ย 76% (เป้า 80%) จาก 7 ฟาร์ม',
+      batch: 'B-2604-C', date: 'เมื่อวาน', farms: ['สุขสบายฟาร์ม', 'มั่นคงฟาร์ม', '+5'],
+      action: 'ตรวจสอบสภาพอากาศ + ปริมาณอาหาร', closed: false },
+    { id: 'A003', sev: 'low', title: 'อุณหภูมิน้ำในเขตสมุทรสาครสูงผิดปกติ', desc: '3 วันติดต่อกัน อาจกระทบล็อตที่กำลังเลี้ยง',
+      batch: null, date: '3 วันที่แล้ว', farms: ['ฟาร์มกุ้งบ้านสวน', 'มั่นคงฟาร์ม', 'ทองสุขฟาร์ม'],
+      action: 'แนะนำลดอาหาร 15%', closed: false },
+  ]);
+
+  // Public scorecard state
+  const [scorecard, setScorecard] = _v3us({
+    public: true,
+    showD30: true, showPCR: true, showRetention: true, showVolume: true, showReviews: false,
+  });
+
+  // Notification settings
+  const [notifs, setNotifs] = _v3us({
+    restock: true, lowD30: true, disease: true, lineReply: false, weekly: true, priceMove: true,
+  });
+
+  // Modal stack — { kind, props }
+  const [modal, setModal] = _v3us(null);
+  const openModal = (kind, props = {}) => setModal({ kind, props });
+  const closeModal = () => setModal(null);
+
+  // Toasts
+  const [toasts, setToasts] = _v3us([]);
+  const toast = (msg, kind = 'success') => {
+    const id = Math.random().toString(36).slice(2);
+    setToasts(t => [...t, { id, msg, kind }]);
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3200);
+  };
+
+  const value = {
+    customers, setCustomers,
+    batches, setBatches,
+    alerts, setAlerts,
+    scorecard, setScorecard,
+    notifs, setNotifs,
+    modal, openModal, closeModal,
+    toast,
+    addCustomer: (c) => { setCustomers(arr => [{ ...c, id: 'C' + String(900 + arr.length).padStart(3,'0'), batches: 0, ltv: 0, status: 'active', cycleDay: null, d30: null, d60: null, restockIn: null }, ...arr]); toast(`เพิ่มลูกค้า "${c.farm}" แล้ว`); },
+    addBatch: (b) => { setBatches(arr => [{ ...b, id: 'B-' + (2604 + arr.length).toString().slice(0,4) + '-' + 'XYZWV'[arr.length % 5], plSold: 0, farms: 0 }, ...arr]); toast(`ลงทะเบียนล็อต ${b.source} แล้ว`); },
+    closeAlert: (id) => { setAlerts(arr => arr.map(a => a.id === id ? { ...a, closed: true } : a)); toast('ปิดเคสแล้ว'); },
+  };
+
+  return (
+    <V3Ctx.Provider value={value}>
+      {children}
+      <V3ModalRoot/>
+      <V3ToastRoot toasts={toasts}/>
+    </V3Ctx.Provider>
+  );
+}
+
+// =============================================================
+// Modal root + chrome
+// =============================================================
+function V3ModalRoot() {
+  const { modal, closeModal } = window.useV3();
+  if (!modal) return null;
+  const Body = window.V3Modals[modal.kind];
+  return (
+    <div onClick={closeModal} style={{
+      position: 'fixed', inset: 0, zIndex: 100,
+      background: 'rgba(13,12,24,0.55)', backdropFilter: 'blur(2px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 24, animation: 'aw3-fade 0.12s ease-out',
+    }}>
+      <style>{`@keyframes aw3-fade { from { opacity: 0 } to { opacity: 1 } } @keyframes aw3-slip { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }`}</style>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: '#fff', borderRadius: 'var(--r-xl)',
+        boxShadow: '0 20px 60px rgba(13,12,24,0.25)',
+        maxWidth: 560, width: '100%', maxHeight: '88vh', overflow: 'auto',
+        animation: 'aw3-slip 0.16s ease-out',
+      }}>
+        {Body ? <Body {...modal.props} close={closeModal}/> : null}
+      </div>
+    </div>
+  );
+}
+
+const V3ModalShell = ({ title, subtitle, children, close, footer }) => (
+  <div>
+    <div style={{ padding: '24px 28px 16px', borderBottom: '1px solid var(--aw3-line)' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, letterSpacing: '-0.01em' }}>{title}</h2>
+          {subtitle && <div style={{ fontSize: 13, color: 'var(--aw3-ink-3)', marginTop: 4 }}>{subtitle}</div>}
+        </div>
+        <button onClick={close} style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--aw3-soft)', border: 0, cursor: 'pointer', fontSize: 18, lineHeight: 1, color: 'var(--aw3-ink-3)' }}>×</button>
+      </div>
+    </div>
+    <div style={{ padding: '20px 28px' }}>{children}</div>
+    {footer && (
+      <div style={{ padding: '14px 28px 20px', borderTop: '1px solid var(--aw3-line)', display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+        {footer}
+      </div>
+    )}
+  </div>
+);
+window.V3ModalShell = V3ModalShell;
+
+// =============================================================
+// Toast root
+// =============================================================
+function V3ToastRoot({ toasts }) {
+  return (
+    <div style={{
+      position: 'fixed', bottom: 24, right: 24, zIndex: 200,
+      display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'none',
+    }}>
+      {toasts.map(t => (
+        <div key={t.id} style={{
+          background: t.kind === 'error' ? 'var(--aw3-bad)' : 'var(--aw3-ink)',
+          color: '#fff', padding: '14px 22px',
+          borderRadius: 'var(--r)', boxShadow: '0 8px 24px rgba(13,12,24,0.18)',
+          fontSize: 14, fontWeight: 600,
+          display: 'flex', alignItems: 'center', gap: 10,
+          animation: 'aw3-slip 0.18s ease-out',
+        }}>
+          <svg width={18} height={18} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M3 8.5l3.5 3.5 6.5-7"/></svg>
+          {t.msg}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// =============================================================
+// Reusable form bits
+// =============================================================
+const V3Field = ({ label, hint, children }) => (
+  <div style={{ marginBottom: 14 }}>
+    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--aw3-ink-3)', marginBottom: 6 }}>{label}</label>
+    {children}
+    {hint && <div style={{ fontSize: 11.5, color: 'var(--aw3-ink-4)', marginTop: 4 }}>{hint}</div>}
+  </div>
+);
+window.V3Field = V3Field;
+
+const V3Toggle = ({ on, onChange, size = 'md' }) => {
+  const dim = size === 'sm' ? { w: 44, h: 26, k: 20 } : { w: 48, h: 28, k: 22 };
+  return (
+    <button onClick={() => onChange(!on)} style={{
+      width: dim.w, height: dim.h, borderRadius: 'var(--r-pill)',
+      background: on ? 'var(--aw3-hero)' : 'var(--aw3-line-2)',
+      border: 0, cursor: 'pointer', position: 'relative', transition: 'all 0.15s',
+      flexShrink: 0,
+    }}>
+      <span style={{
+        position: 'absolute', top: 3, left: on ? dim.w - dim.k - 3 : 3,
+        width: dim.k, height: dim.k, borderRadius: '50%',
+        background: '#fff', transition: 'left 0.15s',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+      }}/>
+    </button>
+  );
+};
+window.V3Toggle = V3Toggle;
+
+window.V3Provider = V3Provider;
+
+</script>
+
+<script type="text/babel" data-presets="react" data-module="v3-modals">
+/* global React */
+const { useState: _v3ms2 } = React;
+
+// =============================================================
+// All modal bodies — keyed by `kind` in openModal('kind', props)
+// =============================================================
+
+// ---- Add Customer ----
+function V3M_AddCustomer({ close }) {
+  const { addCustomer } = window.useV3();
+  const [f, setF] = _v3ms2({ farm: '', name: '', phone: '', zone: 'สมุทรสาคร', plan: '300k' });
+  const set = (k, v) => setF(s => ({ ...s, [k]: v }));
+  const submit = () => {
+    if (!f.farm || !f.name) return;
+    addCustomer(f);
+    close();
+  };
+  return (
+    <window.V3ModalShell title="เพิ่มลูกค้าใหม่" subtitle="ข้อมูลฟาร์มที่จะใช้ในใบรับรองและ LINE OA" close={close} footer={
+      <>
+        <button className="aw3-btn aw3-btn-ghost" onClick={close}>ยกเลิก</button>
+        <button className="aw3-btn aw3-btn-hero" onClick={submit}>เพิ่มลูกค้า</button>
+      </>
+    }>
+      <window.V3Field label="ชื่อฟาร์ม">
+        <input className="aw3-input" placeholder="เช่น ฟาร์มกุ้งบ้านสวน" value={f.farm} onChange={e => set('farm', e.target.value)}/>
+      </window.V3Field>
+      <window.V3Field label="ชื่อเจ้าของ">
+        <input className="aw3-input" placeholder="ชื่อ-นามสกุล" value={f.name} onChange={e => set('name', e.target.value)}/>
+      </window.V3Field>
+      <window.V3Field label="เบอร์โทรศัพท์">
+        <input className="aw3-input" placeholder="081-234-5678" value={f.phone} onChange={e => set('phone', e.target.value)}/>
+      </window.V3Field>
+      <window.V3Field label="เขต/จังหวัด">
+        <select className="aw3-input" value={f.zone} onChange={e => set('zone', e.target.value)}>
+          <option>สมุทรสาคร</option><option>ฉะเชิงเทรา</option><option>สมุทรสงคราม</option><option>เพชรบุรี</option><option>ตราด</option>
+        </select>
+      </window.V3Field>
+      <window.V3Field label="แพ็กเกจที่สนใจ" hint="ปรับเปลี่ยนได้ตอนเสนอราคา">
+        <div style={{ display: 'flex', gap: 8 }}>
+          {['200k', '300k', '500k', '1M'].map(p => (
+            <button key={p} onClick={() => set('plan', p)} style={{
+              flex: 1, padding: '10px 0', border: 0, borderRadius: 'var(--r)',
+              background: f.plan === p ? 'var(--aw3-hero)' : 'var(--aw3-soft)',
+              color: f.plan === p ? '#fff' : 'var(--aw3-ink-2)',
+              fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+            }}>{p} PL</button>
+          ))}
+        </div>
+      </window.V3Field>
+    </window.V3ModalShell>
+  );
+}
+
+// ---- Add Batch ----
+function V3M_AddBatch({ close }) {
+  const { addBatch } = window.useV3();
+  const [step, setStep] = _v3ms2(1);
+  const [f, setF] = _v3ms2({ source: 'CP-Genetics Line A', plProduced: 2000000, date: '2026-04-26', pcr: 'pending' });
+  const set = (k, v) => setF(s => ({ ...s, [k]: v }));
+  const next = () => step < 3 ? setStep(step + 1) : (() => { addBatch({ ...f, meanD30: 0, dist: [0,0,0,0,0,0,0,0,0,0] }); close(); })();
+
+  const STEPS = ['ข้อมูลล็อต', 'ผลตรวจ PCR', 'ยืนยัน'];
+
+  return (
+    <window.V3ModalShell title="ลงทะเบียนล็อตใหม่" subtitle={`ขั้นที่ ${step} จาก 3 — ${STEPS[step-1]}`} close={close} footer={
+      <>
+        {step > 1 && <button className="aw3-btn aw3-btn-ghost" onClick={() => setStep(step-1)}>ย้อนกลับ</button>}
+        <button className="aw3-btn aw3-btn-hero" onClick={next}>{step === 3 ? 'ลงทะเบียน' : 'ถัดไป →'}</button>
+      </>
+    }>
+      {/* Stepper */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 22 }}>
+        {STEPS.map((s, i) => (
+          <div key={i} style={{
+            flex: 1, height: 4, borderRadius: 'var(--r-pill)',
+            background: i + 1 <= step ? 'var(--aw3-hero)' : 'var(--aw3-line-2)',
+          }}/>
+        ))}
+      </div>
+
+      {step === 1 && (
+        <>
+          <window.V3Field label="สายพันธุ์">
+            <select className="aw3-input" value={f.source} onChange={e => set('source', e.target.value)}>
+              <option>CP-Genetics Line A</option><option>CP-Genetics Line B</option><option>SyAqua Line 7</option><option>Shrimp Improvement Sys.</option>
+            </select>
+          </window.V3Field>
+          <window.V3Field label="วันที่ลงไข่">
+            <input className="aw3-input" type="date" value={f.date} onChange={e => set('date', e.target.value)}/>
+          </window.V3Field>
+          <window.V3Field label="จำนวน PL ที่ผลิต" hint="หน่วยล้านตัว">
+            <input className="aw3-input" type="number" step="0.1" value={f.plProduced/1000000} onChange={e => set('plProduced', parseFloat(e.target.value)*1000000)}/>
+          </window.V3Field>
+        </>
+      )}
+
+      {step === 2 && (
+        <>
+          <div style={{ fontSize: 13, color: 'var(--aw3-ink-3)', marginBottom: 14 }}>เลือกอัปโหลดไฟล์ PCR หรือกรอกผลด้วยตัวเอง</div>
+          <div style={{
+            padding: 24, borderRadius: 'var(--r)',
+            background: 'var(--aw3-soft)', border: '2px dashed var(--aw3-line-2)',
+            textAlign: 'center', marginBottom: 18, cursor: 'pointer',
+          }}>
+            <div style={{ fontSize: 28, marginBottom: 8 }}>📄</div>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>อัปโหลดไฟล์ PCR</div>
+            <div style={{ fontSize: 12, color: 'var(--aw3-ink-4)', marginTop: 4 }}>PDF, JPG หรือ PNG</div>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {['WSSV','EHP','IHHNV','TSV'].map(d => (
+              <div key={d} style={{ flex: 1, padding: 12, background: 'var(--aw3-good-tint)', borderRadius: 'var(--r-sm)', textAlign: 'center' }}>
+                <div style={{ fontSize: 11, color: 'var(--aw3-good)', fontWeight: 700 }}>{d}</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--aw3-good)', marginTop: 2 }}>✓ ผ่าน</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {step === 3 && (
+        <div>
+          <div style={{ padding: 18, borderRadius: 'var(--r)', background: 'var(--aw3-soft)', marginBottom: 14 }}>
+            {[
+              ['สายพันธุ์', f.source],
+              ['วันที่ลงไข่', f.date],
+              ['ปริมาณ', `${(f.plProduced/1000000).toFixed(1)}M PL`],
+              ['PCR', '✓ ผ่านทุกชนิด'],
+            ].map(([k, v], i) => (
+              <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderTop: i > 0 ? '1px solid var(--aw3-line)' : 0 }}>
+                <span style={{ color: 'var(--aw3-ink-3)', fontSize: 13 }}>{k}</span>
+                <span style={{ fontWeight: 700, fontSize: 13 }}>{v}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: 12.5, color: 'var(--aw3-ink-4)' }}>กดลงทะเบียนเพื่อสร้างใบรับรองและเปิดให้ขายในระบบ</div>
+        </div>
+      )}
+    </window.V3ModalShell>
+  );
+}
+
+// ---- Send LINE message ----
+function V3M_SendLine({ close, customer }) {
+  const { toast } = window.useV3();
+  const [msg, setMsg] = _v3ms2('สวัสดีครับ คุณ' + (customer?.name?.split(' ')[0] || '') + ' รอบนี้ใกล้ครบแล้ว ทางเรามีล็อตใหม่ B-2604-A พร้อมส่ง 320k PL ครับ');
+  const send = () => { toast(`ส่งข้อความถึง ${customer?.farm || 'ลูกค้า'} แล้ว`); close(); };
+  return (
+    <window.V3ModalShell title="ส่งข้อความผ่าน LINE" subtitle={customer?.farm} close={close} footer={
+      <>
+        <button className="aw3-btn aw3-btn-ghost" onClick={close}>ยกเลิก</button>
+        <button className="aw3-btn aw3-btn-hero" onClick={send}>
+          ส่งข้อความ
+          <svg width={14} height={14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 8h12M9 4l5 4-5 4"/></svg>
+        </button>
+      </>
+    }>
+      <window.V3Field label="แม่แบบ">
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {['ใกล้ครบรอบ', 'มีล็อตใหม่', 'ส่งใบรับรอง', 'ขอราคาเก็บเกี่ยว'].map(t => (
+            <button key={t} onClick={() => setMsg(`[แม่แบบ "${t}"] สวัสดีครับ ...`)} style={{
+              padding: '7px 12px', borderRadius: 'var(--r-pill)',
+              background: 'var(--aw3-soft)', border: 0,
+              fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
+            }}>{t}</button>
+          ))}
+        </div>
+      </window.V3Field>
+      <window.V3Field label="ข้อความ" hint={`${msg.length} / 1000 อักษร`}>
+        <textarea className="aw3-input" rows={5} value={msg} onChange={e => setMsg(e.target.value)} style={{ fontSize: 14, lineHeight: 1.6, resize: 'vertical' }}/>
+      </window.V3Field>
+      <div style={{ padding: 14, borderRadius: 'var(--r)', background: 'var(--aw3-mint)', display: 'flex', gap: 10, alignItems: 'center' }}>
+        <span style={{ fontSize: 18 }}>💬</span>
+        <div style={{ fontSize: 12.5, color: 'var(--aw3-mint-fg)', fontWeight: 600 }}>
+          จะส่งผ่าน LINE Official Account @fasaihatchery
+        </div>
+      </div>
+    </window.V3ModalShell>
+  );
+}
+
+// ---- Send Quote ----
+function V3M_Quote({ close, customer }) {
+  const { toast } = window.useV3();
+  const [size, setSize] = _v3ms2('300k');
+  const [batch, setBatch] = _v3ms2('B-2604-A');
+  const [discount, setDiscount] = _v3ms2(5);
+  const sizes = { '200k': 200, '300k': 300, '500k': 500, '1M': 1000 };
+  const unitPrice = 0.18;
+  const subtotal = sizes[size] * 1000 * unitPrice;
+  const total = subtotal * (1 - discount / 100);
+
+  const send = () => { toast(`ส่งใบเสนอราคาให้ ${customer?.farm || 'ลูกค้า'} แล้ว`); close(); };
+
+  return (
+    <window.V3ModalShell title="เสนอราคาล็อตใหม่" subtitle={customer?.farm} close={close} footer={
+      <>
+        <button className="aw3-btn aw3-btn-ghost" onClick={close}>ยกเลิก</button>
+        <button className="aw3-btn aw3-btn-hero" onClick={send}>ส่งใบเสนอราคา LINE</button>
+      </>
+    }>
+      <window.V3Field label="เลือกล็อต">
+        <select className="aw3-input" value={batch} onChange={e => setBatch(e.target.value)}>
+          {window.AW_DATA.BATCHES.filter(b => b.pcr === 'clean').map(b => (
+            <option key={b.id}>{b.id} — {b.source} ({(b.plProduced/1000000).toFixed(1)}M)</option>
+          ))}
+        </select>
+      </window.V3Field>
+      <window.V3Field label="ปริมาณ">
+        <div style={{ display: 'flex', gap: 8 }}>
+          {Object.keys(sizes).map(s => (
+            <button key={s} onClick={() => setSize(s)} style={{
+              flex: 1, padding: '12px 0', border: 0, borderRadius: 'var(--r)',
+              background: size === s ? 'var(--aw3-hero)' : 'var(--aw3-soft)',
+              color: size === s ? '#fff' : 'var(--aw3-ink-2)',
+              fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+            }}>{s} PL</button>
+          ))}
+        </div>
+      </window.V3Field>
+      <window.V3Field label={`ส่วนลดลูกค้าเก่า: ${discount}%`}>
+        <input type="range" min="0" max="15" value={discount} onChange={e => setDiscount(parseInt(e.target.value))}
+          style={{ width: '100%', accentColor: 'var(--aw3-hero)' }}/>
+      </window.V3Field>
+      <div style={{ padding: 18, borderRadius: 'var(--r)', background: 'var(--aw3-soft)', marginTop: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
+          <span style={{ color: 'var(--aw3-ink-3)' }}>ราคา {sizes[size]}k × ฿{unitPrice}/PL</span>
+          <span>฿{subtotal.toLocaleString()}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 10 }}>
+          <span style={{ color: 'var(--aw3-ink-3)' }}>ส่วนลด {discount}%</span>
+          <span style={{ color: 'var(--aw3-bad)' }}>−฿{(subtotal-total).toLocaleString()}</span>
+        </div>
+        <div style={{ borderTop: '1px solid var(--aw3-line)', paddingTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <span style={{ fontWeight: 700 }}>รวม</span>
+          <span style={{ fontSize: 22, fontWeight: 800 }}>฿{total.toLocaleString()}</span>
+        </div>
+      </div>
+    </window.V3ModalShell>
+  );
+}
+
+// ---- Send Certificate ----
+function V3M_Cert({ close, batch }) {
+  const { toast } = window.useV3();
+  const [recipients, setRecipients] = _v3ms2(window.AW_DATA.CUSTOMERS.slice(0,4).map(c => c.id));
+  const toggle = (id) => setRecipients(r => r.includes(id) ? r.filter(x => x !== id) : [...r, id]);
+  const send = () => { toast(`ส่งใบรับรอง ${batch?.id || ''} ให้ ${recipients.length} ฟาร์มแล้ว`); close(); };
+  return (
+    <window.V3ModalShell title="ส่งใบรับรอง" subtitle={`ล็อต ${batch?.id || 'B-2604-A'}`} close={close} footer={
+      <>
+        <button className="aw3-btn aw3-btn-ghost" onClick={close}>ยกเลิก</button>
+        <button className="aw3-btn aw3-btn-hero" onClick={send} disabled={recipients.length === 0}>
+          ส่งให้ {recipients.length} ฟาร์ม
+        </button>
+      </>
+    }>
+      <window.V3Field label="วิธีการส่ง">
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="aw3-btn aw3-btn-hero aw3-btn-sm" style={{ flex: 1, justifyContent: 'center' }}>LINE Flex</button>
+          <button className="aw3-btn aw3-btn-soft aw3-btn-sm" style={{ flex: 1, justifyContent: 'center' }}>PDF แนบ</button>
+          <button className="aw3-btn aw3-btn-soft aw3-btn-sm" style={{ flex: 1, justifyContent: 'center' }}>SMS ลิงก์</button>
+        </div>
+      </window.V3Field>
+      <window.V3Field label="ส่งให้ฟาร์ม">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 280, overflow: 'auto', padding: 4, margin: -4 }}>
+          {window.AW_DATA.CUSTOMERS.slice(0, 8).map(c => {
+            const on = recipients.includes(c.id);
+            return (
+              <div key={c.id} onClick={() => toggle(c.id)} style={{
+                display: 'flex', alignItems: 'center', gap: 12, padding: 10,
+                borderRadius: 'var(--r)', cursor: 'pointer',
+                background: on ? 'var(--aw3-hero-soft)' : 'var(--aw3-soft)',
+              }}>
+                <div style={{
+                  width: 22, height: 22, borderRadius: 'var(--r-sm)',
+                  background: on ? 'var(--aw3-hero)' : '#fff',
+                  border: on ? 0 : '1.5px solid var(--aw3-line-2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontSize: 13, fontWeight: 700,
+                }}>{on ? '✓' : ''}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 700 }}>{c.farm}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--aw3-ink-4)' }}>{c.name}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </window.V3Field>
+    </window.V3ModalShell>
+  );
+}
+
+// ---- Invite team member ----
+function V3M_InviteTeam({ close }) {
+  const { toast } = window.useV3();
+  const [f, setF] = _v3ms2({ name: '', email: '', perm: 'editor' });
+  const set = (k, v) => setF(s => ({ ...s, [k]: v }));
+  const send = () => { toast(`ส่งคำเชิญถึง ${f.email || f.name} แล้ว`); close(); };
+  return (
+    <window.V3ModalShell title="เชิญสมาชิก" subtitle="ส่งลิงก์เชิญผ่านอีเมลหรือ LINE" close={close} footer={
+      <>
+        <button className="aw3-btn aw3-btn-ghost" onClick={close}>ยกเลิก</button>
+        <button className="aw3-btn aw3-btn-hero" onClick={send} disabled={!f.email && !f.name}>ส่งคำเชิญ</button>
+      </>
+    }>
+      <window.V3Field label="ชื่อ"><input className="aw3-input" value={f.name} onChange={e => set('name', e.target.value)}/></window.V3Field>
+      <window.V3Field label="อีเมล"><input className="aw3-input" type="email" value={f.email} onChange={e => set('email', e.target.value)} placeholder="example@email.com"/></window.V3Field>
+      <window.V3Field label="สิทธิ์การใช้งาน">
+        {[
+          { id: 'admin', label: 'แอดมิน', desc: 'แก้ไขข้อมูลทั้งหมด + เชิญสมาชิก' },
+          { id: 'editor', label: 'แก้ไขได้', desc: 'จัดการลูกค้า ล็อต และข้อความ' },
+          { id: 'viewer', label: 'ดูเท่านั้น', desc: 'เปิดดูข้อมูลแต่แก้ไขไม่ได้' },
+        ].map(p => (
+          <div key={p.id} onClick={() => set('perm', p.id)} style={{
+            padding: 14, marginBottom: 8, borderRadius: 'var(--r)',
+            border: f.perm === p.id ? '1.5px solid var(--aw3-hero)' : '1.5px solid var(--aw3-line)',
+            background: f.perm === p.id ? 'var(--aw3-hero-soft)' : '#fff',
+            cursor: 'pointer',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 18, height: 18, borderRadius: '50%',
+                border: f.perm === p.id ? '5px solid var(--aw3-hero)' : '2px solid var(--aw3-line-2)',
+                background: '#fff',
+              }}/>
+              <div style={{ fontSize: 14, fontWeight: 700 }}>{p.label}</div>
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--aw3-ink-4)', marginTop: 4, marginLeft: 28 }}>{p.desc}</div>
+          </div>
+        ))}
+      </window.V3Field>
+    </window.V3ModalShell>
+  );
+}
+
+// ---- Confirm Close Alert ----
+function V3M_CloseAlert({ close, alert }) {
+  const { closeAlert } = window.useV3();
+  const [reason, setReason] = _v3ms2('แก้ไขแล้ว');
+  return (
+    <window.V3ModalShell title="ปิดเคสแจ้งเตือน" subtitle={alert?.title} close={close} footer={
+      <>
+        <button className="aw3-btn aw3-btn-ghost" onClick={close}>ยกเลิก</button>
+        <button className="aw3-btn aw3-btn-hero" onClick={() => { closeAlert(alert.id); close(); }}>ปิดเคส</button>
+      </>
+    }>
+      <window.V3Field label="เหตุผล">
+        <select className="aw3-input" value={reason} onChange={e => setReason(e.target.value)}>
+          <option>แก้ไขแล้ว</option><option>ติดต่อฟาร์มทุกแห่งแล้ว</option><option>เป็นการแจ้งเตือนผิด</option><option>เลื่อนไปเฝ้าระวัง</option>
+        </select>
+      </window.V3Field>
+      <window.V3Field label="บันทึก (ไม่บังคับ)">
+        <textarea className="aw3-input" rows={3} placeholder="เช่น ส่ง PCR ใหม่แล้วพบสะอาด"/>
+      </window.V3Field>
+    </window.V3ModalShell>
+  );
+}
+
+// ---- Schedule call ----
+function V3M_Schedule({ close, customer }) {
+  const { toast } = window.useV3();
+  const [day, setDay] = _v3ms2('พรุ่งนี้');
+  const [time, setTime] = _v3ms2('09:00');
+  const send = () => { toast(`นัดโทรหา ${customer?.farm || 'ลูกค้า'} ${day} ${time} น.`); close(); };
+  return (
+    <window.V3ModalShell title="นัดโทรกลับ" subtitle={customer?.farm} close={close} footer={
+      <>
+        <button className="aw3-btn aw3-btn-ghost" onClick={close}>ยกเลิก</button>
+        <button className="aw3-btn aw3-btn-hero" onClick={send}>นัดเลย</button>
+      </>
+    }>
+      <window.V3Field label="วัน">
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {['วันนี้','พรุ่งนี้','มะรืน','สัปดาห์หน้า','เลือกวัน'].map(d => (
+            <button key={d} onClick={() => setDay(d)} style={{
+              padding: '10px 14px', border: 0, borderRadius: 'var(--r)',
+              background: day === d ? 'var(--aw3-hero)' : 'var(--aw3-soft)',
+              color: day === d ? '#fff' : 'var(--aw3-ink-2)',
+              fontFamily: 'inherit', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+            }}>{d}</button>
+          ))}
+        </div>
+      </window.V3Field>
+      <window.V3Field label="เวลา">
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {['08:00','09:00','10:00','13:00','15:00','17:00'].map(t => (
+            <button key={t} onClick={() => setTime(t)} style={{
+              padding: '8px 14px', border: 0, borderRadius: 'var(--r-pill)',
+              background: time === t ? 'var(--aw3-ink)' : 'var(--aw3-soft)',
+              color: time === t ? '#fff' : 'var(--aw3-ink-2)',
+              fontFamily: 'inherit', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+            }}>{t}</button>
+          ))}
+        </div>
+      </window.V3Field>
+    </window.V3ModalShell>
+  );
+}
+
+window.V3Modals = {
+  addCustomer: V3M_AddCustomer,
+  addBatch: V3M_AddBatch,
+  sendLine: V3M_SendLine,
+  quote: V3M_Quote,
+  cert: V3M_Cert,
+  invite: V3M_InviteTeam,
+  closeAlert: V3M_CloseAlert,
+  schedule: V3M_Schedule,
+};
+
+</script>
+
+<script type="text/babel" data-presets="react" data-module="v3-shell">
+/* global React */
+const { useState: _v3sh } = React;
+
+// V3 — three-column shell with rounded inner card.
+function V3Shell({ page, setPage, children }) {
+  const NAV_OVERVIEW = [
+    { id: 'dashboard', label: 'หน้าหลัก', en: 'Dashboard', icon: 'home' },
+    { id: 'customers', label: 'ลูกค้า', en: 'Customers', icon: 'users' },
+    { id: 'batches', label: 'ล็อตลูกกุ้ง', en: 'Batches', icon: 'box' },
+    { id: 'restock', label: 'รอบใหม่', en: 'Restock', icon: 'cycle' },
+  ];
+  const NAV_DAILY = [
+    { id: 'alerts', label: 'แจ้งเตือนโรค', en: 'Disease watch', icon: 'alert' },
+    { id: 'scorecard', label: 'คะแนนสาธารณะ', en: 'Public score', icon: 'badge' },
+  ];
+  const NAV_SETTINGS = [
+    { id: 'settings', label: 'ตั้งค่า', en: 'Settings', icon: 'gear' },
+    { id: 'logout', label: 'ออกจากระบบ', en: 'Logout', icon: 'out' },
+  ];
+
+  const Icon = ({ name, color }) => {
+    const props = { width: 22, height: 22, viewBox: '0 0 20 20', fill: 'none', stroke: color || 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' };
+    if (name === 'home') return <svg {...props}><path d="M3 9l7-6 7 6v8a1 1 0 01-1 1h-3v-5H7v5H4a1 1 0 01-1-1V9z"/></svg>;
+    if (name === 'users') return <svg {...props}><circle cx="7" cy="7" r="3"/><path d="M2 17c0-3 2-5 5-5s5 2 5 5"/><circle cx="14" cy="6" r="2.5"/><path d="M13 12c2 0 5 1.5 5 5"/></svg>;
+    if (name === 'box') return <svg {...props}><path d="M3 6l7-3 7 3v8l-7 3-7-3V6z"/><path d="M3 6l7 3 7-3M10 9v9"/></svg>;
+    if (name === 'cycle') return <svg {...props}><path d="M3 10a7 7 0 0112-5l2 2"/><path d="M17 4v3h-3"/><path d="M17 10a7 7 0 01-12 5l-2-2"/><path d="M3 16v-3h3"/></svg>;
+    if (name === 'alert') return <svg {...props}><path d="M10 3l8 14H2L10 3z"/><path d="M10 8v4M10 14h.01"/></svg>;
+    if (name === 'badge') return <svg {...props}><path d="M10 2l2.4 4.6 5.1.7-3.7 3.6.9 5.1L10 13.6l-4.6 2.4.9-5.1L2.5 7.3l5.1-.7L10 2z"/></svg>;
+    if (name === 'gear') return <svg {...props}><circle cx="10" cy="10" r="3"/><path d="M10 1v3M10 16v3M19 10h-3M4 10H1M16.4 3.6l-2.1 2.1M5.7 14.3l-2.1 2.1M16.4 16.4l-2.1-2.1M5.7 5.7L3.6 3.6"/></svg>;
+    if (name === 'out') return <svg {...props}><path d="M8 3H4a1 1 0 00-1 1v12a1 1 0 001 1h4M13 14l4-4-4-4M17 10H7"/></svg>;
+    return null;
+  };
+
+  const NavItem = ({ n }) => {
+    const active = page === n.id;
+    return (
+      <button onClick={() => { setPage(n.id); window.scrollTo(0, 0); }}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 14,
+          width: '100%', padding: '14px 16px',
+          background: active ? 'var(--aw3-hero-soft)' : 'transparent',
+          color: active ? 'var(--aw3-hero)' : 'var(--aw3-ink)',
+          border: 0, borderRadius: 'var(--r)',
+          fontFamily: 'inherit', fontSize: 16, fontWeight: active ? 700 : 600,
+          textAlign: 'left', cursor: 'pointer',
+          minHeight: 50,
+          transition: 'all 0.12s',
+        }}>
+        <Icon name={n.icon}/>
+        <span style={{ whiteSpace: 'nowrap' }}>{n.label}</span>
+      </button>
+    );
+  };
+
+  const Group = ({ label, items }) => (
+    <div style={{ marginBottom: 18 }}>
+      <div className="eyebrow" style={{ padding: '0 14px', marginBottom: 6 }}>{label}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {items.map(n => <NavItem key={n.id} n={n}/>)}
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ minHeight: '100vh', padding: 20, background: 'var(--aw3-canvas)' }}>
+      <div data-screen-label="AquaWise v3 webapp" style={{
+        background: 'var(--aw3-app)',
+        borderRadius: 'var(--r-xl)',
+        boxShadow: '0 4px 24px rgba(20,19,31,0.06)',
+        display: 'grid', gridTemplateColumns: '270px 1fr 320px',
+        minHeight: 'calc(100vh - 40px)',
+        overflow: 'hidden',
+      }}>
+        {/* Left rail */}
+        <aside style={{ borderRight: '1px solid var(--aw3-line)', padding: '24px 14px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 10px 24px' }}>
+            <V3Mark size={32}/>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.01em' }}>AquaWise</div>
+              <div style={{ fontSize: 10.5, color: 'var(--aw3-ink-4)', fontWeight: 500, marginTop: -2 }}>ฟ้าใส แฮทเชอรี่</div>
+            </div>
+          </div>
+          <Group label="ภาพรวม" items={NAV_OVERVIEW}/>
+          <Group label="งานประจำวัน" items={NAV_DAILY}/>
+          <div style={{ flex: 1 }}/>
+          <Group label="ตั้งค่า" items={NAV_SETTINGS}/>
+        </aside>
+
+        {/* Center */}
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          <V3TopBar/>
+          <main className="aw3-rise" key={page} style={{ padding: '20px 28px 40px', flex: 1 }}>
+            {children}
+          </main>
+        </div>
+
+        {/* Right rail */}
+        <aside style={{ borderLeft: '1px solid var(--aw3-line)', padding: '20px 22px 28px', overflow: 'auto' }}>
+          <V3RightRail/>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function V3TopBar() {
+  return (
+    <header style={{
+      display: 'flex', alignItems: 'center', gap: 16,
+      padding: '20px 28px',
+      borderBottom: '1px solid var(--aw3-line)',
+    }}>
+      <div style={{ flex: 1, position: 'relative' }}>
+        <svg width={16} height={16} viewBox="0 0 20 20" fill="none" stroke="var(--aw3-ink-4)" strokeWidth="1.8"
+          style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)' }}>
+          <circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/>
+        </svg>
+        <input className="aw3-input" placeholder="ค้นหาฟาร์ม ล็อต หรือเลขใบรับรอง…" style={{ paddingLeft: 44 }}/>
+      </div>
+      <button style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--aw3-soft)', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+        <svg width={18} height={18} viewBox="0 0 20 20" fill="none" stroke="var(--aw3-ink)" strokeWidth="1.7">
+          <path d="M3 6l7 5 7-5M3 6v9a1 1 0 001 1h12a1 1 0 001-1V6M3 6l7-3 7 3"/>
+        </svg>
+        <span style={{ position: 'absolute', top: 8, right: 9, width: 8, height: 8, background: 'var(--aw3-hero)', borderRadius: '50%', border: '2px solid var(--aw3-card)' }}/>
+      </button>
+      <button style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--aw3-soft)', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <svg width={18} height={18} viewBox="0 0 20 20" fill="none" stroke="var(--aw3-ink)" strokeWidth="1.7">
+          <path d="M10 11a3 3 0 100-6 3 3 0 000 6zM4 17c0-3 2.5-5 6-5s6 2 6 5"/>
+        </svg>
+      </button>
+      <div style={{ width: 1, height: 26, background: 'var(--aw3-line-2)', margin: '0 4px' }}/>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <V3Avatar name="สุเทพ" tone="lav" size={36}/>
+        <div style={{ whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: 15, fontWeight: 700 }}>คุณสุเทพ</div>
+          <div style={{ fontSize: 12, color: 'var(--aw3-ink-3)' }}>เจ้าของฟาร์ม</div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function V3RightRail() {
+  const D = window.AW_DATA;
+  const TEAM = [
+    { name: 'นิภา ใจดี', role: 'หัวหน้าโรงเพาะ', tone: 'mint' },
+    { name: 'พรชัย ตั้งใจ', role: 'เจ้าหน้าที่ PCR', tone: 'sky' },
+    { name: 'รัตนา สุขสวัสดิ์', role: 'ดูแลลูกค้า', tone: 'rose' },
+  ];
+  const followUps = D.CUSTOMERS.filter(c => c.restockIn != null && c.restockIn <= 14).slice(0, 3);
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>สถิติของคุณ</h3>
+        <button style={{ width: 24, height: 24, border: 0, background: 'transparent', cursor: 'pointer', color: 'var(--aw3-ink-4)' }}>⋯</button>
+      </div>
+
+      {/* Progress ring */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, position: 'relative' }}>
+        <V3Ring value={82} size={170} stroke={9}>
+          <V3Avatar name="สุเทพ" tone="lav" size={130}/>
+        </V3Ring>
+        <div style={{
+          position: 'absolute', top: 8, right: 38,
+          background: '#fff', color: 'var(--aw3-hero)',
+          padding: '4px 10px', borderRadius: 'var(--r-pill)',
+          fontSize: 11, fontWeight: 700,
+          boxShadow: '0 4px 8px rgba(91,75,255,0.18)',
+        }}>82%</div>
+      </div>
+
+      <div style={{ textAlign: 'center', marginBottom: 8 }}>
+        <div style={{ fontSize: 18, fontWeight: 700 }}>สวัสดีครับ คุณสุเทพ</div>
+        <div style={{ fontSize: 13, color: 'var(--aw3-ink-3)', marginTop: 6, padding: '0 8px' }}>
+          เป้าหมาย D30 อัตรารอด 80% ของไตรมาสนี้
+        </div>
+      </div>
+
+      {/* D30 trend sparkline */}
+      <div style={{ background: 'var(--aw3-soft)', borderRadius: 'var(--r-lg)', padding: 16, marginTop: 18, marginBottom: 22 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <div className="eyebrow">D30 — 12 สัปดาห์</div>
+          <V3Chip tone="good" size="xs">+11%</V3Chip>
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--aw3-ink-4)', marginBottom: 8 }}>เลื่อนเมาส์ดูแต่ละสัปดาห์</div>
+        <window.V3Sparkline values={[68, 71, 73, 70, 72, 75, 74, 76, 78, 80, 81, 82]} height={70}/>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 10, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>
+          <span>ก.พ.</span><span>มี.ค.</span><span>เม.ย.</span>
+        </div>
+      </div>
+
+      {/* Follow-ups */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>ต้องติดต่อ</h3>
+        <V3RoundBtn dir="right" size={28}/>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {followUps.map((c, i) => (
+          <div key={c.id} style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: 10, borderRadius: 'var(--r)',
+            background: i === 0 ? 'var(--aw3-hero-soft)' : 'var(--aw3-soft)',
+          }}>
+            <V3Avatar name={c.farm} tone={['lav','peach','mint'][i]} size={36}/>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.farm}</div>
+              <div style={{ fontSize: 11, color: 'var(--aw3-ink-3)' }}>
+                {c.restockIn === 0 ? 'ตอนนี้' : `ใน ${c.restockIn} วัน`} · {c.zone}
+              </div>
+            </div>
+            <button className="aw3-btn aw3-btn-soft aw3-btn-sm" style={{ padding: '5px 11px' }}>
+              <svg width={12} height={12} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M3 5l5-3 5 3M3 5v6l5 3 5-3V5M3 5l5 3 5-3M8 8v6"/>
+              </svg>
+              ติดต่อ
+            </button>
+          </div>
+        ))}
+        <button className="aw3-btn aw3-btn-ghost" style={{ width: '100%', justifyContent: 'center', marginTop: 6 }}>ดูทั้งหมด</button>
+      </div>
+
+      {/* Team */}
+      <div style={{ marginTop: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>ทีมของคุณ</h3>
+        <V3RoundBtn dir="right" size={28}/>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {TEAM.map(t => (
+          <div key={t.name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 4 }}>
+            <V3Avatar name={t.name} tone={t.tone} size={36}/>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 700 }}>{t.name}</div>
+              <div style={{ fontSize: 11, color: 'var(--aw3-ink-3)' }}>{t.role}</div>
+            </div>
+            <button className="aw3-btn aw3-btn-soft aw3-btn-sm" style={{ padding: '4px 10px' }}>
+              <svg width={11} height={11} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 4v8M4 8h8"/></svg>
+              ทักทาย
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+window.V3Shell = V3Shell;
+
+</script>
+
+<script type="text/babel" data-presets="react" data-module="v3-pages">
+/* global React */
+const { useState: _v3ds } = React;
+
+// V3 Dashboard — hero card + category stat chips + continue cards + your-lesson table
+function V3Dashboard({ setPage, setCustomerId, setBatchId }) {
+  const D = window.AW_DATA;
+  const { customers, openModal } = window.useV3();
+
+  const STATS = [
+    { tone: 'lav', icon: '⌬', label: 'ล็อตที่กำลังเลี้ยง', value: '5/8', sub: 'ลูกค้า 47 ฟาร์ม', goto: () => setPage('batches') },
+    { tone: 'peach', icon: '◇', label: 'D30 อัตรารอดเฉลี่ย', value: '82%', sub: 'สูงกว่าค่ากลาง 11%', goto: () => setPage('scorecard') },
+    { tone: 'mint', icon: '◈', label: 'ต้องสั่งใหม่ใน 14 วัน', value: '3 ฟาร์ม', sub: 'รวม ~620k PL', goto: () => setPage('restock') },
+  ];
+
+  const CONTINUE = customers.filter(c => c.cycleDay).slice(0, 3).map((c, i) => ({
+    ...c,
+    tone: ['peach', 'lav', 'sky'][i],
+    chip: ['ล็อต B-2604-A', 'ล็อต B-2604-B', 'ล็อต B-2603-C'][i],
+    chipTone: ['peach', 'lav', 'mint'][i],
+  }));
+
+  return (
+    <div>
+      {/* Hero */}
+      <div style={{
+        background: 'linear-gradient(135deg, #004AAD 0%, #1A66C7 60%, #3D85DD 100%)',
+        borderRadius: 'var(--r-xl)',
+        padding: 40, position: 'relative', overflow: 'hidden',
+        marginBottom: 28,
+      }}>
+        <svg width="100%" height="100%" viewBox="0 0 600 200" preserveAspectRatio="xMaxYMid slice"
+          style={{ position: 'absolute', inset: 0, opacity: 0.6 }}>
+          {[
+            { x: 380, y: 50, s: 1.4 }, { x: 460, y: 110, s: 1.0 },
+            { x: 540, y: 60, s: 0.7 }, { x: 420, y: 150, s: 0.5 },
+            { x: 500, y: 30, s: 0.4 },
+          ].map((s, i) => (
+            <g key={i} transform={`translate(${s.x},${s.y}) scale(${s.s})`}>
+              <path d="M0 -30 Q 6 -6, 30 0 Q 6 6, 0 30 Q -6 6, -30 0 Q -6 -6, 0 -30Z" fill="rgba(255,255,255,0.35)"/>
+            </g>
+          ))}
+          <path d="M-20 180 Q 100 140, 220 170 T 460 175" stroke="rgba(255,255,255,0.18)" strokeWidth="2" fill="none"/>
+        </svg>
+        <div style={{ position: 'relative', maxWidth: 540 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.10em', textTransform: 'uppercase', marginBottom: 16 }}>
+            ระบบจัดการโรงเพาะฟาร์ม
+          </div>
+          <h1 style={{ margin: 0, color: '#fff', fontSize: 38, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.01em' }}>
+            ช่วยลูกค้าเลี้ยงรอบนี้<br/>ให้รอดมากที่สุด
+          </h1>
+          <div style={{ display: 'flex', gap: 10, marginTop: 26 }}>
+            <button onClick={() => setPage('restock')} className="aw3-btn"
+              style={{ background: '#fff', color: 'var(--aw3-ink)', fontSize: 16, padding: '14px 24px' }}>
+              ดูฟาร์มที่ต้องติดต่อ
+              <svg width={16} height={16} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+            </button>
+            <button onClick={() => openModal('addBatch')} className="aw3-btn"
+              style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', fontSize: 16, padding: '14px 22px', backdropFilter: 'blur(4px)' }}>
+              + ลงล็อตใหม่
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stat chips */}
+      <V3Grid cols={3} gap={16} style={{ marginBottom: 28 }}>
+        {STATS.map((s, i) => (
+          <V3Card key={i} pad={20} hover onClick={s.goto} style={{ display: 'flex', alignItems: 'center', gap: 16, border: '1.5px solid var(--aw3-line-2)' }}>
+            <div style={{
+              width: 52, height: 52, borderRadius: 'var(--r)',
+              background: `var(--aw3-${s.tone})`, color: `var(--aw3-${s.tone}-fg)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 24, fontWeight: 700, flexShrink: 0,
+            }}>{s.icon}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, color: 'var(--aw3-ink-3)', fontWeight: 600, marginBottom: 4 }}>{s.label}</div>
+              <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.01em', lineHeight: 1.1 }}>{s.value}</div>
+              <div style={{ fontSize: 12, color: 'var(--aw3-ink-4)', fontWeight: 500, marginTop: 4 }}>{s.sub}</div>
+            </div>
+          </V3Card>
+        ))}
+      </V3Grid>
+
+      {/* Continue Watching */}
+      <V3Section title="ฟาร์มที่ต้องตามต่อ" action={
+        <button className="aw3-btn aw3-btn-ghost aw3-btn-sm" onClick={() => setPage('customers')}>ดูทั้งหมด</button>
+      }>
+        <V3Grid cols={3} gap={16}>
+          {CONTINUE.map(c => (
+            <V3Card key={c.id} pad={14} hover onClick={() => { setCustomerId(c.id); setPage('customer'); }}
+              style={{ border: '1px solid var(--aw3-line)' }}>
+              <div style={{ position: 'relative' }}>
+                <V3Photo tone={c.tone} height={140} label={`วันที่ ${c.cycleDay}/120`}/>
+                <button onClick={e => { e.stopPropagation(); window.useV3 && openModal('sendLine', { customer: c }); }}
+                  style={{
+                    position: 'absolute', top: 10, right: 10,
+                    width: 30, height: 30, borderRadius: '50%',
+                    background: '#fff', border: 0, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
+                  }}>
+                  <svg width={14} height={14} viewBox="0 0 16 16" fill="none" stroke="var(--aw3-ink)" strokeWidth="1.7">
+                    <path d="M3 5l5-3 5 3M3 5v6l5 3 5-3V5"/>
+                  </svg>
+                </button>
+              </div>
+              <div style={{ padding: '14px 4px 4px' }}>
+                <V3Chip tone={c.chipTone} size="xs" icon="✦">{c.chip}</V3Chip>
+                <h3 style={{ margin: '12px 0 0', fontSize: 16, fontWeight: 700, lineHeight: 1.3 }}>{c.farm}</h3>
+                <div style={{ marginTop: 10, height: 4, background: 'var(--aw3-line)', borderRadius: 'var(--r-pill)', overflow: 'hidden' }}>
+                  <div style={{ width: `${(c.cycleDay/120)*100}%`, height: '100%', background: 'var(--aw3-hero)', borderRadius: 'var(--r-pill)' }}/>
+                </div>
+                <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--aw3-line)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <V3Avatar name={c.name} size={28}/>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600 }}>{c.name}</div>
+                    <div style={{ fontSize: 10.5, color: 'var(--aw3-ink-4)' }}>{c.zone}</div>
+                  </div>
+                </div>
+              </div>
+            </V3Card>
+          ))}
+        </V3Grid>
+      </V3Section>
+
+      {/* Recent batches */}
+      <V3Section title="ล็อตล่าสุด" action={<button className="aw3-btn aw3-btn-ghost aw3-btn-sm" onClick={() => setPage('batches')}>ดูทั้งหมด</button>}>
+        <V3Card pad={0} style={{ border: '1px solid var(--aw3-line)', overflow: 'hidden' }}>
+          <div style={{
+            display: 'grid', gridTemplateColumns: '2fr 1.4fr 1.6fr 80px',
+            padding: '12px 20px', background: 'var(--aw3-soft)',
+            fontSize: 11, fontWeight: 700, color: 'var(--aw3-ink-4)',
+            letterSpacing: '0.06em', textTransform: 'uppercase',
+          }}>
+            <span>ล็อต</span><span>สายพันธุ์</span><span>ผล</span><span style={{ textAlign: 'right' }}>เปิด</span>
+          </div>
+          {D.BATCHES.slice(0, 4).map((b, i, arr) => (
+            <div key={b.id} className="aw3-row" onClick={() => { setBatchId(b.id); setPage('batch'); }}
+              style={{
+                display: 'grid', gridTemplateColumns: '2fr 1.4fr 1.6fr 80px',
+                padding: '14px 20px', alignItems: 'center', gap: 10,
+                borderBottom: i < arr.length - 1 ? '1px solid var(--aw3-line)' : 0,
+              }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <V3Avatar name={b.id} tone={['lav','peach','mint','sky'][i % 4]} size={36}/>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700 }}>{b.id}</div>
+                  <div style={{ fontSize: 11, color: 'var(--aw3-ink-4)' }}>{b.date}</div>
+                </div>
+              </div>
+              <V3Chip tone={['lav','peach','mint','sky'][i % 4]} size="xs">{b.source}</V3Chip>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <V3Chip tone={b.pcr === 'clean' ? 'good' : 'bad'} size="xs">PCR {b.pcr === 'clean' ? 'สะอาด' : 'พบเชื้อ'}</V3Chip>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--aw3-ink-2)' }}>D30 {b.meanD30}%</span>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <V3RoundBtn dir="right" size={30} tone="soft"/>
+              </div>
+            </div>
+          ))}
+        </V3Card>
+      </V3Section>
+    </div>
+  );
+}
+
+// =============================================================
+// Customers
+// =============================================================
+function V3Customers({ setPage, setCustomerId }) {
+  const { customers, openModal } = window.useV3();
+  const [q, setQ] = _v3ds('');
+  const [filter, setFilter] = _v3ds('all');
+  const filtered = customers.filter(c => {
+    if (q && !(c.farm + c.name).toLowerCase().includes(q.toLowerCase())) return false;
+    if (filter === 'active' && !c.cycleDay) return false;
+    if (filter === 'restock' && c.restockIn == null) return false;
+    if (filter === 'concern' && c.status !== 'concern' && c.status !== 'restock-now') return false;
+    return true;
+  });
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+        <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, letterSpacing: '-0.01em' }}>ลูกค้า</h1>
+        <button className="aw3-btn aw3-btn-hero aw3-btn-sm" onClick={() => openModal('addCustomer')}>+ เพิ่มลูกค้า</button>
+      </div>
+      <div style={{ color: 'var(--aw3-ink-3)', fontSize: 15, marginBottom: 24 }}>
+        {customers.length} ฟาร์ม · {customers.filter(c => c.cycleDay).length} กำลังเลี้ยง
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginBottom: 18 }}>
+        <input className="aw3-input" placeholder="ค้นหาฟาร์มหรือเจ้าของ…"
+          value={q} onChange={e => setQ(e.target.value)} style={{ flex: 1 }}/>
+        <div style={{ display: 'flex', gap: 4, padding: 4, background: 'var(--aw3-soft)', borderRadius: 'var(--r)' }}>
+          {[
+            { id: 'all', label: 'ทั้งหมด' },
+            { id: 'active', label: 'กำลังเลี้ยง' },
+            { id: 'restock', label: 'ใกล้ครบรอบ' },
+            { id: 'concern', label: 'น่าห่วง' },
+          ].map(t => (
+            <button key={t.id} onClick={() => setFilter(t.id)} style={{
+              padding: '8px 16px', border: 0, borderRadius: 'var(--r-sm)',
+              background: filter === t.id ? '#fff' : 'transparent',
+              color: filter === t.id ? 'var(--aw3-ink)' : 'var(--aw3-ink-3)',
+              fontFamily: 'inherit', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              boxShadow: filter === t.id ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
+            }}>{t.label}</button>
+          ))}
+        </div>
+      </div>
+
+      <V3Grid cols={2} gap={14}>
+        {filtered.map((c, i) => (
+          <V3Card key={c.id} pad={18} hover onClick={() => { setCustomerId(c.id); setPage('customer'); }}
+            style={{ border: '1px solid var(--aw3-line)', display: 'flex', alignItems: 'center', gap: 14 }}>
+            <V3Avatar name={c.farm} tone={['lav','peach','mint','sky','rose','amber'][i % 6]} size={48}/>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 15, fontWeight: 700 }}>{c.farm}</span>
+                {c.status === 'restock-now' && <V3Chip tone="bad" size="xs">ติดต่อด่วน</V3Chip>}
+                {c.status === 'concern' && <V3Chip tone="amber" size="xs">น่าห่วง</V3Chip>}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--aw3-ink-3)', marginTop: 2 }}>{c.name} · {c.zone}</div>
+              <div style={{ marginTop: 10, display: 'flex', gap: 16 }}>
+                <span style={{ fontSize: 12 }}><b>{c.batches}</b> รอบ</span>
+                <span style={{ fontSize: 12 }}>มูลค่า ฿{(c.ltv/1000).toFixed(0)}k</span>
+                {c.cycleDay && <span style={{ fontSize: 12 }}>วันที่ {c.cycleDay}</span>}
+              </div>
+            </div>
+            <button onClick={e => { e.stopPropagation(); openModal('sendLine', { customer: c }); }}
+              style={{ background: 'transparent', border: 0, padding: 8, cursor: 'pointer', color: 'var(--aw3-hero)' }}>
+              <svg width={18} height={18} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M3 5l5-3 5 3M3 5v6l5 3 5-3V5"/></svg>
+            </button>
+          </V3Card>
+        ))}
+        {filtered.length === 0 && (
+          <div style={{ gridColumn: '1 / -1', padding: 60, textAlign: 'center', color: 'var(--aw3-ink-4)' }}>
+            ไม่พบลูกค้าที่ตรงกับการค้นหา
+          </div>
+        )}
+      </V3Grid>
+    </div>
+  );
+}
+
+// =============================================================
+// Customer Detail
+// =============================================================
+function V3CustomerDetail({ setPage, customerId }) {
+  const { customers, openModal } = window.useV3();
+  const c = customers.find(x => x.id === customerId) || customers[0];
+  const trend = c.d30 ? [
+    Math.max(40, c.d30 - 12), Math.max(40, c.d30 - 8), Math.max(40, c.d30 - 4),
+    c.d30 - 2, c.d30 - 1, c.d30
+  ] : [60, 65, 68, 70, 75, 80];
+  const HISTORY = [
+    { batch: 'B-2604-A', date: '2026-04-22', pl: 320, d30: c.d30 || 82, status: c.cycleDay ? 'กำลังเลี้ยง' : 'จบ' },
+    { batch: 'B-2511-C', date: '2025-11-18', pl: 280, d30: 78, status: 'จบ' },
+    { batch: 'B-2508-B', date: '2025-08-12', pl: 250, d30: 81, status: 'จบ' },
+    { batch: 'B-2505-A', date: '2025-05-04', pl: 220, d30: 73, status: 'จบ' },
+  ];
+
+  return (
+    <div>
+      <button onClick={() => setPage('customers')} style={{ background: 'transparent', border: 0, padding: 0, cursor: 'pointer', color: 'var(--aw3-ink-3)', marginBottom: 14, fontSize: 13 }}>← ลูกค้าทั้งหมด</button>
+
+      <V3Card pad={28} style={{ border: '1px solid var(--aw3-line)', marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
+          <V3Avatar name={c.farm} size={68} tone="lav"/>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800 }}>{c.farm}</h1>
+            <div style={{ fontSize: 14, color: 'var(--aw3-ink-3)', marginTop: 4 }}>{c.name} · {c.zone}</div>
+            <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+              {c.cycleDay && <V3Chip tone="sky" size="xs">วันที่ {c.cycleDay}/120</V3Chip>}
+              {c.status === 'concern' && <V3Chip tone="amber" size="xs">น่าห่วง</V3Chip>}
+              {c.status === 'restock-now' && <V3Chip tone="bad" size="xs">ติดต่อด่วน</V3Chip>}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="aw3-btn aw3-btn-soft" onClick={() => openModal('schedule', { customer: c })}>
+              <svg width={14} height={14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h10M3 6v8h10V6M3 6l3-3h4l3 3M7 10h2"/></svg>
+              นัดโทร
+            </button>
+            <button className="aw3-btn aw3-btn-soft" onClick={() => openModal('quote', { customer: c })}>เสนอราคา</button>
+            <button className="aw3-btn aw3-btn-hero" onClick={() => openModal('sendLine', { customer: c })}>
+              ส่ง LINE
+              <svg width={14} height={14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 8h12M9 4l5 4-5 4"/></svg>
+            </button>
+          </div>
+        </div>
+      </V3Card>
+
+      <V3Grid cols={4} gap={14} style={{ marginBottom: 20 }}>
+        {[
+          { label: 'รอบทั้งหมด', value: c.batches, tone: 'lav' },
+          { label: 'มูลค่าตลอดอายุ', value: `฿${(c.ltv/1000).toFixed(0)}k`, tone: 'peach' },
+          { label: 'D30 รอบล่าสุด', value: c.d30 ? `${c.d30}%` : '—', tone: c.d30 >= 80 ? 'good' : c.d30 < 70 ? 'bad' : 'amber' },
+          { label: 'รอบใหม่ใน', value: c.restockIn != null ? `${c.restockIn} วัน` : '—', tone: 'sky' },
+        ].map((s, i) => (
+          <V3Card key={i} pad={18} style={{ border: '1px solid var(--aw3-line)' }}>
+            <V3Chip tone={s.tone} size="xs">{s.label}</V3Chip>
+            <div style={{ fontSize: 28, fontWeight: 800, marginTop: 10, letterSpacing: '-0.02em' }}>{s.value}</div>
+          </V3Card>
+        ))}
+      </V3Grid>
+
+      <V3Grid cols={12} gap={20}>
+        <V3Col span={7}>
+          <V3Card pad={22} style={{ border: '1px solid var(--aw3-line)' }}>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>แนวโน้ม D30 ตลอด 6 รอบ</h3>
+            <div style={{ fontSize: 12, color: 'var(--aw3-ink-3)', marginTop: 4, marginBottom: 18 }}>เลื่อนเมาส์ดูค่าแต่ละรอบ</div>
+            <window.V3Sparkline values={trend} height={90}/>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 11, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>
+              {HISTORY.slice().reverse().slice(0, 6).map((h, i) => <span key={i}>{h.batch.slice(2,6)}</span>)}
+            </div>
+          </V3Card>
+        </V3Col>
+        <V3Col span={5}>
+          <V3Card pad={22} style={{ border: '1px solid var(--aw3-line)', height: '100%' }}>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>ติดต่อ</h3>
+            <div style={{ marginTop: 14 }}>
+              {[
+                { ic: '📞', label: 'เบอร์โทร', v: '081-234-5678' },
+                { ic: '💬', label: 'LINE ID', v: '@somchaisuanban' },
+                { ic: '📍', label: 'ที่อยู่', v: '45 ม.3 ต.บ้านบ่อ ' + c.zone },
+              ].map((r, i) => (
+                <div key={i} style={{ display: 'flex', gap: 12, padding: '10px 0', borderTop: i > 0 ? '1px solid var(--aw3-line)' : 0 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 'var(--r-sm)', background: 'var(--aw3-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>{r.ic}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 11, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>{r.label}</div>
+                    <div style={{ fontSize: 13.5, fontWeight: 700 }}>{r.v}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </V3Card>
+        </V3Col>
+      </V3Grid>
+
+      <V3Section title="ประวัติรอบเลี้ยง" style={{ marginTop: 28 }}>
+        <V3Card pad={0} style={{ border: '1px solid var(--aw3-line)', overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1fr 1fr', padding: '12px 20px', background: 'var(--aw3-soft)', fontSize: 11, fontWeight: 700, color: 'var(--aw3-ink-4)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            <span>ล็อต</span><span>วันที่</span><span>ปริมาณ</span><span>D30</span><span>สถานะ</span>
+          </div>
+          {HISTORY.map((h, i) => (
+            <div key={h.batch} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1fr 1fr', padding: '14px 20px', alignItems: 'center', borderBottom: i < HISTORY.length - 1 ? '1px solid var(--aw3-line)' : 0, fontSize: 13.5 }}>
+              <span style={{ fontWeight: 700 }}>{h.batch}</span>
+              <span style={{ color: 'var(--aw3-ink-3)' }}>{h.date}</span>
+              <span style={{ fontWeight: 600 }}>{h.pl}k PL</span>
+              <span style={{ fontWeight: 700, color: h.d30 >= 80 ? 'var(--aw3-good)' : h.d30 < 70 ? 'var(--aw3-bad)' : 'var(--aw3-ink)' }}>{h.d30}%</span>
+              <V3Chip tone={h.status === 'จบ' ? 'soft' : 'sky'} size="xs">{h.status}</V3Chip>
+            </div>
+          ))}
+        </V3Card>
+      </V3Section>
+    </div>
+  );
+}
+
+// =============================================================
+// Batches list
+// =============================================================
+function V3Batches({ setPage, setBatchId }) {
+  const { batches, openModal } = window.useV3();
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24 }}>
+        <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800 }}>ล็อตลูกกุ้ง</h1>
+        <button className="aw3-btn aw3-btn-hero aw3-btn-sm" onClick={() => openModal('addBatch')}>+ ลงทะเบียนล็อตใหม่</button>
+      </div>
+      <V3Grid cols={2} gap={14}>
+        {batches.map((b, i) => (
+          <V3Card key={b.id} pad={18} hover onClick={() => { setBatchId(b.id); setPage('batch'); }}
+            style={{ border: '1px solid var(--aw3-line)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+              <V3Avatar name={b.id} tone={['lav','peach','mint','sky','rose'][i % 5]} size={42}/>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 15, fontWeight: 700 }}>{b.id}</div>
+                <div style={{ fontSize: 11, color: 'var(--aw3-ink-4)' }}>{b.date} · {b.source}</div>
+              </div>
+              <V3Chip tone={b.pcr === 'clean' ? 'good' : 'bad'} size="xs">{b.pcr === 'clean' ? '✓ สะอาด' : '⚠ พบเชื้อ'}</V3Chip>
+            </div>
+            <V3Grid cols={3} gap={10}>
+              <div><div style={{ fontSize: 10.5, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>ผลิต</div><div style={{ fontSize: 16, fontWeight: 700 }}>{(b.plProduced/1000000).toFixed(1)}M</div></div>
+              <div><div style={{ fontSize: 10.5, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>ฟาร์ม</div><div style={{ fontSize: 16, fontWeight: 700 }}>{b.farms}</div></div>
+              <div><div style={{ fontSize: 10.5, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>D30 เฉลี่ย</div><div style={{ fontSize: 16, fontWeight: 700, color: b.meanD30 >= 80 ? 'var(--aw3-good)' : b.meanD30 < 70 ? 'var(--aw3-bad)' : 'var(--aw3-ink)' }}>{b.meanD30 || '—'}%</div></div>
+            </V3Grid>
+          </V3Card>
+        ))}
+      </V3Grid>
+    </div>
+  );
+}
+
+window.V3Dashboard = V3Dashboard;
+window.V3Customers = V3Customers;
+window.V3CustomerDetail = V3CustomerDetail;
+window.V3Batches = V3Batches;
+
+</script>
+
+<script type="text/babel" data-presets="react" data-module="v3-pages-more">
+/* global React */
+const { useState: _v3ms } = React;
+
+// ============ RESTOCK ============
+function V3Restock({ setPage, setCustomerId }) {
+  const { customers, openModal, toast } = window.useV3();
+  const due = customers.filter(c => c.restockIn != null).sort((a,b) => a.restockIn - b.restockIn);
+  const groups = [
+    { id: 'now', label: 'วันนี้', tone: 'bad', icon: '⚠', items: due.filter(c => c.restockIn <= 0) },
+    { id: 'week', label: 'สัปดาห์นี้', tone: 'amber', icon: '◔', items: due.filter(c => c.restockIn > 0 && c.restockIn <= 14) },
+    { id: 'month', label: 'เดือนนี้', tone: 'sky', icon: '◐', items: due.filter(c => c.restockIn > 14 && c.restockIn <= 45) },
+    { id: 'later', label: 'หลังจากนั้น', tone: 'lav', icon: '◯', items: due.filter(c => c.restockIn > 45) },
+  ];
+
+  const totalPL = due.filter(c => c.restockIn <= 14).length * 120;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, letterSpacing: '-0.01em' }}>ฟาร์มที่ใกล้ครบรอบ</h1>
+          <div style={{ color: 'var(--aw3-ink-3)', fontSize: 15, marginTop: 4 }}>
+            พยากรณ์จากวันลงลูกกุ้ง + ระยะเวลาเลี้ยงเฉลี่ย 110 วัน
+          </div>
+        </div>
+        <button className="aw3-btn aw3-btn-hero" onClick={() => toast(`ส่งข้อความถึง ${due.filter(c => c.restockIn <= 14).length} ฟาร์มแล้ว`)}>
+          ส่งข้อความหาทุกคน
+          <svg width={14} height={14} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 8l5 5 7-10"/></svg>
+        </button>
+      </div>
+
+      {/* Summary chips */}
+      <V3Grid cols={4} gap={14} style={{ marginBottom: 28, marginTop: 22 }}>
+        {[
+          { label: 'ติดต่อด่วน', value: groups[0].items.length, tone: 'bad', sub: 'วันนี้ - พรุ่งนี้' },
+          { label: 'รอบใหม่ใน 14 วัน', value: groups[1].items.length, tone: 'amber', sub: `~${totalPL}k PL` },
+          { label: 'อีก 14-45 วัน', value: groups[2].items.length, tone: 'sky', sub: 'เริ่มเตรียมล็อต' },
+          { label: 'หลังจากนั้น', value: groups[3].items.length, tone: 'lav', sub: 'ติดตามต่อ' },
+        ].map((s, i) => (
+          <V3Card key={i} pad={18} style={{ border: '1px solid var(--aw3-line)' }}>
+            <V3Chip tone={s.tone} size="xs">{s.label}</V3Chip>
+            <div style={{ fontSize: 32, fontWeight: 800, marginTop: 12, letterSpacing: '-0.02em', lineHeight: 1 }}>
+              {s.value} <span style={{ fontSize: 14, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>ฟาร์ม</span>
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--aw3-ink-4)', marginTop: 6 }}>{s.sub}</div>
+          </V3Card>
+        ))}
+      </V3Grid>
+
+      {/* Groups */}
+      {groups.map(g => g.items.length > 0 && (
+        <V3Section key={g.id} title={
+          <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{
+              width: 24, height: 24, borderRadius: '50%',
+              background: `var(--aw3-${g.tone === 'bad' ? 'bad-tint' : g.tone === 'amber' ? 'warn-tint' : g.tone})`,
+              color: `var(--aw3-${g.tone === 'bad' ? 'bad' : g.tone === 'amber' ? 'warn' : g.tone+'-fg'})`,
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 12, fontWeight: 700,
+            }}>{g.icon}</span>
+            {g.label}
+            <span style={{ color: 'var(--aw3-ink-4)', fontWeight: 500, fontSize: 14 }}>· {g.items.length}</span>
+          </span>
+        }>
+          <V3Card pad={0} style={{ border: '1px solid var(--aw3-line)', overflow: 'hidden' }}>
+            {g.items.map((c, i) => (
+              <div key={c.id} className="aw3-row"
+                onClick={() => { setCustomerId(c.id); setPage('customer'); }}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '50px 1.6fr 1fr 1fr 1fr auto',
+                  alignItems: 'center', gap: 14,
+                  padding: '16px 20px',
+                  borderBottom: i < g.items.length - 1 ? '1px solid var(--aw3-line)' : 0,
+                }}>
+                <V3Avatar name={c.farm} tone={['lav','peach','mint','sky','rose','amber'][i % 6]} size={42}/>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 700 }}>{c.farm}</div>
+                  <div style={{ fontSize: 12, color: 'var(--aw3-ink-4)' }}>{c.name} · {c.zone}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>เก็บเกี่ยว</div>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>
+                    {c.restockIn <= 0 ? 'แล้ว' : `อีก ${c.restockIn} วัน`}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>รอบที่แล้ว</div>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>{c.batches} ครั้ง</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>D30 รอบล่าสุด</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: c.d30 >= 80 ? 'var(--aw3-good)' : c.d30 < 70 ? 'var(--aw3-bad)' : 'var(--aw3-ink)' }}>
+                    {c.d30 ? `${c.d30}%` : '—'}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
+                  <button className="aw3-btn aw3-btn-soft aw3-btn-sm" onClick={() => openModal('sendLine', { customer: c })}>
+                    <svg width={12} height={12} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 5l5-3 5 3M3 5v6l5 3 5-3V5"/></svg>
+                    LINE
+                  </button>
+                  <button className="aw3-btn aw3-btn-hero aw3-btn-sm" onClick={() => openModal('quote', { customer: c })}>เสนอราคา</button>
+                </div>
+              </div>
+            ))}
+          </V3Card>
+        </V3Section>
+      ))}
+    </div>
+  );
+}
+
+// ============ DISEASE ALERTS ============
+function V3Alerts({ setPage, setBatchId }) {
+  const { alerts, openModal, toast } = window.useV3();
+  const ALERTS = alerts.filter(a => !a.closed);
+
+  const SEVS = {
+    high: { bg: 'var(--aw3-bad-tint)', fg: 'var(--aw3-bad)', label: 'รุนแรง', icon: '⚠' },
+    medium: { bg: 'var(--aw3-warn-tint)', fg: 'var(--aw3-warn)', label: 'ปานกลาง', icon: '◑' },
+    low: { bg: 'var(--aw3-sky)', fg: 'var(--aw3-sky-fg)', label: 'เฝ้าระวัง', icon: 'i' },
+  };
+
+  return (
+    <div>
+      <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, letterSpacing: '-0.01em' }}>แจ้งเตือนโรค</h1>
+      <div style={{ color: 'var(--aw3-ink-3)', fontSize: 15, marginBottom: 24, marginTop: 4 }}>
+        ติดตามและตอบสนองต่อความผิดปกติย้อนกลับไปยังล็อตต้นทาง
+      </div>
+
+      <V3Grid cols={3} gap={14} style={{ marginBottom: 28 }}>
+        {[
+          { label: 'รุนแรง', value: 1, tone: 'bad' },
+          { label: 'ปานกลาง', value: 1, tone: 'warn' },
+          { label: 'เฝ้าระวัง', value: 1, tone: 'sky' },
+        ].map((s, i) => (
+          <V3Card key={i} pad={18} style={{ border: '1px solid var(--aw3-line)' }}>
+            <V3Chip tone={s.tone === 'warn' ? 'amber' : s.tone} size="xs">{s.label}</V3Chip>
+            <div style={{ fontSize: 32, fontWeight: 800, marginTop: 12, letterSpacing: '-0.02em', lineHeight: 1 }}>
+              {s.value} <span style={{ fontSize: 14, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>เคส</span>
+            </div>
+          </V3Card>
+        ))}
+      </V3Grid>
+
+      <V3Section title="แจ้งเตือนทั้งหมด" action={
+        <select className="aw3-input" style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }}>
+          <option>ทุกระดับ</option><option>รุนแรงเท่านั้น</option><option>7 วันล่าสุด</option>
+        </select>
+      }>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {ALERTS.map(a => {
+            const sev = SEVS[a.sev];
+            return (
+              <V3Card key={a.id} pad={20} style={{
+                border: '1px solid var(--aw3-line)',
+                borderLeft: `4px solid ${sev.fg}`,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 'var(--r)',
+                    background: sev.bg, color: sev.fg,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 20, fontWeight: 800, flexShrink: 0,
+                  }}>{sev.icon}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
+                      <V3Chip tone={a.sev === 'high' ? 'bad' : a.sev === 'medium' ? 'amber' : 'sky'} size="xs">{sev.label}</V3Chip>
+                      <span style={{ fontSize: 11, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>{a.date}</span>
+                      {a.batch && <span style={{ fontSize: 11, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>· ล็อต {a.batch}</span>}
+                    </div>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, lineHeight: 1.35 }}>{a.title}</h3>
+                    <div style={{ fontSize: 13.5, color: 'var(--aw3-ink-3)', marginTop: 6, lineHeight: 1.55 }}>{a.desc}</div>
+
+                    <div style={{
+                      marginTop: 14, padding: '12px 14px',
+                      background: 'var(--aw3-soft)', borderRadius: 'var(--r)',
+                      fontSize: 13,
+                    }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--aw3-ink-4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+                        ฟาร์มที่เกี่ยวข้อง
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {a.farms.map(f => (
+                          <span key={f} style={{ padding: '4px 10px', background: '#fff', borderRadius: 'var(--r-pill)', fontSize: 12, fontWeight: 600 }}>{f}</span>
+                        ))}
+                      </div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--aw3-ink-4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 12, marginBottom: 4 }}>
+                        แนะนำ
+                      </div>
+                      <div style={{ fontSize: 13, fontWeight: 600 }}>{a.action}</div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+                      {a.batch && (
+                        <button className="aw3-btn aw3-btn-soft aw3-btn-sm"
+                          onClick={() => { setBatchId(a.batch); setPage('batch'); }}>
+                          ดูล็อต {a.batch}
+                        </button>
+                      )}
+                      <button className="aw3-btn aw3-btn-hero aw3-btn-sm"
+                        onClick={() => a.farms.forEach(f => null) || toast(`ส่งข้อความถึง ${a.farms.length} ฟาร์มแล้ว`)}>
+                        ส่งข้อความถึงฟาร์ม
+                      </button>
+                      <button className="aw3-btn aw3-btn-ghost aw3-btn-sm"
+                        onClick={() => openModal('closeAlert', { alert: a })}>ปิดเคส</button>
+                    </div>
+                  </div>
+                </div>
+              </V3Card>
+            );
+          })}
+        </div>
+      </V3Section>
+    </div>
+  );
+}
+
+// ============ PUBLIC SCORECARD ============
+function V3Scorecard() {
+  const { scorecard, setScorecard, toast } = window.useV3();
+  const pub = scorecard.public;
+  const setPub = (v) => setScorecard(s => ({ ...s, public: v }));
+
+  return (
+    <div>
+      <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, letterSpacing: '-0.01em' }}>คะแนนสาธารณะ</h1>
+      <div style={{ color: 'var(--aw3-ink-3)', fontSize: 15, marginBottom: 24, marginTop: 4 }}>
+        โปรไฟล์ที่ลูกค้ารายใหม่จะเห็นเมื่อสแกน QR หน้าตู้
+      </div>
+
+      <V3Grid cols={12} gap={20}>
+        {/* Live preview */}
+        <V3Col span={5}>
+          <V3Card pad={0} style={{
+            border: '1px solid var(--aw3-line)',
+            background: 'linear-gradient(180deg, #F0F4FC 0%, #fff 30%)',
+            overflow: 'hidden',
+          }}>
+            <div style={{ padding: '32px 28px 0', textAlign: 'center' }}>
+              <V3Mark size={56}/>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.10em', color: 'var(--aw3-hero)', marginTop: 14, textTransform: 'uppercase' }}>
+                AquaWise verified
+              </div>
+              <h2 style={{ margin: '14px 0 4px', fontSize: 26, fontWeight: 800, letterSpacing: '-0.01em' }}>ฟ้าใส แฮทเชอรี่</h2>
+              <div style={{ fontSize: 13, color: 'var(--aw3-ink-3)' }}>สมุทรสาคร · เปิดมาแล้ว 8 ปี</div>
+
+              <div style={{
+                margin: '24px auto 0', padding: '20px 22px',
+                background: '#fff', borderRadius: 'var(--r-lg)',
+                boxShadow: '0 4px 14px rgba(20,19,31,0.06)',
+                textAlign: 'left',
+              }}>
+                <div className="eyebrow" style={{ marginBottom: 14 }}>ผลงาน 6 เดือนล่าสุด</div>
+                {[
+                  { label: 'อัตรารอด D30', val: 'สูงกว่ามัธยฐาน', accent: 'good' },
+                  { label: 'ผ่าน PCR (4 โรค)', val: '100%', accent: 'good' },
+                  { label: 'ฟาร์มที่กลับมาซื้อ', val: '78%', accent: 'good' },
+                  { label: 'เฉลี่ย 12 ล็อต / 47 ฟาร์ม', val: '', accent: 'soft' },
+                ].map((r, i) => (
+                  <div key={i} style={{
+                    display: 'flex', justifyContent: 'space-between',
+                    padding: '10px 0',
+                    borderBottom: i < 3 ? '1px solid var(--aw3-line)' : 0,
+                  }}>
+                    <span style={{ fontSize: 13, color: 'var(--aw3-ink-3)' }}>{r.label}</span>
+                    {r.val && <span style={{ fontSize: 13, fontWeight: 700, color: r.accent === 'good' ? 'var(--aw3-good)' : 'var(--aw3-ink)' }}>{r.val}</span>}
+                  </div>
+                ))}
+              </div>
+
+              <div style={{
+                margin: '20px 0 28px', padding: '12px 18px',
+                background: 'var(--aw3-soft)', borderRadius: 'var(--r)',
+                fontSize: 11.5, color: 'var(--aw3-ink-4)', lineHeight: 1.5, textAlign: 'left',
+              }}>
+                ข้อมูลจาก AquaWise — ไม่แสดงอันดับเทียบฟาร์มอื่น และไม่แสดงค่าที่ต่ำกว่ามัธยฐาน
+              </div>
+            </div>
+          </V3Card>
+          <div style={{ marginTop: 12, textAlign: 'center', fontSize: 12, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>
+            ตัวอย่างที่ลูกค้าเห็นเมื่อสแกน
+          </div>
+        </V3Col>
+
+        <V3Col span={7}>
+          {/* Toggle */}
+          <V3Card pad={20} style={{ border: '1px solid var(--aw3-line)', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>เปิดให้สาธารณะดู</h3>
+                <div style={{ fontSize: 13, color: 'var(--aw3-ink-3)', marginTop: 4 }}>
+                  ลูกค้าที่สแกน QR จะเห็นข้อมูลด้านซ้าย
+                </div>
+              </div>
+              <button onClick={() => setPub(!pub)} style={{
+                width: 56, height: 32, borderRadius: 'var(--r-pill)',
+                background: pub ? 'var(--aw3-hero)' : 'var(--aw3-line-2)',
+                border: 0, cursor: 'pointer', position: 'relative',
+                transition: 'all 0.15s',
+              }}>
+                <span style={{
+                  position: 'absolute', top: 4, left: pub ? 28 : 4,
+                  width: 24, height: 24, borderRadius: '50%',
+                  background: '#fff', transition: 'left 0.15s',
+                }}/>
+              </button>
+            </div>
+          </V3Card>
+
+          {/* What's shown */}
+          <V3Card pad={22} style={{ border: '1px solid var(--aw3-line)', marginBottom: 16 }}>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>สถิติที่แสดง</h3>
+            <div style={{ fontSize: 12.5, color: 'var(--aw3-ink-3)', marginTop: 4, marginBottom: 14 }}>
+              เปิด/ปิดได้ตามต้องการ — แต่เราจะไม่แสดงค่าต่ำกว่ามัธยฐานให้เห็นเลย
+            </div>
+            {[
+              { label: 'อัตรารอด D30', desc: 'แสดงเป็นข้อความ "สูงกว่ามัธยฐาน" ไม่ใช่ตัวเลข', on: true },
+              { label: 'ผลตรวจ PCR', desc: 'ผ่าน 4 โรค WSSV / EHP / IHHNV / TSV', on: true },
+              { label: 'อัตราการกลับมาซื้อ', desc: 'ลูกค้าที่สั่งล็อตที่ 2 ภายใน 6 เดือน', on: true },
+              { label: 'จำนวนฟาร์มและล็อต', desc: 'แสดงเฉพาะค่ารวม ไม่ระบุชื่อ', on: true },
+              { label: 'รีวิวจากลูกค้า', desc: 'ยังไม่เปิด — รอเฟส 2', on: false },
+            ].map((r, i) => (
+              <div key={i} style={{
+                display: 'flex', alignItems: 'center', gap: 14,
+                padding: '12px 0',
+                borderTop: i > 0 ? '1px solid var(--aw3-line)' : 0,
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700 }}>{r.label}</div>
+                  <div style={{ fontSize: 12, color: 'var(--aw3-ink-4)', marginTop: 2 }}>{r.desc}</div>
+                </div>
+                <div style={{
+                  width: 44, height: 26, borderRadius: 'var(--r-pill)',
+                  background: r.on ? 'var(--aw3-hero)' : 'var(--aw3-line-2)',
+                  position: 'relative',
+                }}>
+                  <span style={{
+                    position: 'absolute', top: 3, left: r.on ? 21 : 3,
+                    width: 20, height: 20, borderRadius: '50%', background: '#fff',
+                  }}/>
+                </div>
+              </div>
+            ))}
+          </V3Card>
+
+          {/* QR card */}
+          <V3Card pad={22} style={{ border: '1px solid var(--aw3-line)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+              <div style={{
+                width: 96, height: 96, borderRadius: 'var(--r)',
+                background: 'var(--aw3-soft)', padding: 8,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <svg viewBox="0 0 80 80" width="100%" height="100%">
+                  {Array.from({ length: 7 }).map((_, r) => Array.from({ length: 7 }).map((_, c) => {
+                    const seed = (r * 7 + c * 3 + 11) % 5;
+                    return seed > 1 && <rect key={`${r}-${c}`} x={r*10+5} y={c*10+5} width="9" height="9" fill="var(--aw3-ink)"/>;
+                  }))}
+                  <rect x="0" y="0" width="22" height="22" fill="none" stroke="var(--aw3-ink)" strokeWidth="3"/>
+                  <rect x="58" y="0" width="22" height="22" fill="none" stroke="var(--aw3-ink)" strokeWidth="3"/>
+                  <rect x="0" y="58" width="22" height="22" fill="none" stroke="var(--aw3-ink)" strokeWidth="3"/>
+                </svg>
+              </div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>QR หน้าตู้</h3>
+                <div style={{ fontSize: 13, color: 'var(--aw3-ink-3)', marginTop: 4 }}>
+                  ลูกค้าใหม่สแกนเพื่อดูโปรไฟล์ + เพิ่มเป็นเพื่อน LINE
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                  <button className="aw3-btn aw3-btn-soft aw3-btn-sm" onClick={() => toast('ดาวน์โหลด PDF แล้ว')}>ดาวน์โหลด PDF</button>
+                  <button className="aw3-btn aw3-btn-ghost aw3-btn-sm" onClick={() => toast('ส่งทาง LINE แล้ว')}>ส่ง LINE</button>
+                </div>
+              </div>
+            </div>
+          </V3Card>
+        </V3Col>
+      </V3Grid>
+    </div>
+  );
+}
+
+// ============ SETTINGS ============
+function V3Settings() {
+  const [tab, setTab] = _v3ms('profile');
+  const TABS = [
+    { id: 'profile', label: 'โปรไฟล์ฟาร์ม' },
+    { id: 'notifications', label: 'การแจ้งเตือน' },
+    { id: 'team', label: 'ทีมงาน' },
+    { id: 'data', label: 'ข้อมูลและส่งออก' },
+    { id: 'billing', label: 'แพ็กเกจ' },
+  ];
+
+  return (
+    <div>
+      <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, letterSpacing: '-0.01em' }}>ตั้งค่า</h1>
+      <div style={{ color: 'var(--aw3-ink-3)', fontSize: 15, marginBottom: 24, marginTop: 4 }}>
+        จัดการโปรไฟล์ การแจ้งเตือน และข้อมูลส่งออก
+      </div>
+
+      <div style={{ display: 'flex', gap: 6, marginBottom: 22, padding: 4, background: 'var(--aw3-soft)', borderRadius: 'var(--r)', width: 'fit-content' }}>
+        {TABS.map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)}
+            style={{
+              padding: '10px 18px', border: 0, borderRadius: 'var(--r-sm)',
+              background: tab === t.id ? '#fff' : 'transparent',
+              color: tab === t.id ? 'var(--aw3-ink)' : 'var(--aw3-ink-3)',
+              fontFamily: 'inherit', fontSize: 14, fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: tab === t.id ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+            }}>{t.label}</button>
+        ))}
+      </div>
+
+      {tab === 'profile' && <V3SettingsProfile/>}
+      {tab === 'notifications' && <V3SettingsNotif/>}
+      {tab === 'team' && <V3SettingsTeam/>}
+      {tab === 'data' && <V3SettingsData/>}
+      {tab === 'billing' && <V3SettingsBilling/>}
+    </div>
+  );
+}
+
+function V3SettingsProfile() {
+  return (
+    <V3Grid cols={12} gap={16}>
+      <V3Col span={8}>
+        <V3Card pad={26} style={{ border: '1px solid var(--aw3-line)' }}>
+          <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>ข้อมูลฟาร์ม</h3>
+          <div style={{ fontSize: 13, color: 'var(--aw3-ink-3)', marginTop: 4, marginBottom: 22 }}>
+            ข้อมูลนี้จะแสดงในใบรับรองและในโปรไฟล์สาธารณะ
+          </div>
+          {[
+            { label: 'ชื่อโรงเพาะ', value: 'ฟ้าใส แฮทเชอรี่' },
+            { label: 'ชื่อภาษาอังกฤษ', value: 'Fasai Hatchery' },
+            { label: 'เลขทะเบียน', value: 'TH-HATCH-23489' },
+            { label: 'ที่อยู่', value: '78/12 ม.4 ต.บ้านบ่อ อ.เมือง สมุทรสาคร 74000' },
+            { label: 'เบอร์ติดต่อ', value: '081-234-5678' },
+            { label: 'LINE OA', value: '@fasaihatchery' },
+          ].map((f, i) => (
+            <div key={i} style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--aw3-ink-3)', marginBottom: 6 }}>{f.label}</label>
+              <input className="aw3-input" defaultValue={f.value} style={{ fontSize: 14 }}/>
+            </div>
+          ))}
+          <button className="aw3-btn aw3-btn-hero" style={{ marginTop: 8 }}>บันทึก</button>
+        </V3Card>
+      </V3Col>
+      <V3Col span={4}>
+        <V3Card pad={22} style={{ border: '1px solid var(--aw3-line)' }}>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>โลโก้</h3>
+          <div style={{
+            marginTop: 14, height: 160, borderRadius: 'var(--r)',
+            background: 'var(--aw3-soft)', border: '2px dashed var(--aw3-line-2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexDirection: 'column', gap: 8, color: 'var(--aw3-ink-4)',
+          }}>
+            <V3Mark size={48}/>
+            <div style={{ fontSize: 12, fontWeight: 600 }}>ลากไฟล์มาวางหรือคลิก</div>
+          </div>
+          <button className="aw3-btn aw3-btn-soft" style={{ width: '100%', marginTop: 12, justifyContent: 'center' }}>อัปโหลด</button>
+        </V3Card>
+        <V3Card pad={22} style={{ border: '1px solid var(--aw3-line)', marginTop: 16 }}>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>เปิดมาแล้ว</h3>
+          <div style={{ fontSize: 32, fontWeight: 800, marginTop: 8, letterSpacing: '-0.02em' }}>
+            8 <span style={{ fontSize: 14, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>ปี</span>
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--aw3-ink-3)', marginTop: 4 }}>เริ่มกิจการ มี.ค. 2018</div>
+        </V3Card>
+      </V3Col>
+    </V3Grid>
+  );
+}
+
+function V3SettingsNotif() {
+  const ROWS = [
+    { label: 'มีฟาร์มที่ใกล้ครบรอบ (≤14 วัน)', desc: 'ดู สรุปทุกเช้า 7:00 น.', on: true },
+    { label: 'D30 ของล็อตต่ำกว่าเป้า', desc: 'ส่งเมื่อมีฟาร์ม ≥2 ที่รายงานต่ำ', on: true },
+    { label: 'พบเชื้อในล็อตที่ส่งไปแล้ว', desc: 'ส่งทันที + เสนอให้ส่งข้อความถึงทุกฟาร์ม', on: true },
+    { label: 'ลูกค้าตอบรับใน LINE', desc: 'ทุกข้อความที่ส่งมา', on: false },
+    { label: 'สรุปรายสัปดาห์', desc: 'ทุกวันจันทร์เช้า', on: true },
+    { label: 'ราคาตลาดเปลี่ยน > 5%', desc: 'จากตลาดทะเลไทย สมุทรสาคร', on: true },
+  ];
+  return (
+    <V3Card pad={26} style={{ border: '1px solid var(--aw3-line)', maxWidth: 720 }}>
+      {ROWS.map((r, i) => (
+        <div key={i} style={{
+          display: 'flex', alignItems: 'center', gap: 16,
+          padding: '16px 0',
+          borderTop: i > 0 ? '1px solid var(--aw3-line)' : 0,
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 15, fontWeight: 700 }}>{r.label}</div>
+            <div style={{ fontSize: 12.5, color: 'var(--aw3-ink-4)', marginTop: 2 }}>{r.desc}</div>
+          </div>
+          <div style={{
+            width: 48, height: 28, borderRadius: 'var(--r-pill)',
+            background: r.on ? 'var(--aw3-hero)' : 'var(--aw3-line-2)',
+            position: 'relative', cursor: 'pointer',
+          }}>
+            <span style={{
+              position: 'absolute', top: 3, left: r.on ? 23 : 3,
+              width: 22, height: 22, borderRadius: '50%', background: '#fff',
+            }}/>
+          </div>
+        </div>
+      ))}
+    </V3Card>
+  );
+}
+
+function V3SettingsTeam() {
+  const { openModal } = window.useV3();
+  const TEAM = [
+    { name: 'สุเทพ ใจดี', role: 'เจ้าของฟาร์ม', perm: 'admin', tone: 'lav' },
+    { name: 'นิภา ใจดี', role: 'หัวหน้าโรงเพาะ', perm: 'admin', tone: 'mint' },
+    { name: 'พรชัย ตั้งใจ', role: 'เจ้าหน้าที่ PCR', perm: 'editor', tone: 'sky' },
+    { name: 'รัตนา สุขสวัสดิ์', role: 'ดูแลลูกค้า', perm: 'editor', tone: 'rose' },
+    { name: 'มานพ จงดี', role: 'ดูข้อมูลอย่างเดียว', perm: 'viewer', tone: 'amber' },
+  ];
+  const PERMS = { admin: { label: 'แอดมิน', tone: 'solid' }, editor: { label: 'แก้ไขได้', tone: 'sky' }, viewer: { label: 'ดูเท่านั้น', tone: 'soft' } };
+  return (
+    <div>
+      <V3Card pad={0} style={{ border: '1px solid var(--aw3-line)', overflow: 'hidden', maxWidth: 820 }}>
+        {TEAM.map((t, i) => (
+          <div key={t.name} style={{
+            display: 'flex', alignItems: 'center', gap: 14,
+            padding: '16px 22px',
+            borderTop: i > 0 ? '1px solid var(--aw3-line)' : 0,
+          }}>
+            <V3Avatar name={t.name} tone={t.tone} size={42}/>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>{t.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--aw3-ink-4)' }}>{t.role}</div>
+            </div>
+            <V3Chip tone={PERMS[t.perm].tone} size="xs">{PERMS[t.perm].label}</V3Chip>
+            <button className="aw3-btn aw3-btn-ghost aw3-btn-sm">แก้ไข</button>
+          </div>
+        ))}
+      </V3Card>
+      <button className="aw3-btn aw3-btn-hero" style={{ marginTop: 16 }} onClick={() => openModal('invite')}>+ เชิญสมาชิก</button>
+    </div>
+  );
+}
+
+function V3SettingsData() {
+  return (
+    <V3Grid cols={2} gap={16} style={{ maxWidth: 920 }}>
+      {[
+        { title: 'ส่งออกข้อมูลลูกค้า', desc: 'CSV รายชื่อฟาร์ม ประวัติการสั่ง และผลลัพธ์', cta: 'ดาวน์โหลด CSV' },
+        { title: 'ส่งออกประวัติ PCR', desc: 'PDF + ภาพถ่ายของทุกล็อตในช่วงที่เลือก', cta: 'ดาวน์โหลด ZIP' },
+        { title: 'สำรองข้อมูลทั้งหมด', desc: 'JSON สำรองไว้ — ใช้เมื่อย้ายระบบ', cta: 'ดาวน์โหลด' },
+        { title: 'ลบข้อมูลทั้งหมด', desc: 'ทำไม่ได้กลับ — ติดต่อทีมงานก่อน', cta: 'ติดต่อทีม', danger: true },
+      ].map((r, i) => (
+        <V3Card key={i} pad={22} style={{ border: '1px solid var(--aw3-line)' }}>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>{r.title}</h3>
+          <div style={{ fontSize: 13, color: 'var(--aw3-ink-3)', marginTop: 6, lineHeight: 1.6, marginBottom: 16 }}>{r.desc}</div>
+          <button className={r.danger ? 'aw3-btn aw3-btn-ghost' : 'aw3-btn aw3-btn-soft'}
+            style={{ color: r.danger ? 'var(--aw3-bad)' : undefined }}>
+            {r.cta}
+          </button>
+        </V3Card>
+      ))}
+    </V3Grid>
+  );
+}
+
+function V3SettingsBilling() {
+  return (
+    <V3Grid cols={12} gap={16}>
+      <V3Col span={7}>
+        <V3Card pad={28} style={{
+          border: '1px solid var(--aw3-line)',
+          background: 'linear-gradient(135deg, #004AAD 0%, #1A66C7 100%)',
+          color: '#fff', position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', opacity: 0.85 }}>
+            แพ็กเกจปัจจุบัน
+          </div>
+          <h2 style={{ margin: '8px 0 0', fontSize: 32, fontWeight: 800, letterSpacing: '-0.01em' }}>Pro</h2>
+          <div style={{ fontSize: 14, opacity: 0.9, marginTop: 4 }}>2,490 บาท / เดือน · ต่ออายุ 12 พ.ค. 2026</div>
+          <div style={{ marginTop: 22, display: 'flex', gap: 14, fontSize: 13 }}>
+            <div><b>50</b> ฟาร์ม</div>
+            <div><b>ไม่จำกัด</b> ล็อต</div>
+            <div><b>5</b> ทีมงาน</div>
+            <div>LIFF + LINE OA</div>
+          </div>
+          <button className="aw3-btn" style={{ background: '#fff', color: 'var(--aw3-hero)', marginTop: 24 }}>เปลี่ยนแพ็กเกจ</button>
+        </V3Card>
+      </V3Col>
+      <V3Col span={5}>
+        <V3Card pad={22} style={{ border: '1px solid var(--aw3-line)' }}>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>การชำระล่าสุด</h3>
+          {[
+            { date: '12 เม.ย. 2026', amt: 2490 },
+            { date: '12 มี.ค. 2026', amt: 2490 },
+            { date: '12 ก.พ. 2026', amt: 2490 },
+          ].map((r, i) => (
+            <div key={i} style={{
+              display: 'flex', justifyContent: 'space-between',
+              padding: '12px 0',
+              borderTop: i === 0 ? '1px solid var(--aw3-line)' : '1px solid var(--aw3-line)',
+              marginTop: i === 0 ? 14 : 0,
+              fontSize: 13,
+            }}>
+              <span style={{ color: 'var(--aw3-ink-3)' }}>{r.date}</span>
+              <span style={{ fontWeight: 700 }}>฿{r.amt.toLocaleString()}</span>
+            </div>
+          ))}
+        </V3Card>
+      </V3Col>
+    </V3Grid>
+  );
+}
+
+// ============ BATCH DETAIL ============
+function V3BatchDetail({ setPage, batchId }) {
+  const { batches, openModal, toast } = window.useV3();
+  const D = window.AW_DATA;
+  const b = batches.find(x => x.id === batchId) || batches[0];
+  const buyers = D.CUSTOMERS.slice(0, b.farms);
+  const dist = b.dist;
+  const distMax = Math.max(...dist);
+  const distLabels = ['<50','50-55','55-60','60-65','65-70','70-75','75-80','80-85','85-90','>90'];
+
+  return (
+    <div>
+      <button onClick={() => setPage('batches')} style={{ background: 'transparent', border: 0, padding: 0, cursor: 'pointer', color: 'var(--aw3-ink-3)', marginBottom: 14, fontSize: 13 }}>← ล็อตทั้งหมด</button>
+
+      <V3Card pad={28} style={{ border: '1px solid var(--aw3-line)', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+          <V3Avatar name={b.id} size={68} tone={b.pcr === 'clean' ? 'mint' : 'rose'}/>
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, letterSpacing: '-0.01em' }}>ล็อต {b.id}</h1>
+              <V3Chip tone={b.pcr === 'clean' ? 'good' : 'bad'} size="xs">PCR {b.pcr === 'clean' ? '✓ สะอาด' : '⚠ พบเชื้อ'}</V3Chip>
+            </div>
+            <div style={{ fontSize: 14, color: 'var(--aw3-ink-3)', marginTop: 4 }}>
+              ลงวันที่ {b.date} · {b.source}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="aw3-btn aw3-btn-soft" onClick={() => toast(`พิมพ์ใบรับรอง ${b.id} แล้ว`)}>พิมพ์ใบรับรอง</button>
+            <button className="aw3-btn aw3-btn-hero" onClick={() => openModal('cert', { batch: b })}>ส่งใบรับรอง LINE</button>
+          </div>
+        </div>
+      </V3Card>
+
+      <V3Grid cols={4} gap={14} style={{ marginBottom: 20 }}>
+        {[
+          { label: 'ผลิต', value: `${(b.plProduced/1000000).toFixed(1)}M`, sub: 'PL ทั้งหมด', tone: 'lav' },
+          { label: 'ขายแล้ว', value: `${(b.plSold/1000000).toFixed(1)}M`, sub: `${Math.round(b.plSold/b.plProduced*100)}% ของล็อต`, tone: 'sky' },
+          { label: 'ฟาร์มที่ซื้อ', value: b.farms, sub: 'ตามสายไปได้', tone: 'mint' },
+          { label: 'D30 เฉลี่ย', value: `${b.meanD30}%`, sub: b.meanD30 >= 80 ? 'เกินเป้า' : 'ต่ำกว่าเป้า', tone: b.meanD30 >= 80 ? 'good' : 'amber' },
+        ].map((s, i) => (
+          <V3Card key={i} pad={18} style={{ border: '1px solid var(--aw3-line)' }}>
+            <V3Chip tone={s.tone} size="xs">{s.label}</V3Chip>
+            <div style={{ fontSize: 28, fontWeight: 800, marginTop: 12, letterSpacing: '-0.02em', lineHeight: 1 }}>{s.value}</div>
+            <div style={{ fontSize: 12, color: 'var(--aw3-ink-4)', marginTop: 6 }}>{s.sub}</div>
+          </V3Card>
+        ))}
+      </V3Grid>
+
+      <V3Grid cols={12} gap={20}>
+        <V3Col span={7}>
+          <V3Card pad={24} style={{ border: '1px solid var(--aw3-line)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>การกระจายของอัตรารอด D30</h3>
+              <V3Chip tone="soft" size="xs">{b.farms} ฟาร์ม</V3Chip>
+            </div>
+            <div style={{ fontSize: 12.5, color: 'var(--aw3-ink-3)', marginBottom: 18 }}>
+              แต่ละแท่งคือจำนวนฟาร์มในช่วงอัตรารอดนั้น
+            </div>
+            <window.V3DistChart values={dist} labels={distLabels} height={170}/>
+          </V3Card>
+        </V3Col>
+        <V3Col span={5}>
+          <V3Card pad={22} style={{ border: '1px solid var(--aw3-line)', height: '100%' }}>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>ผลตรวจ PCR</h3>
+            <div style={{ fontSize: 12, color: 'var(--aw3-ink-3)', marginTop: 4, marginBottom: 18 }}>ตรวจวันที่ {b.date} · ห้องปฏิบัติการ DOFR</div>
+            {['WSSV', 'EHP', 'IHHNV', 'TSV'].map((d, i) => {
+              const flagged = b.pcr !== 'clean' && d === 'EHP';
+              return (
+                <div key={d} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '12px 0',
+                  borderTop: i > 0 ? '1px solid var(--aw3-line)' : 0,
+                }}>
+                  <div style={{
+                    width: 30, height: 30, borderRadius: '50%',
+                    background: flagged ? 'var(--aw3-bad-tint)' : 'var(--aw3-good-tint)',
+                    color: flagged ? 'var(--aw3-bad)' : 'var(--aw3-good)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 14, fontWeight: 800,
+                  }}>{flagged ? '⚠' : '✓'}</div>
+                  <div style={{ flex: 1, fontSize: 14, fontWeight: 700 }}>{d}</div>
+                  <V3Chip tone={flagged ? 'bad' : 'good'} size="xs">{flagged ? 'พบเชื้อ' : 'ไม่พบเชื้อ'}</V3Chip>
+                </div>
+              );
+            })}
+          </V3Card>
+        </V3Col>
+      </V3Grid>
+
+      <V3Section title="ฟาร์มที่ซื้อล็อตนี้" style={{ marginTop: 28 }}>
+        <V3Card pad={0} style={{ border: '1px solid var(--aw3-line)', overflow: 'hidden' }}>
+          {buyers.map((c, i) => (
+            <div key={c.id} style={{
+              display: 'grid', gridTemplateColumns: '50px 1.5fr 1fr 1fr 1fr 80px',
+              alignItems: 'center', gap: 14,
+              padding: '14px 20px',
+              borderBottom: i < buyers.length - 1 ? '1px solid var(--aw3-line)' : 0,
+            }}>
+              <V3Avatar name={c.farm} tone={['lav','peach','mint','sky','rose','amber'][i % 6]} size={36}/>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700 }}>{c.farm}</div>
+                <div style={{ fontSize: 11, color: 'var(--aw3-ink-4)' }}>{c.zone}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>ซื้อ</div>
+                <div style={{ fontSize: 13, fontWeight: 700 }}>{(180 + i * 30)}k PL</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>D30</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: c.d30 >= 80 ? 'var(--aw3-good)' : c.d30 < 70 ? 'var(--aw3-bad)' : 'var(--aw3-ink)' }}>
+                  {c.d30 ? `${c.d30}%` : 'รอ'}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--aw3-ink-4)', fontWeight: 600 }}>สถานะ</div>
+                <V3Chip tone={c.cycleDay ? 'sky' : 'soft'} size="xs">{c.cycleDay ? `วันที่ ${c.cycleDay}` : 'จบรอบ'}</V3Chip>
+              </div>
+              <V3RoundBtn dir="right" size={30} tone="soft"/>
+            </div>
+          ))}
+        </V3Card>
+      </V3Section>
+    </div>
+  );
+}
+
+window.V3Restock = V3Restock;
+window.V3Alerts = V3Alerts;
+window.V3Scorecard = V3Scorecard;
+window.V3Settings = V3Settings;
+window.V3BatchDetail = V3BatchDetail;
+
+</script>
+
+<script type="text/babel" data-presets="react" data-module="v3-app">
+/* global React, ReactDOM */
+const { useState: _v3as } = React;
+
+function V3App() {
+  const [page, setPage] = _v3as('dashboard');
+  const [customerId, setCustomerId] = _v3as('C001');
+  const [batchId, setBatchId] = _v3as('B-2604-A');
+
+  let body = null;
+  if (page === 'dashboard') body = <V3Dashboard setPage={setPage} setCustomerId={setCustomerId} setBatchId={setBatchId}/>;
+  else if (page === 'customers') body = <V3Customers setPage={setPage} setCustomerId={setCustomerId}/>;
+  else if (page === 'customer') body = <V3CustomerDetail setPage={setPage} customerId={customerId}/>;
+  else if (page === 'batches') body = <V3Batches setPage={setPage} setBatchId={setBatchId}/>;
+  else if (page === 'batch') body = <V3BatchDetail setPage={setPage} batchId={batchId}/>;
+  else if (page === 'restock') body = <V3Restock setPage={setPage} setCustomerId={setCustomerId}/>;
+  else if (page === 'alerts') body = <V3Alerts setPage={setPage} setBatchId={setBatchId}/>;
+  else if (page === 'scorecard') body = <V3Scorecard/>;
+  else if (page === 'settings') body = <V3Settings/>;
+  else body = <V3Dashboard setPage={setPage} setCustomerId={setCustomerId} setBatchId={setBatchId}/>;
+
+  return (
+    <window.V3Provider>
+      <V3Shell page={page} setPage={setPage}>{body}</V3Shell>
+    </window.V3Provider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<V3App/>);
+
+</script>
+
+</body>
+</html>

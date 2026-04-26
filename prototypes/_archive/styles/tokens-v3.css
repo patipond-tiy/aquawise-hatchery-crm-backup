@@ -1,0 +1,140 @@
+/* AquaWise v3 — friendly, rounded, three-column shell */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Backdrop & surfaces */
+  --aw3-canvas: #E8E9EE;       /* outer body — soft cool grey */
+  --aw3-app: #FFFFFF;          /* the main app shell card */
+  --aw3-card: #FFFFFF;          /* inner cards on app */
+  --aw3-soft: #F6F6FB;         /* tinted card / chip bg */
+  --aw3-soft-2: #EFEEFB;
+  --aw3-line: #ECECF2;
+  --aw3-line-2: #E0E0EA;
+
+  /* Ink */
+  --aw3-ink: #0D0C18;
+  --aw3-ink-2: #1F1E2C;
+  --aw3-ink-3: #4F4E62;
+  --aw3-ink-4: #75748A;
+  --aw3-ink-5: #B0AFC2;
+
+  /* Hero accent — AquaWise primary blue */
+  --aw3-hero: #004AAD;
+  --aw3-hero-2: #003A8C;
+  --aw3-hero-soft: #DCE7F7;
+  --aw3-hero-tint: #EEF3FB;
+
+  /* Pastel category tints */
+  --aw3-lav: #E2EAFB;     --aw3-lav-fg: #2A4DAB;
+  --aw3-peach: #FFE7DA;   --aw3-peach-fg: #C2542B;
+  --aw3-mint: #DEF4E8;    --aw3-mint-fg: #2B7A50;
+  --aw3-sky: #DDECFB;     --aw3-sky-fg: #1F5BB8;
+  --aw3-rose: #FDE2EB;    --aw3-rose-fg: #B83767;
+  --aw3-amber: #FBEFC9;   --aw3-amber-fg: #8C6900;
+
+  /* Status */
+  --aw3-good: #2B7A50;     --aw3-good-tint: #DEF4E8;
+  --aw3-bad:  #C2412B;     --aw3-bad-tint: #FFE0DA;
+  --aw3-warn: #B07000;     --aw3-warn-tint: #FBEFC9;
+
+  /* Type */
+  --font3-thai: 'Noto Sans Thai', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font3-en: 'Plus Jakarta Sans', 'Noto Sans Thai', system-ui, sans-serif;
+  --font3-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Radii */
+  --r-sm: 8px;
+  --r: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  /* Soft shadow */
+  --shadow-card: 0 1px 2px rgba(20,19,31,0.04);
+  --shadow-pop: 0 8px 24px rgba(20,19,31,0.08);
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: var(--font3-thai);
+  font-size: 16px; line-height: 1.6;
+  color: var(--aw3-ink);
+  background: var(--aw3-canvas);
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: var(--font3-mono); font-feature-settings: 'tnum'; }
+.eyebrow {
+  font-family: var(--font3-en);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--aw3-ink-3);
+}
+
+::selection { background: var(--aw3-hero); color: #fff; }
+
+/* Inputs */
+.aw3-input {
+  font-family: inherit; font-size: 16px;
+  background: var(--aw3-soft);
+  border: 1.5px solid var(--aw3-line-2);
+  border-radius: var(--r);
+  padding: 14px 20px;
+  outline: none; width: 100%;
+  color: var(--aw3-ink);
+  transition: all 0.15s;
+}
+.aw3-input:focus {
+  background: #fff;
+  border-color: var(--aw3-hero);
+  box-shadow: 0 0 0 4px var(--aw3-hero-soft);
+}
+
+/* Buttons */
+.aw3-btn {
+  font-family: inherit; font-weight: 700; font-size: 15px;
+  background: var(--aw3-ink); color: #fff;
+  border: 0; border-radius: var(--r);
+  padding: 13px 22px; cursor: pointer;
+  min-height: 46px;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: all 0.15s ease;
+}
+.aw3-btn:hover { background: var(--aw3-hero); }
+.aw3-btn-hero { background: var(--aw3-hero); }
+.aw3-btn-hero:hover { background: var(--aw3-hero-2); }
+.aw3-btn-ghost {
+  background: var(--aw3-soft); color: var(--aw3-ink);
+}
+.aw3-btn-ghost:hover { background: var(--aw3-soft-2); transform: none; }
+.aw3-btn-soft {
+  background: var(--aw3-hero-soft); color: var(--aw3-hero);
+}
+.aw3-btn-soft:hover { background: var(--aw3-hero); color: #fff; transform: none; }
+.aw3-btn-sm { padding: 9px 16px; font-size: 14px; min-height: 38px; }
+
+/* Card */
+.aw3-card {
+  background: var(--aw3-card);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+}
+
+/* Row hover */
+.aw3-row { transition: background 0.12s ease; cursor: pointer; }
+.aw3-row:hover { background: var(--aw3-soft); }
+
+/* Reveal — translate only, no opacity flash (older users read fades as stalls) */
+@keyframes aw3-rise {
+  from { transform: translateY(6px); }
+  to { transform: translateY(0); }
+}
+.aw3-rise { animation: aw3-rise 0.10s ease-out both; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--aw3-ink-5); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--aw3-ink-4); }
+::-webkit-scrollbar-track { background: transparent; }

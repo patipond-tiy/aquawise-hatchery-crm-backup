@@ -1,0 +1,67 @@
+{
+  "app": {
+    "title": "AquaWise Hatchery",
+    "tagline": "ระบบจัดการโรงเพาะฟาร์ม"
+  },
+  "nav": {
+    "dashboard": "หน้าหลัก",
+    "customers": "ลูกค้า",
+    "batches": "ล็อตลูกกุ้ง",
+    "restock": "รอบใหม่",
+    "alerts": "แจ้งเตือนโรค",
+    "scorecard": "คะแนนสาธารณะ",
+    "settings": "ตั้งค่า",
+    "logout": "ออกจากระบบ",
+    "groups": {
+      "overview": "ภาพรวม",
+      "daily": "งานประจำวัน",
+      "settings": "ตั้งค่า"
+    }
+  },
+  "common": {
+    "search_placeholder": "ค้นหาฟาร์ม ล็อต หรือเลขใบรับรอง…",
+    "loading": "กำลังโหลด…",
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "view_all": "ดูทั้งหมด",
+    "back": "ย้อนกลับ",
+    "next": "ถัดไป →",
+    "submit": "ยืนยัน"
+  },
+  "user": {
+    "greeting": "สวัสดีครับ คุณ{name}",
+    "owner": "เจ้าของฟาร์ม",
+    "your_stats": "สถิติของคุณ",
+    "your_team": "ทีมของคุณ",
+    "follow_ups": "ต้องติดต่อ"
+  },
+  "stub": {
+    "coming_soon": "อยู่ระหว่างพัฒนา",
+    "page_under_construction": "หน้านี้จะเปิดให้ใช้งานในเฟสถัดไป"
+  },
+  "billing": {
+    "pro": "Pro",
+    "per_month": "เดือน",
+    "trial_days_left": "ทดลองใช้ฟรี — เหลืออีก {days} วัน",
+    "trial_expired_title": "ทดลองใช้ฟรี 30 วันหมดอายุแล้ว",
+    "trial_expired_body": "สมัครแพ็กเกจ Pro เพื่อใช้งานต่อ — ทุกข้อมูลที่บันทึกไว้ยังอยู่ครบและจะกลับมาทันทีหลังสมัคร",
+    "subscribe_cta": "สมัคร 5,000 ฿ / เดือน",
+    "preparing_checkout": "กำลังเตรียมหน้าชำระเงิน…",
+    "manage_cta": "จัดการแพ็กเกจ",
+    "next_renewal": "ต่ออายุ {date}",
+    "canceled_until": "ยกเลิกแล้ว — ใช้ได้ถึง {date}",
+    "past_due_banner": "การชำระเงินไม่สำเร็จ — กรุณาอัปเดตวิธีการชำระ",
+    "update_payment": "อัปเดตวิธีการชำระ",
+    "upgrade_cta": "อัปเกรด",
+    "no_invoices": "ยังไม่มีประวัติการชำระเงิน",
+    "payment_history": "ประวัติการชำระเงิน",
+    "current_plan": "แพ็กเกจปัจจุบัน",
+    "free_trial_label": "ทดลองใช้ฟรี",
+    "trial_until": "ใช้ฟรีถึง {date}",
+    "no_card_required": "ไม่ต้องใช้บัตรเครดิต",
+    "cancel_anytime": "ยกเลิกได้ตลอดเวลา · เก็บข้อมูลของท่านปลอดภัยเสมอ",
+    "pro_features": "ลูกค้าไม่จำกัด|ล็อตไม่จำกัด|แจ้งเตือนโรค + ส่ง LINE|ใบรับรอง PCR + คะแนนสาธารณะ|ทีมงานสูงสุด 5 คน",
+    "checkout_success": "✓ สมัครสำเร็จ ขอบคุณที่เข้าร่วมครับ!",
+    "checkout_canceled": "ยกเลิกการสมัคร — ลองใหม่ได้ทุกเมื่อ"
+  }
+}

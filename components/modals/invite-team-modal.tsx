@@ -1,0 +1,116 @@
+'use client';
+
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useModal } from '@/lib/store/modal';
+import { ModalShell, Field } from './modal-shell';
+
+const PERMS = [
+  { id: 'admin', label: 'แอดมิน', desc: 'แก้ไขข้อมูลทั้งหมด + เชิญสมาชิก' },
+  { id: 'editor', label: 'แก้ไขได้', desc: 'จัดการลูกค้า ล็อต และข้อความ' },
+  { id: 'viewer', label: 'ดูเท่านั้น', desc: 'เปิดดูข้อมูลแต่แก้ไขไม่ได้' },
+] as const;
+
+export function InviteTeamModal() {
+  const close = useModal((s) => s.close);
+  const [f, setF] = useState({
+    name: '',
+    email: '',
+    perm: 'editor' as (typeof PERMS)[number]['id'],
+  });
+  const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) =>
+    setF((s) => ({ ...s, [k]: v }));
+
+  const send = () => {
+    toast.success(`ส่งคำเชิญถึง ${f.email || f.name} แล้ว`);
+    close();
+  };
+
+  return (
+    <ModalShell
+      title="เชิญสมาชิก"
+      subtitle="ส่งลิงก์เชิญผ่านอีเมลหรือ LINE"
+      footer={
+        <>
+          <button className="aw3-btn aw3-btn-ghost" type="button" onClick={close}>
+            ยกเลิก
+          </button>
+          <button
+            className="aw3-btn aw3-btn-hero"
+            type="button"
+            onClick={send}
+            disabled={!f.email && !f.name}
+          >
+            ส่งคำเชิญ
+          </button>
+        </>
+      }
+    >
+      <Field label="ชื่อ">
+        <input
+          className="aw3-input"
+          value={f.name}
+          onChange={(e) => set('name', e.target.value)}
+        />
+      </Field>
+      <Field label="อีเมล">
+        <input
+          className="aw3-input"
+          type="email"
+          value={f.email}
+          onChange={(e) => set('email', e.target.value)}
+          placeholder="example@email.com"
+        />
+      </Field>
+      <Field label="สิทธิ์การใช้งาน">
+        {PERMS.map((p) => {
+          const active = f.perm === p.id;
+          return (
+            <button
+              type="button"
+              key={p.id}
+              onClick={() => set('perm', p.id)}
+              style={{
+                width: '100%',
+                padding: 14,
+                marginBottom: 8,
+                borderRadius: 'var(--radius)',
+                border: active
+                  ? '1.5px solid var(--color-hero)'
+                  : '1.5px solid var(--color-line)',
+                background: active ? 'var(--color-hero-soft)' : '#fff',
+                cursor: 'pointer',
+                textAlign: 'left',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div
+                  style={{
+                    width: 18,
+                    height: 18,
+                    borderRadius: '50%',
+                    border: active
+                      ? '5px solid var(--color-hero)'
+                      : '2px solid var(--color-line-2)',
+                    background: '#fff',
+                  }}
+                />
+                <div style={{ fontSize: 14, fontWeight: 700 }}>{p.label}</div>
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: 'var(--color-ink-4)',
+                  marginTop: 4,
+                  marginLeft: 28,
+                }}
+              >
+                {p.desc}
+              </div>
+            </button>
+          );
+        })}
+      </Field>
+    </ModalShell>
+  );
+}

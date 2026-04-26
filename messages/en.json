@@ -1,0 +1,67 @@
+{
+  "app": {
+    "title": "AquaWise Hatchery",
+    "tagline": "Hatchery management for SEA shrimp & fish farms"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "customers": "Customers",
+    "batches": "Batches",
+    "restock": "Restock",
+    "alerts": "Disease watch",
+    "scorecard": "Public score",
+    "settings": "Settings",
+    "logout": "Logout",
+    "groups": {
+      "overview": "Overview",
+      "daily": "Daily",
+      "settings": "Settings"
+    }
+  },
+  "common": {
+    "search_placeholder": "Search farms, batches, or certificates…",
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "view_all": "View all",
+    "back": "Back",
+    "next": "Next →",
+    "submit": "Submit"
+  },
+  "user": {
+    "greeting": "Hello, {name}",
+    "owner": "Farm Owner",
+    "your_stats": "Your stats",
+    "your_team": "Your team",
+    "follow_ups": "Follow-ups"
+  },
+  "stub": {
+    "coming_soon": "Coming soon",
+    "page_under_construction": "This page will land in a later phase."
+  },
+  "billing": {
+    "pro": "Pro",
+    "per_month": "month",
+    "trial_days_left": "Free trial — {days} days left",
+    "trial_expired_title": "Your 30-day free trial has ended",
+    "trial_expired_body": "Subscribe to Pro to keep using AquaWise Hatchery — every record you've added is preserved and reappears the moment you subscribe.",
+    "subscribe_cta": "Subscribe — 5,000 ฿ / month",
+    "preparing_checkout": "Preparing checkout…",
+    "manage_cta": "Manage subscription",
+    "next_renewal": "Renews {date}",
+    "canceled_until": "Canceled — access until {date}",
+    "past_due_banner": "Payment failed — please update your payment method",
+    "update_payment": "Update payment",
+    "upgrade_cta": "Upgrade",
+    "no_invoices": "No payment history yet",
+    "payment_history": "Payment history",
+    "current_plan": "Current plan",
+    "free_trial_label": "Free trial",
+    "trial_until": "Free until {date}",
+    "no_card_required": "No credit card required",
+    "cancel_anytime": "Cancel anytime · Your data stays safe",
+    "pro_features": "Unlimited customers|Unlimited batches|Disease alerts + LINE messaging|PCR certificates + public scorecard|Up to 5 team members",
+    "checkout_success": "✓ Subscribed — welcome aboard!",
+    "checkout_canceled": "Checkout canceled — you can try again any time"
+  }
+}

@@ -1,0 +1,139 @@
+/* AquaWise v2.1 — Thai-first hatchery operating tool */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Neutrals — warm but clearer than v1 */
+  --aw-bg: #F5F2EA;
+  --aw-bg-2: #ECE7D8;
+  --aw-card: #FFFFFF;
+  --aw-card-soft: #FAF7EE;
+  --aw-ink: #131210;
+  --aw-ink-2: #2A2925;
+  --aw-ink-3: #5C5A53;
+  --aw-ink-4: #8A8780;
+  --aw-ink-5: #BAB6A8;
+  --aw-line: #1F1E18;
+  --aw-line-2: #DAD4C2;
+  --aw-line-3: #EBE6D4;
+
+  /* Hatchery blue — sea/water authority */
+  --aw-blue: #1F4FB8;
+  --aw-blue-2: #143C92;
+  --aw-blue-tint: #DDE6FA;
+
+  /* Status — direct */
+  --aw-good: #1F7A45;
+  --aw-good-tint: #DDF0E4;
+  --aw-bad: #B8351C;
+  --aw-bad-tint: #F8E1DA;
+  --aw-warn: #B07000;
+  --aw-warn-tint: #F8EAC8;
+  --aw-ok-bg: #E8EDD8;
+
+  /* Earned highlights */
+  --aw-acid: #E5F26A;
+  --aw-flame: #E84B1E;
+
+  /* Type — Thai first, every time */
+  --font-thai: 'Noto Sans Thai', 'Inter', system-ui, sans-serif;
+  --font-en: 'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --hairline: 1px solid var(--aw-line);
+  --hairline-2: 1px solid var(--aw-line-2);
+  --hairline-3: 1px solid var(--aw-line-3);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-thai);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--aw-ink);
+  background: var(--aw-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+.en { font-family: var(--font-en); }
+.mono { font-family: var(--font-mono); font-feature-settings: 'tnum', 'zero'; }
+.tabular { font-variant-numeric: tabular-nums; }
+
+.label {
+  font-family: var(--font-thai);
+  font-size: 12px; font-weight: 500;
+  color: var(--aw-ink-3);
+}
+.label-mono {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--aw-ink-3);
+}
+
+.hr { border-top: var(--hairline); }
+.hr-2 { border-top: var(--hairline-2); }
+.hr-3 { border-top: var(--hairline-3); }
+
+::selection { background: var(--aw-blue); color: #fff; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: var(--aw-ink-4);
+  border: 3px solid var(--aw-bg);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Inputs */
+.aw-input {
+  font-family: var(--font-thai);
+  font-size: 15px;
+  background: var(--aw-card);
+  border: 1px solid var(--aw-line-2);
+  padding: 10px 12px;
+  outline: none;
+  width: 100%;
+  color: var(--aw-ink);
+}
+.aw-input:focus { border-color: var(--aw-blue); }
+
+/* Buttons — chunky, fingertip-friendly */
+.aw-btn {
+  font-family: var(--font-thai);
+  font-weight: 600;
+  font-size: 14px;
+  background: var(--aw-ink);
+  color: #fff;
+  border: 0;
+  padding: 12px 18px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.12s ease;
+}
+.aw-btn:hover { background: var(--aw-blue); }
+.aw-btn-blue { background: var(--aw-blue); }
+.aw-btn-blue:hover { background: var(--aw-blue-2); }
+.aw-btn-ghost {
+  background: transparent; color: var(--aw-ink);
+  border: 1px solid var(--aw-line-2);
+}
+.aw-btn-ghost:hover { background: var(--aw-bg); border-color: var(--aw-ink); }
+.aw-btn-sm { padding: 7px 12px; font-size: 13px; }
+
+/* Row hover */
+.aw-row { transition: background 0.1s ease; }
+.aw-row:hover { background: var(--aw-card-soft); cursor: pointer; }
+
+/* Reveal */
+@keyframes aw-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.aw-rise { animation: aw-rise 0.4s ease-out both; }
+
+/* Pulse for live indicator */
+@keyframes aw-blink { 0%,100% { opacity: 1 } 50% { opacity: 0.3 } }
+.aw-blink { animation: aw-blink 1.4s ease-in-out infinite; }

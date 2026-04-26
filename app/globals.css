@@ -1,0 +1,225 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* ============================================================
+   AquaWise v3 design tokens (ported from prototypes/_archive/styles/tokens-v3.css)
+   ============================================================ */
+
+@theme inline {
+  /* Colors — backdrop & surfaces */
+  --color-canvas: #e8e9ee;
+  --color-app: #ffffff;
+  --color-card: #ffffff;
+  --color-soft: #f6f6fb;
+  --color-soft-2: #efeefb;
+  --color-line: #ececf2;
+  --color-line-2: #e0e0ea;
+
+  /* Ink */
+  --color-ink: #0d0c18;
+  --color-ink-2: #1f1e2c;
+  --color-ink-3: #4f4e62;
+  --color-ink-4: #75748a;
+  --color-ink-5: #b0afc2;
+
+  /* Hero accent */
+  --color-hero: #004aad;
+  --color-hero-2: #003a8c;
+  --color-hero-soft: #dce7f7;
+  --color-hero-tint: #eef3fb;
+
+  /* Pastel tints + their foreground colors */
+  --color-lav: #e2eafb;
+  --color-lav-fg: #2a4dab;
+  --color-peach: #ffe7da;
+  --color-peach-fg: #c2542b;
+  --color-mint: #def4e8;
+  --color-mint-fg: #2b7a50;
+  --color-sky: #ddecfb;
+  --color-sky-fg: #1f5bb8;
+  --color-rose: #fde2eb;
+  --color-rose-fg: #b83767;
+  --color-amber: #fbefc9;
+  --color-amber-fg: #8c6900;
+
+  /* Status */
+  --color-good: #2b7a50;
+  --color-good-tint: #def4e8;
+  --color-bad: #c2412b;
+  --color-bad-tint: #ffe0da;
+  --color-warn: #b07000;
+  --color-warn-tint: #fbefc9;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 2px rgba(20, 19, 31, 0.04);
+  --shadow-pop: 0 8px 24px rgba(20, 19, 31, 0.08);
+
+  /* Type */
+  --font-sans: 'Noto Sans Thai', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Noto Sans Thai', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Animation */
+  --animate-aw3-rise: aw3-rise 0.1s ease-out both;
+}
+
+@keyframes aw3-rise {
+  from {
+    transform: translateY(6px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-ink);
+  background: var(--color-canvas);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-hero);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-5);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-4);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ============================================================
+   Utility classes ported from v3 prototype
+   ============================================================ */
+
+@layer components {
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink-3);
+  }
+
+  .mono {
+    font-family: var(--font-mono);
+    font-feature-settings: 'tnum';
+  }
+
+  .aw3-input {
+    font-family: inherit;
+    font-size: 16px;
+    background: var(--color-soft);
+    border: 1.5px solid var(--color-line-2);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    outline: none;
+    width: 100%;
+    color: var(--color-ink);
+    transition: all 0.15s;
+  }
+  .aw3-input:focus {
+    background: #fff;
+    border-color: var(--color-hero);
+    box-shadow: 0 0 0 4px var(--color-hero-soft);
+  }
+
+  .aw3-btn {
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 15px;
+    background: var(--color-ink);
+    color: #fff;
+    border: 0;
+    border-radius: var(--radius);
+    padding: 13px 22px;
+    cursor: pointer;
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+  }
+  .aw3-btn:hover {
+    background: var(--color-hero);
+  }
+  .aw3-btn-hero {
+    background: var(--color-hero);
+  }
+  .aw3-btn-hero:hover {
+    background: var(--color-hero-2);
+  }
+  .aw3-btn-ghost {
+    background: var(--color-soft);
+    color: var(--color-ink);
+  }
+  .aw3-btn-ghost:hover {
+    background: var(--color-soft-2);
+  }
+  .aw3-btn-soft {
+    background: var(--color-hero-soft);
+    color: var(--color-hero);
+  }
+  .aw3-btn-soft:hover {
+    background: var(--color-hero);
+    color: #fff;
+  }
+  .aw3-btn-sm {
+    padding: 9px 16px;
+    font-size: 14px;
+    min-height: 38px;
+  }
+
+  .aw3-card {
+    background: var(--color-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+  }
+
+  .aw3-row {
+    transition: background 0.12s ease;
+    cursor: pointer;
+  }
+  .aw3-row:hover {
+    background: var(--color-soft);
+  }
+
+  .aw3-rise {
+    animation: aw3-rise 0.1s ease-out both;
+  }
+}
