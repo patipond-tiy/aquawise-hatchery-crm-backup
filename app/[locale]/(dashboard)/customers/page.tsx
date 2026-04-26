@@ -139,7 +139,7 @@ export default function CustomersPage() {
             key={c.id}
             pad={18}
             hover
-            onClick={() => router.push({ pathname: '/customers/[id]', params: { id: c.id } } as never)}
+            onClick={() => router.push(`/customers/${c.id}` as never)}
             style={{
               border: '1px solid var(--color-line)',
               display: 'flex',
@@ -197,7 +197,7 @@ export default function CustomersPage() {
                 color: 'var(--color-hero)',
                 fontSize: 18,
               }}
-              aria-label="Send LINE"
+              aria-label="ส่ง LINE"
             >
               💬
             </button>

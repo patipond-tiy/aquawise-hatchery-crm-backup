@@ -1,31 +1,56 @@
+'use client';
+
 import type { ReactNode } from 'react';
 import { LeftRail } from './left-rail';
 import { TopBar } from './top-bar';
 import { RightRail } from './right-rail';
+import { useSidebar } from '@/lib/store/sidebar';
+
+const SIDEBAR_OPEN = 270;
+const SIDEBAR_CLOSED = 72;
 
 export function Shell({ children }: { children: ReactNode }) {
+  const collapsed = useSidebar((s) => s.collapsed);
+  const leftWidth = collapsed ? SIDEBAR_CLOSED : SIDEBAR_OPEN;
+
   return (
     <div
-      className="min-h-screen p-5"
-      style={{ background: 'var(--color-canvas)' }}
+      style={{
+        flex: '1 1 0%',
+        display: 'grid',
+        gridTemplateColumns: `${leftWidth}px 1fr 320px`,
+        gridTemplateRows: '1fr',
+        background: 'var(--color-app)',
+        minHeight: 0,
+        minWidth: 0,
+        overflow: 'hidden',
+        transition: 'grid-template-columns 0.18s ease',
+      }}
     >
+      <LeftRail />
       <div
-        className="grid overflow-hidden"
         style={{
-          background: 'var(--color-app)',
-          borderRadius: 'var(--radius-xl)',
-          boxShadow: '0 4px 24px rgba(20,19,31,0.06)',
-          gridTemplateColumns: '270px 1fr 320px',
-          minHeight: 'calc(100vh - 40px)',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+          minWidth: 0,
+          overflow: 'hidden',
         }}
       >
-        <LeftRail />
-        <div className="flex flex-col min-h-0">
-          <TopBar />
-          <main className="aw3-rise flex-1 px-7 pt-5 pb-10">{children}</main>
-        </div>
-        <RightRail />
+        <TopBar />
+        <main
+          className="aw3-rise aw3-scroll"
+          style={{
+            flex: '1 1 0%',
+            minHeight: 0,
+            overflowY: 'auto',
+            padding: '20px 28px 40px',
+          }}
+        >
+          {children}
+        </main>
       </div>
+      <RightRail />
     </div>
   );
 }

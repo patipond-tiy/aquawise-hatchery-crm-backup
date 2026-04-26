@@ -14,6 +14,7 @@ import { V3Avatar } from '@/components/aw/v3-avatar';
 import { V3Section } from '@/components/aw/v3-section';
 import { V3RoundBtn } from '@/components/aw/v3-round-btn';
 import { V3DistChart } from '@/components/aw/charts/v3-dist-chart';
+import { Icon } from '@/components/aw/icon';
 
 const DIST_LABELS = [
   '<50',
@@ -83,9 +84,13 @@ function Body({ id }: { id: string }) {
           color: 'var(--color-ink-3)',
           marginBottom: 14,
           fontSize: 13,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
         }}
       >
-        ← ล็อตทั้งหมด
+        <Icon name="chevron-left" size={14} />
+        ล็อตทั้งหมด
       </button>
 
       <V3Card pad={28} style={{ border: '1px solid var(--color-line)', marginBottom: 20 }}>

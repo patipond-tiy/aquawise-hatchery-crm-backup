@@ -16,7 +16,9 @@
       "overview": "Overview",
       "daily": "Daily",
       "settings": "Settings"
-    }
+    },
+    "collapse_sidebar": "Collapse sidebar",
+    "expand_sidebar": "Expand sidebar"
   },
   "common": {
     "search_placeholder": "Search farms, batches, or certificates…",

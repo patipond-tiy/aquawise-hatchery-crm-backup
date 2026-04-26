@@ -204,7 +204,7 @@ export default function RestockPage() {
                   <div
                     key={c.id}
                     className="aw3-row"
-                    onClick={() => router.push({ pathname: '/customers/[id]', params: { id: c.id } } as never)}
+                    onClick={() => router.push(`/customers/${c.id}` as never)}
                     style={{
                       display: 'grid',
                       gridTemplateColumns: '50px 1.6fr 1fr 1fr 1fr auto',

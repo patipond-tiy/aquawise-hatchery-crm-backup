@@ -10,7 +10,9 @@ type IconName =
   | 'search'
   | 'mail'
   | 'profile'
-  | 'arrow-right';
+  | 'arrow-right'
+  | 'chevron-left'
+  | 'chevron-right';
 
 type IconProps = {
   name: IconName;
@@ -113,6 +115,18 @@ export function Icon({ name, size = 22, color = 'currentColor', className }: Ico
       return (
         <svg {...props} viewBox="0 0 16 16">
           <path d="M3 8h10M9 4l4 4-4 4" />
+        </svg>
+      );
+    case 'chevron-left':
+      return (
+        <svg {...props} viewBox="0 0 16 16">
+          <path d="M10 3L6 8l4 5" />
+        </svg>
+      );
+    case 'chevron-right':
+      return (
+        <svg {...props} viewBox="0 0 16 16">
+          <path d="M6 3l4 5-4 5" />
         </svg>
       );
     default:

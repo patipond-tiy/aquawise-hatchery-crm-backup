@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { usePathname, Link } from '@/i18n/navigation';
 import { V3Mark } from '@/components/aw/v3-mark';
 import { Icon } from '@/components/aw/icon';
+import { useSidebar } from '@/lib/store/sidebar';
 
 type NavItem = {
   id: string;
@@ -47,6 +48,7 @@ const SETTINGS: NavItem[] = [
 export function LeftRail() {
   const t = useTranslations();
   const pathname = usePathname();
+  const collapsed = useSidebar((s) => s.collapsed);
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
@@ -58,72 +60,142 @@ export function LeftRail() {
     return (
       <Link
         href={item.href}
-        className="flex items-center gap-3.5 px-4 py-3.5 rounded-[var(--radius)] min-h-[50px] text-left transition-colors duration-150"
+        title={collapsed ? t(`nav.${item.labelKey}`) : undefined}
+        className="flex items-center rounded-[var(--radius)] min-h-[50px] transition-colors duration-150"
         style={{
           background: active ? 'var(--color-hero-soft)' : 'transparent',
           color: active ? 'var(--color-hero)' : 'var(--color-ink)',
           fontWeight: active ? 700 : 600,
           fontSize: 16,
+          gap: collapsed ? 0 : 14,
+          padding: collapsed ? '14px 0' : '14px 16px',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          textAlign: 'left',
         }}
       >
         <Icon name={item.icon} size={22} />
-        <span className="whitespace-nowrap">{t(`nav.${item.labelKey}`)}</span>
+        {!collapsed && (
+          <span className="whitespace-nowrap">{t(`nav.${item.labelKey}`)}</span>
+        )}
       </Link>
     );
   };
 
   return (
     <aside
-      className="flex flex-col h-full p-6 px-3.5 border-r"
-      style={{ borderColor: 'var(--color-line)' }}
+      className="border-r"
+      style={{
+        height: '100%',
+        minHeight: 0,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: collapsed ? '24px 10px' : '24px 14px',
+        borderColor: 'var(--color-line)',
+        transition: 'padding 0.18s ease',
+      }}
     >
-      <div className="flex items-center gap-2.5 px-2.5 pb-6">
+      {/* Logo header — toggle lives in the TopBar so the title has full width */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: collapsed ? '0 0 24px' : '0 10px 24px',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+        }}
+      >
         <V3Mark size={32} />
-        <div>
-          <div className="text-lg font-extrabold tracking-tight">
-            {t('app.title')}
+        {!collapsed && (
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              className="font-extrabold tracking-tight"
+              style={{
+                fontSize: 17,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {t('app.title')}
+            </div>
+            <div
+              className="mt-[-2px] font-medium"
+              style={{
+                fontSize: 10.5,
+                color: 'var(--color-ink-4)',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              ฟ้าใส แฮทเชอรี่
+            </div>
           </div>
-          <div className="text-[10.5px] mt-[-2px] font-medium" style={{ color: 'var(--color-ink-4)' }}>
-            ฟ้าใส แฮทเชอรี่
-          </div>
-        </div>
+        )}
       </div>
 
-      <NavGroup label={t('nav.groups.overview')}>
-        {OVERVIEW.map((n) => (
-          <NavLink key={n.id} item={n} />
-        ))}
-      </NavGroup>
+      {/* Top groups */}
+      <div style={{ flexShrink: 0 }}>
+        <NavGroup label={t('nav.groups.overview')} hideLabel={collapsed}>
+          {OVERVIEW.map((n) => (
+            <NavLink key={n.id} item={n} />
+          ))}
+        </NavGroup>
 
-      <NavGroup label={t('nav.groups.daily')}>
-        {DAILY.map((n) => (
-          <NavLink key={n.id} item={n} />
-        ))}
-      </NavGroup>
+        <NavGroup label={t('nav.groups.daily')} hideLabel={collapsed}>
+          {DAILY.map((n) => (
+            <NavLink key={n.id} item={n} />
+          ))}
+        </NavGroup>
+      </div>
 
-      <div className="flex-1" />
+      {/* Spacer pushes the settings group to the bottom */}
+      <div style={{ flex: '1 1 0%', minHeight: 0 }} />
 
-      <NavGroup label={t('nav.groups.settings')}>
-        {SETTINGS.map((n) => (
-          <NavLink key={n.id} item={n} />
-        ))}
-        <button
-          type="button"
-          className="flex items-center gap-3.5 px-4 py-3.5 rounded-[var(--radius)] min-h-[50px] text-left bg-transparent border-0 cursor-pointer font-semibold text-base"
-          style={{ color: 'var(--color-ink)' }}
-        >
-          <Icon name="out" size={22} />
-          <span className="whitespace-nowrap">{t('nav.logout')}</span>
-        </button>
-      </NavGroup>
+      {/* Settings group — pinned to the bottom */}
+      <div style={{ flexShrink: 0 }}>
+        <NavGroup label={t('nav.groups.settings')} hideLabel={collapsed}>
+          {SETTINGS.map((n) => (
+            <NavLink key={n.id} item={n} />
+          ))}
+          <button
+            type="button"
+            title={collapsed ? t('nav.logout') : undefined}
+            className="flex items-center rounded-[var(--radius)] min-h-[50px] bg-transparent border-0 cursor-pointer font-semibold text-base"
+            style={{
+              color: 'var(--color-ink)',
+              gap: collapsed ? 0 : 14,
+              padding: collapsed ? '14px 0' : '14px 16px',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              textAlign: 'left',
+            }}
+          >
+            <Icon name="out" size={22} />
+            {!collapsed && (
+              <span className="whitespace-nowrap">{t('nav.logout')}</span>
+            )}
+          </button>
+        </NavGroup>
+      </div>
     </aside>
   );
 }
 
-function NavGroup({ label, children }: { label: string; children: React.ReactNode }) {
+function NavGroup({
+  label,
+  hideLabel,
+  children,
+}: {
+  label: string;
+  hideLabel: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <div className="mb-[18px]">
-      <div className="eyebrow px-3.5 mb-1.5">{label}</div>
+      {!hideLabel && (
+        <div className="eyebrow px-3.5 mb-1.5">{label}</div>
+      )}
       <div className="flex flex-col gap-0.5">{children}</div>
     </div>
   );

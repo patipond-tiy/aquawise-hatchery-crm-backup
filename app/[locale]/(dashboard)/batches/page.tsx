@@ -44,7 +44,7 @@ export default function BatchesPage() {
             key={b.id}
             pad={18}
             hover
-            onClick={() => router.push({ pathname: '/batches/[id]', params: { id: b.id } } as never)}
+            onClick={() => router.push(`/batches/${b.id}` as never)}
             style={{ border: '1px solid var(--color-line)' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>

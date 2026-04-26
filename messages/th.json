@@ -16,7 +16,9 @@
       "overview": "ภาพรวม",
       "daily": "งานประจำวัน",
       "settings": "ตั้งค่า"
-    }
+    },
+    "collapse_sidebar": "ย่อแถบด้านข้าง",
+    "expand_sidebar": "ขยายแถบด้านข้าง"
   },
   "common": {
     "search_placeholder": "ค้นหาฟาร์ม ล็อต หรือเลขใบรับรอง…",

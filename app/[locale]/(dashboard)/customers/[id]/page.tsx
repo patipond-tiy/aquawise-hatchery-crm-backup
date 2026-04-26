@@ -11,6 +11,7 @@ import { V3Chip } from '@/components/aw/v3-chip';
 import { V3Avatar } from '@/components/aw/v3-avatar';
 import { V3Section } from '@/components/aw/v3-section';
 import { V3Sparkline } from '@/components/aw/charts/v3-sparkline';
+import { Icon } from '@/components/aw/icon';
 
 export default function CustomerDetailPage({
   params,
@@ -85,9 +86,13 @@ function Body({ id }: { id: string }) {
           color: 'var(--color-ink-3)',
           marginBottom: 14,
           fontSize: 13,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
         }}
       >
-        ← ลูกค้าทั้งหมด
+        <Icon name="chevron-left" size={14} />
+        ลูกค้าทั้งหมด
       </button>
 
       <V3Card pad={28} style={{ border: '1px solid var(--color-line)', marginBottom: 20 }}>

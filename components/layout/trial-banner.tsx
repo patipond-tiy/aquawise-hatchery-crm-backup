@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
@@ -21,6 +22,8 @@ const TONE_FG: Record<'sky' | 'amber' | 'bad', string> = {
   bad: 'var(--color-bad)',
 };
 
+const DISMISS_PREFIX = 'aw3-banner-dismissed:';
+
 export function TrialBanner() {
   const t = useTranslations('billing');
   const { data: sub } = useQuery({
@@ -34,7 +37,13 @@ export function TrialBanner() {
   // Past-due banner — bright red, prompts to update card
   if (status === 'past_due') {
     return (
-      <Banner tone="bad" message={t('past_due_banner')} ctaHref="/settings" cta={t('update_payment')} />
+      <Banner
+        dismissKey={`${DISMISS_PREFIX}past_due`}
+        tone="bad"
+        message={t('past_due_banner')}
+        ctaHref="/settings"
+        cta={t('update_payment')}
+      />
     );
   }
 
@@ -44,6 +53,10 @@ export function TrialBanner() {
     const tone = bannerToneForTrial(days);
     return (
       <Banner
+        // Days bucket is part of the key so a fresh urgency level (e.g. switching
+        // from sky to red as the trial winds down) re-shows even if the user
+        // dismissed the earlier tone.
+        dismissKey={`${DISMISS_PREFIX}trialing:${tone}`}
         tone={tone}
         message={t('trial_days_left', { days })}
         ctaHref="/settings"
@@ -58,16 +71,38 @@ export function TrialBanner() {
 }
 
 function Banner({
+  dismissKey,
   tone,
   message,
   ctaHref,
   cta,
 }: {
+  dismissKey: string;
   tone: 'sky' | 'amber' | 'bad';
   message: string;
   ctaHref: '/settings';
   cta: string;
 }) {
+  // Hide for the rest of this browser session once the user dismisses it.
+  // sessionStorage means a brand-new tab / window / day shows the banner again.
+  const [dismissed, setDismissed] = useState(true); // start hidden to avoid SSR-vs-client flash
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const seen = window.sessionStorage.getItem(dismissKey) === '1';
+    setDismissed(seen);
+  }, [dismissKey]);
+
+  if (dismissed) return null;
+
+  const dismiss = () => {
+    try {
+      window.sessionStorage.setItem(dismissKey, '1');
+    } catch {
+      /* sessionStorage may be unavailable in some privacy modes */
+    }
+    setDismissed(true);
+  };
+
   return (
     <div
       style={{
@@ -81,6 +116,7 @@ function Banner({
         fontSize: 14,
         fontWeight: 600,
         borderBottom: `1px solid ${TONE_FG[tone]}22`,
+        position: 'relative',
       }}
     >
       <span>{message}</span>
@@ -98,6 +134,34 @@ function Banner({
       >
         {cta} →
       </Link>
+      <button
+        type="button"
+        onClick={dismiss}
+        aria-label="ปิด"
+        style={{
+          position: 'absolute',
+          right: 16,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: 28,
+          height: 28,
+          borderRadius: '50%',
+          background: 'transparent',
+          border: 0,
+          color: TONE_FG[tone],
+          cursor: 'pointer',
+          fontSize: 18,
+          lineHeight: 1,
+          opacity: 0.65,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+        onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.65')}
+      >
+        ×
+      </button>
     </div>
   );
 }

@@ -59,7 +59,7 @@ export function ModalShell({
           <button
             type="button"
             onClick={close}
-            aria-label="Close"
+            aria-label="ปิด"
             style={{
               width: 32,
               height: 32,

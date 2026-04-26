@@ -3,15 +3,39 @@
 import { useTranslations } from 'next-intl';
 import { Icon } from '@/components/aw/icon';
 import { V3Avatar } from '@/components/aw/v3-avatar';
+import { useSidebar } from '@/lib/store/sidebar';
 
 export function TopBar() {
   const t = useTranslations();
+  const collapsed = useSidebar((s) => s.collapsed);
+  const toggle = useSidebar((s) => s.toggle);
 
   return (
     <header
       className="flex items-center gap-4 px-7 py-5 border-b"
       style={{ borderColor: 'var(--color-line)' }}
     >
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={collapsed ? t('nav.expand_sidebar') : t('nav.collapse_sidebar')}
+        title={collapsed ? t('nav.expand_sidebar') : t('nav.collapse_sidebar')}
+        className="flex items-center justify-center cursor-pointer border-0"
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: '50%',
+          background: 'var(--color-soft)',
+          color: 'var(--color-ink-3)',
+          flexShrink: 0,
+          transition: 'background 0.15s',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-soft-2)')}
+        onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-soft)')}
+      >
+        <Icon name={collapsed ? 'chevron-right' : 'chevron-left'} size={16} />
+      </button>
+
       <div className="flex-1 relative">
         <div className="absolute left-[18px] top-1/2 -translate-y-1/2" style={{ color: 'var(--color-ink-4)' }}>
           <Icon name="search" size={16} color="currentColor" />

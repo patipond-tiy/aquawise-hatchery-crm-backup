@@ -227,7 +227,7 @@ export default function AlertsPage() {
                           type="button"
                           className="aw3-btn aw3-btn-soft aw3-btn-sm"
                           onClick={() =>
-                            router.push({ pathname: '/batches/[id]', params: { id: a.batch! } } as never)
+                            router.push(`/batches/${a.batch!}` as never)
                           }
                         >
                           ดูล็อต {a.batch}

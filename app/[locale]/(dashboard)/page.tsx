@@ -135,7 +135,7 @@ export default function DashboardPage() {
             <br />
             ให้รอดมากที่สุด
           </h1>
-          <div style={{ display: 'flex', gap: 10, marginTop: 26 }}>
+          <div style={{ display: 'flex', gap: 10, marginTop: 48 }}>
             <button
               type="button"
               onClick={() => router.push('/restock')}
@@ -254,7 +254,7 @@ export default function DashboardPage() {
               key={c.id}
               pad={14}
               hover
-              onClick={() => router.push({ pathname: `/customers/[id]`, params: { id: c.id } } as never)}
+              onClick={() => router.push(`/customers/${c.id}` as never)}
               style={{ border: '1px solid var(--color-line)' }}
             >
               <div style={{ position: 'relative' }}>
@@ -376,7 +376,7 @@ export default function DashboardPage() {
             <div
               key={b.id}
               className="aw3-row"
-              onClick={() => router.push({ pathname: `/batches/[id]`, params: { id: b.id } } as never)}
+              onClick={() => router.push(`/batches/${b.id}` as never)}
               style={{
                 display: 'grid',
                 gridTemplateColumns: '2fr 1.4fr 1.6fr 80px',

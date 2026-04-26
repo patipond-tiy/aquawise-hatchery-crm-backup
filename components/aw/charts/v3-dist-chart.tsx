@@ -32,7 +32,7 @@ export function V3DistChart({
         style={{
           position: 'relative',
           display: 'flex',
-          alignItems: 'flex-end',
+          alignItems: 'stretch',
           gap: 6,
           height,
           padding: '8px 0',
@@ -65,6 +65,7 @@ export function V3DistChart({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'stretch',
+              justifyContent: 'flex-end',
               position: 'relative',
               cursor: 'pointer',
             }}

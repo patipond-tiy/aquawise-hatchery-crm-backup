@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { Plus_Jakarta_Sans, Noto_Sans_Thai, JetBrains_Mono } from 'next/font/google';
 import { routing } from '@/i18n/routing';
 import { Providers } from '@/components/providers';
+import { ComingSoon } from '@/components/coming-soon';
 import '../globals.css';
 
 const jakarta = Plus_Jakarta_Sans({
@@ -65,7 +66,11 @@ export default async function LocaleLayout({
         }}
       >
         <NextIntlClientProvider>
-          <Providers>{children}</Providers>
+          {locale === 'en' ? (
+            <ComingSoon />
+          ) : (
+            <Providers>{children}</Providers>
+          )}
         </NextIntlClientProvider>
       </body>
     </html>

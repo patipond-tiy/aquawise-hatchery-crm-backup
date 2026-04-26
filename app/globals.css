@@ -107,19 +107,42 @@ body {
   color: #fff;
 }
 
+/* Minimal global scrollbar — thin, neutral, only colored on hover */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-ink-5);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-ink-4);
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.15s;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* Reveal scrollbar only when the parent is hovered or actively scrolling.
+   Apply `aw3-scroll` to any panel that wants the macOS-style auto-hide. */
+.aw3-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s;
+}
+.aw3-scroll:hover,
+.aw3-scroll:focus-within,
+.aw3-scroll:active {
+  scrollbar-color: var(--color-ink-5) transparent;
+}
+.aw3-scroll::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+.aw3-scroll:hover::-webkit-scrollbar-thumb,
+.aw3-scroll:focus-within::-webkit-scrollbar-thumb,
+.aw3-scroll:active::-webkit-scrollbar-thumb {
+  background: var(--color-ink-5);
+}
+.aw3-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-4);
 }
 
 /* ============================================================
