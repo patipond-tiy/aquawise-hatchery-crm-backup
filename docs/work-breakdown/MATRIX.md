@@ -786,3 +786,57 @@ Implementation work completed on this branch:
 - A2.i team_invites — needs Resend or Supabase Auth Admin email config; spec wants owner-only invite, current RLS allows owner+counter_staff (rls policy still needs to tighten)
 - H3 read-only mutation guard — needs Stripe test mode for live verification
 - G1 / G3' — separate `aquawise-line-bot` repo + LINE OA provisioning
+
+---
+
+## Fourth-pass: team-driven sprint (2026-04-29, team `h1-pilot-week0`)
+
+Spawned 4 parallel sonnet workers via `/oh-my-claudecode:team` on the `feat/h1-pilot-week0` branch. 8 tasks across the 4 workers, all landed in ~20 min wall clock. Lead committed in 2 batches.
+
+**Workers and their slices:**
+
+| Worker | Tasks | Tests added |
+|---|---|---|
+| `worker-auth` | A1.i bootstrap + A3.i settings profile | 6 |
+| `worker-team` | A2.i team invites end-to-end | 7 |
+| `worker-data` | B2.i customer fields + plan persistence; P1.1 dashboard hero stats | 10 |
+| `worker-cross` | H3 mutation guard; D1 configurable thresholds; P2.10 logout button | 13 |
+
+**Commits on the branch:**
+
+| Commit | Subject |
+|---|---|
+| `56a9492` | feat(h1): A1 + A2 + A3 + B2 + P1.1 — H1 pilot batch (5 stories) |
+| `efec382` | feat(h1): H3 + D1 + P2.10 — H1 pilot batch (worker-cross) |
+
+**Status flips (parent rows still 🟡 because `.v` live verification waits on a real Supabase project):**
+
+| Story | `.i` Status before | After | Note |
+|---|---|---|---|
+| A1.i | ❌ | ✅ | `lib/auth/bootstrap.ts` calls `create_hatchery` RPC; idempotent |
+| A2.i | ❌ | ✅ | Migration 008 + invite + accept-invite route + modal submit |
+| A3.i | ❌ | ✅ | Profile inputs controlled; storage helper for logo upload |
+| B2.i | 🟡 | ✅ | Migration 009 + addCustomer maps `plan` → `package_interest` |
+| H3 (mutation guard) | 🟡 | ✅ | `lib/billing/guard.ts` PaywallError + requireActiveSubscription wraps mutations |
+| D1.i | 🟡 | ✅ | Migration 010 + `restock_thresholds` jsonb; restock page reads from settings |
+| P1.1 dashboard hero | (06 P1.1 only) | ✅ | `lib/derive/dashboard-stats.ts` replaces hardcoded `5/8`/`82%`/`3 ฟาร์ม` |
+| P2.10 logout | (06 P2.10) | ✅ | `app/actions/auth.ts` + form action on left-rail button |
+
+**Test suite growth:**
+- Pre-sprint: 5 tests (smoke + B1 regression + E1 regression)
+- Post-sprint: **42 tests across 11 files**, all passing.
+
+**Test infra additions (worker-auth):**
+- `tests/__mocks__/server-only.ts` shim + `vitest.config.ts` alias so server-only files can be imported under jsdom. Pays dividends for every future `.t` row that touches a server action.
+
+**Coordination notes worth remembering:**
+- Cross-worker file overlaps on `lib/api/supabase.ts` (3 workers) and `lib/database.types.ts` (3 workers) resolved without conflicts thanks to ordering — not designed; lucky.
+- worker-team noticed and fixed a pre-existing typecheck error in worker-auth's `settings/actions.ts` mid-flight without being asked. Without that fix, the first commit batch would have failed `pnpm typecheck`.
+- worker-cross stalled around the 10-minute mark mid-H3 and required a status-check ping from the lead. Watchdog policy (5-min stall threshold) earned its keep.
+
+**Still open after this pilot:**
+- Live verification (`.v` rows) for A1/A2/A3/B2/H3 — needs Supabase project provisioned + Stripe test mode + email service.
+- B3.i, C1.i (per-disease PCR), C3.i (real buyers table), C4.i (PCR cert PDF) — next pilot.
+- LINE epic (G1, G2, G3', G4) — different repo, defer.
+- E2 auto-alerts — farm-side schema cross-team coordination.
+- B1.t and E1.t cross-tenant RLS tests — fold into P0.3 cross-cutting work.
