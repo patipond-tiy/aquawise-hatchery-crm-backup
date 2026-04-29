@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { useModal } from '@/lib/store/modal';
 import { ModalShell, Field } from './modal-shell';
+import { inviteTeamMember } from '@/app/[locale]/(dashboard)/settings/team/actions';
 
 const PERMS = [
-  { id: 'admin', label: 'แอดมิน', desc: 'แก้ไขข้อมูลทั้งหมด + เชิญสมาชิก' },
-  { id: 'editor', label: 'แก้ไขได้', desc: 'จัดการลูกค้า ล็อต และข้อความ' },
-  { id: 'viewer', label: 'ดูเท่านั้น', desc: 'เปิดดูข้อมูลแต่แก้ไขไม่ได้' },
+  { id: 'counter_staff', label: 'พนักงานเคาน์เตอร์', desc: 'จัดการลูกค้า ล็อต และส่งข้อความ' },
+  { id: 'lab_tech', label: 'เจ้าหน้าที่ PCR', desc: 'อัปโหลดผล PCR และออกใบรับรอง' },
+  { id: 'auditor', label: 'ผู้ตรวจสอบ', desc: 'เปิดดูข้อมูลแต่แก้ไขไม่ได้' },
 ] as const;
 
 export function InviteTeamModal() {
@@ -16,14 +17,23 @@ export function InviteTeamModal() {
   const [f, setF] = useState({
     name: '',
     email: '',
-    perm: 'editor' as (typeof PERMS)[number]['id'],
+    perm: 'counter_staff' as (typeof PERMS)[number]['id'],
   });
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) =>
     setF((s) => ({ ...s, [k]: v }));
 
+  const [pending, startTransition] = useTransition();
+
   const send = () => {
-    toast.success(`ส่งคำเชิญถึง ${f.email || f.name} แล้ว`);
-    close();
+    startTransition(async () => {
+      const result = await inviteTeamMember(f.email, f.perm);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(`ส่งคำเชิญถึง ${f.email} แล้ว`);
+      close();
+    });
   };
 
   return (
@@ -39,9 +49,9 @@ export function InviteTeamModal() {
             className="aw3-btn aw3-btn-hero"
             type="button"
             onClick={send}
-            disabled={!f.email && !f.name}
+            disabled={!f.email || pending}
           >
-            ส่งคำเชิญ
+            {pending ? 'กำลังส่ง...' : 'ส่งคำเชิญ'}
           </button>
         </>
       }

@@ -31,7 +31,7 @@ email, **so that** I can start using the CRM without a password.
 - Click link → `/auth/callback` exchanges code → redirected to `/{locale}`
 - First-ever sign-in for the email creates a `hatcheries` row (name from
   email domain placeholder), an `auth.users → hatchery_members` row with
-  role `admin`, and a 14-day Stripe trial subscription
+  role `owner`, and a 30-day Stripe trial subscription
 - Subsequent sign-ins land directly on the dashboard
 
 **Today.** Magic-link page exists at `app/[locale]/login/`. Callback handler

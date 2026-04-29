@@ -63,11 +63,18 @@ export type Prices = {
   rows: PriceRow[];
 };
 
+export type RestockThresholds = {
+  now: number;
+  week: number;
+  month: number;
+};
+
 export type Hatchery = {
   name: string;
   nameEn: string;
   location: string;
   locationEn: string;
+  restockThresholds: RestockThresholds;
 };
 
 export type ScorecardSettings = {
@@ -91,7 +98,7 @@ export type NotificationSettings = {
 export type TeamMember = {
   name: string;
   role: string;
-  perm: 'admin' | 'editor' | 'viewer';
+  perm: 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
   tone?: string;
 };
 

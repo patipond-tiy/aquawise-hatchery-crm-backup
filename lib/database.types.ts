@@ -62,11 +62,42 @@ export type Database = {
         Row: {
           hatchery_id: string;
           user_id: string;
-          role: 'owner' | 'admin' | 'editor' | 'viewer' | 'technician';
+          role: 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
           created_at: string;
         };
-        Insert: Database['public']['Tables']['hatchery_members']['Row'];
+        Insert: {
+          hatchery_id: string;
+          user_id: string;
+          role: 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
+          created_at?: string;
+        };
         Update: Partial<Database['public']['Tables']['hatchery_members']['Row']>;
+        Relationships: [];
+      };
+      team_invites: {
+        Row: {
+          id: string;
+          hatchery_id: string;
+          email: string;
+          role: 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
+          token: string;
+          created_by: string;
+          created_at: string;
+          expires_at: string;
+          accepted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          hatchery_id: string;
+          email: string;
+          role: 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
+          token: string;
+          created_by: string;
+          created_at?: string;
+          expires_at?: string;
+          accepted_at?: string | null;
+        };
+        Update: Partial<Database['public']['Tables']['team_invites']['Row']>;
         Relationships: [];
       };
       customers: {
@@ -80,6 +111,7 @@ export type Database = {
           line_id: string | null;
           zone: string | null;
           address: string | null;
+          package_interest: string | null;
           status: 'active' | 'restock-soon' | 'restock-now' | 'concern' | 'quiet';
           ltv: number;
           last_buy: string | null;
@@ -242,6 +274,23 @@ export type Database = {
         Update: Partial<Database['public']['Tables']['audit_log']['Row']>;
         Relationships: [];
       };
+      hatchery_brand: {
+        Row: {
+          hatchery_id: string;
+          display_name_th: string;
+          display_name_en: string;
+          logo_url: string | null;
+          brand_color: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database['public']['Tables']['hatchery_brand']['Row']> & {
+          hatchery_id: string;
+          display_name_th: string;
+          display_name_en: string;
+        };
+        Update: Partial<Database['public']['Tables']['hatchery_brand']['Row']>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -255,7 +304,7 @@ export type Database = {
       };
     };
     Enums: {
-      hatchery_role: 'owner' | 'admin' | 'editor' | 'viewer' | 'technician';
+      hatchery_role: 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
       customer_status:
         | 'active'
         | 'restock-soon'

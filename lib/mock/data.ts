@@ -14,6 +14,7 @@ export const HATCHERY: Hatchery = {
   nameEn: 'Fasai Hatchery',
   location: 'สมุทรสาคร',
   locationEn: 'Samut Sakhon',
+  restockThresholds: { now: 0, week: 14, month: 45 },
 };
 
 export const CUSTOMERS: Customer[] = [
@@ -288,7 +289,7 @@ export const DEFAULT_NOTIFICATIONS: NotificationSettings = {
 };
 
 export const TEAM: TeamMember[] = [
-  { name: 'นิภา ใจดี', role: 'หัวหน้าโรงเพาะ', perm: 'admin', tone: 'mint' },
-  { name: 'พรชัย ตั้งใจ', role: 'เจ้าหน้าที่ PCR', perm: 'editor', tone: 'sky' },
-  { name: 'รัตนา สุขสวัสดิ์', role: 'ดูแลลูกค้า', perm: 'editor', tone: 'rose' },
+  { name: 'นิภา ใจดี', role: 'หัวหน้าโรงเพาะ', perm: 'counter_staff', tone: 'mint' },
+  { name: 'พรชัย ตั้งใจ', role: 'เจ้าหน้าที่ PCR', perm: 'lab_tech', tone: 'sky' },
+  { name: 'รัตนา สุขสวัสดิ์', role: 'ดูแลลูกค้า', perm: 'counter_staff', tone: 'rose' },
 ];

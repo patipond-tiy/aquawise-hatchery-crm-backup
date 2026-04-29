@@ -9,6 +9,7 @@ import {
   getNotificationSettings,
   updateNotificationSettings,
   getSubscription,
+  listTeam,
 } from '@/lib/api';
 import {
   createCheckoutSession,
@@ -111,14 +112,52 @@ export default function SettingsPage() {
 }
 
 function Profile() {
-  const FIELDS = [
-    { label: 'ชื่อโรงเพาะ', value: 'ฟ้าใส แฮทเชอรี่' },
-    { label: 'ชื่อภาษาอังกฤษ', value: 'Fasai Hatchery' },
-    { label: 'เลขทะเบียน', value: 'TH-HATCH-23489' },
-    { label: 'ที่อยู่', value: '78/12 ม.4 ต.บ้านบ่อ อ.เมือง สมุทรสาคร 74000' },
-    { label: 'เบอร์ติดต่อ', value: '081-234-5678' },
-    { label: 'LINE OA', value: '@fasaihatchery' },
+  const [name, setName] = useState('ฟ้าใส แฮทเชอรี่');
+  const [nameEn, setNameEn] = useState('Fasai Hatchery');
+  const [location, setLocation] = useState('78/12 ม.4 ต.บ้านบ่อ อ.เมือง สมุทรสาคร 74000');
+  const [locationEn, setLocationEn] = useState('');
+  const [displayNameTh, setDisplayNameTh] = useState('ฟ้าใส แฮทเชอรี่');
+  const [displayNameEn, setDisplayNameEn] = useState('Fasai Hatchery');
+  const [brandColor, setBrandColor] = useState('#1F6FEB');
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const { updateProfile } = await import('./actions');
+    const result = await updateProfile(
+      {
+        name,
+        name_en: nameEn,
+        location,
+        location_en: locationEn,
+        display_name_th: displayNameTh,
+        display_name_en: displayNameEn,
+        brand_color: brandColor,
+      },
+      logoFile
+    );
+    setSaving(false);
+    if (result.ok) {
+      toast.success('บันทึกสำเร็จ');
+    } else {
+      toast.error(result.error);
+    }
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLogoFile(e.target.files?.[0] ?? null);
+  };
+
+  const FIELDS: { label: string; value: string; onChange: (v: string) => void }[] = [
+    { label: 'ชื่อโรงเพาะ', value: name, onChange: setName },
+    { label: 'ชื่อภาษาอังกฤษ', value: nameEn, onChange: setNameEn },
+    { label: 'ที่อยู่', value: location, onChange: setLocation },
+    { label: 'ที่อยู่ (อังกฤษ)', value: locationEn, onChange: setLocationEn },
+    { label: 'ชื่อแบรนด์ (ไทย)', value: displayNameTh, onChange: setDisplayNameTh },
+    { label: 'ชื่อแบรนด์ (อังกฤษ)', value: displayNameEn, onChange: setDisplayNameEn },
   ];
+
   return (
     <V3Grid cols={12} gap={16}>
       <V3Col span={8}>
@@ -134,8 +173,8 @@ function Profile() {
           >
             ข้อมูลนี้จะแสดงในใบรับรองและในโปรไฟล์สาธารณะ
           </div>
-          {FIELDS.map((f, i) => (
-            <div key={i} style={{ marginBottom: 16 }}>
+          {FIELDS.map((f) => (
+            <div key={f.label} style={{ marginBottom: 16 }}>
               <label
                 style={{
                   display: 'block',
@@ -149,13 +188,47 @@ function Profile() {
               </label>
               <input
                 className="aw3-input"
-                defaultValue={f.value}
+                value={f.value}
+                onChange={(e) => f.onChange(e.target.value)}
                 style={{ fontSize: 14 }}
               />
             </div>
           ))}
-          <button type="button" className="aw3-btn aw3-btn-hero" style={{ marginTop: 8 }}>
-            บันทึก
+          <div style={{ marginBottom: 16 }}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 12,
+                fontWeight: 700,
+                color: 'var(--color-ink-3)',
+                marginBottom: 6,
+              }}
+            >
+              สีแบรนด์
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input
+                type="color"
+                value={brandColor}
+                onChange={(e) => setBrandColor(e.target.value)}
+                style={{ width: 40, height: 36, cursor: 'pointer', border: 'none', padding: 2 }}
+              />
+              <input
+                className="aw3-input"
+                value={brandColor}
+                onChange={(e) => setBrandColor(e.target.value)}
+                style={{ fontSize: 14, width: 120 }}
+              />
+            </div>
+          </div>
+          <button
+            type="button"
+            className="aw3-btn aw3-btn-hero"
+            style={{ marginTop: 8 }}
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? 'กำลังบันทึก…' : 'บันทึก'}
           </button>
         </V3Card>
       </V3Col>
@@ -178,15 +251,24 @@ function Profile() {
             }}
           >
             <V3Mark size={48} />
-            <div style={{ fontSize: 12, fontWeight: 600 }}>ลากไฟล์มาวางหรือคลิก</div>
+            <div style={{ fontSize: 12, fontWeight: 600 }}>
+              {logoFile ? logoFile.name : 'ลากไฟล์มาวางหรือคลิก'}
+            </div>
           </div>
-          <button
-            type="button"
-            className="aw3-btn aw3-btn-soft"
-            style={{ width: '100%', marginTop: 12, justifyContent: 'center' }}
-          >
-            อัปโหลด
-          </button>
+          <label style={{ display: 'block', marginTop: 12 }}>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              style={{ display: 'none' }}
+              onChange={handleLogoChange}
+            />
+            <span
+              className="aw3-btn aw3-btn-soft"
+              style={{ width: '100%', justifyContent: 'center', display: 'flex', cursor: 'pointer' }}
+            >
+              อัปโหลด
+            </span>
+          </label>
         </V3Card>
         <V3Card
           pad={22}
@@ -315,20 +397,21 @@ function Notifications() {
   );
 }
 
+const ROLE_LABELS: Record<string, { label: string; tone: 'solid' | 'sky' | 'soft' }> = {
+  owner:         { label: 'เจ้าของ', tone: 'solid' },
+  counter_staff: { label: 'เคาน์เตอร์', tone: 'sky' },
+  lab_tech:      { label: 'PCR', tone: 'sky' },
+  auditor:       { label: 'ดูเท่านั้น', tone: 'soft' },
+};
+
+const TONE_CYCLE = ['lav', 'mint', 'sky', 'rose', 'amber'] as const;
+
 function Team() {
   const openModal = useModal((s) => s.open);
-  const TEAM = [
-    { name: 'สุเทพ ใจดี', role: 'เจ้าของฟาร์ม', perm: 'admin', tone: 'lav' as const },
-    { name: 'นิภา ใจดี', role: 'หัวหน้าโรงเพาะ', perm: 'admin', tone: 'mint' as const },
-    { name: 'พรชัย ตั้งใจ', role: 'เจ้าหน้าที่ PCR', perm: 'editor', tone: 'sky' as const },
-    { name: 'รัตนา สุขสวัสดิ์', role: 'ดูแลลูกค้า', perm: 'editor', tone: 'rose' as const },
-    { name: 'มานพ จงดี', role: 'ดูข้อมูลอย่างเดียว', perm: 'viewer', tone: 'amber' as const },
-  ];
-  const PERMS: Record<string, { label: string; tone: 'solid' | 'sky' | 'soft' }> = {
-    admin: { label: 'แอดมิน', tone: 'solid' },
-    editor: { label: 'แก้ไขได้', tone: 'sky' },
-    viewer: { label: 'ดูเท่านั้น', tone: 'soft' },
-  };
+  const { data: team = [] } = useQuery({
+    queryKey: ['team'],
+    queryFn: listTeam,
+  });
 
   return (
     <div>
@@ -340,32 +423,36 @@ function Team() {
           maxWidth: 820,
         }}
       >
-        {TEAM.map((t, i) => (
-          <div
-            key={t.name}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-              padding: '16px 22px',
-              borderTop: i > 0 ? '1px solid var(--color-line)' : 0,
-            }}
-          >
-            <V3Avatar name={t.name} tone={t.tone} size={42} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 15, fontWeight: 700 }}>{t.name}</div>
-              <div style={{ fontSize: 12, color: 'var(--color-ink-4)' }}>
-                {t.role}
+        {team.map((t, i) => {
+          const permInfo = ROLE_LABELS[t.perm] ?? { label: t.perm, tone: 'soft' as const };
+          const tone = (t.tone as (typeof TONE_CYCLE)[number]) ?? TONE_CYCLE[i % TONE_CYCLE.length];
+          return (
+            <div
+              key={t.name}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                padding: '16px 22px',
+                borderTop: i > 0 ? '1px solid var(--color-line)' : 0,
+              }}
+            >
+              <V3Avatar name={t.name} tone={tone} size={42} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 15, fontWeight: 700 }}>{t.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--color-ink-4)' }}>
+                  {t.role}
+                </div>
               </div>
+              <V3Chip tone={permInfo.tone} size="xs">
+                {permInfo.label}
+              </V3Chip>
+              <button type="button" className="aw3-btn aw3-btn-ghost aw3-btn-sm">
+                แก้ไข
+              </button>
             </div>
-            <V3Chip tone={PERMS[t.perm].tone} size="xs">
-              {PERMS[t.perm].label}
-            </V3Chip>
-            <button type="button" className="aw3-btn aw3-btn-ghost aw3-btn-sm">
-              แก้ไข
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </V3Card>
       <button
         type="button"

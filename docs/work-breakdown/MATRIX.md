@@ -47,9 +47,9 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 > **Drift flag — H1 stories not yet at ✅:** Of the 19 H1 parents above, **0 are fully ✅**. Mock layer gives the illusion of completion for B1, D1, E1, E3, F1, H1 but every one of those needs a Supabase swap + RLS audit (P0.3) before it can be marked ✅. Reflect this in sprint planning.
 
-> **Drift flag — schema vs spec roles (three-way):** `supabase/migrations/001_init.sql:23` declares `('owner', 'admin', 'editor', 'viewer', 'technician')`. `08-roles-and-rls.md` and `FR-TEAM-002` specify `('owner', 'counter_staff', 'lab_tech', 'auditor')`. **And** `components/modals/invite-team-modal.tsx:8–12` uses a third set: `(admin, editor, viewer)`. Reconcile all three in a follow-up migration + modal change **before A2.i lands** — see `FR-COVERAGE.md` "Schema drift" section.
+> **Drift flag — schema vs spec roles: ✅ RESOLVED** (2026-04-29). Migration `007_roles_reconcile.sql` renamed the enum to `(owner, counter_staff, lab_tech, auditor)` per spec. `lib/database.types.ts`, `lib/rbac.ts`, `lib/types.ts`, `lib/mock/data.ts`, `components/modals/invite-team-modal.tsx` updated. Per-value mapping: admin/editor → counter_staff, viewer → auditor, technician → lab_tech. Permission semantics preserved (RLS that admitted 'admin' now admits 'counter_staff'); tightening to owner-only on team/billing per `08-roles-and-rls.md` is in `lib/rbac.ts` already; equivalent RLS tightening tracked under H3 / A2 stories.
 
-> **Drift flag — trial period:** `supabase/migrations/004_billing.sql:5` sets `trial_ends_at = now() + interval '30 days'`. `03-user-stories.md` §A1 AC says "14-day Stripe trial". `README.md` and `00-overview.md` describe a 30-day no-card trial. **Three sources, two values.** Confirm with business team which is canonical; A1.i should target the agreed value. The verification log below records this drift.
+> **Drift flag — trial period: ✅ RESOLVED** (2026-04-29). 30-day trial chosen as canonical (matches `004_billing.sql:5`, `README.md`, `00-overview.md`). `03-user-stories.md` §A1 AC updated from 14-day → 30-day; A1 AC also corrected from role `admin` → role `owner`.
 
 ---
 
@@ -128,11 +128,11 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 | Sub | Task | Status | Owner | Est | Blocked-by | Code refs |
 |-----|------|--------|-------|-----|------------|-----------|
-| .i  | **Replace `customer_cycles!inner` with a left join** at `lib/api/supabase.ts:111` so customers without a cycle row are not silently dropped. Then verify Supabase implementation matches mock shape. | 🟡 | | 0.25d | — | `app/[locale]/(dashboard)/customers/page.tsx`, `lib/api/supabase.ts:104–121` `listCustomers`, `lib/mock/api.ts` `listCustomers` |
-| .t  | RLS test: hatchery_a user cannot read hatchery_b customers. Vitest: search by Thai farm name with diacritics. **Add a customer with no `customer_cycles` row → expect them in the list (regression for the inner-join bug).** | ❌ | | 0.5d | B1.i | `tests/customers/list.test.ts` |
+| .i  | ✅ Replaced `customer_cycles!inner` with a left join at `lib/api/supabase.ts:104–122`; customers without a cycle row are no longer silently dropped (commit `ddf6ea3`). | ✅ | | 0.25d | — | `app/[locale]/(dashboard)/customers/page.tsx`, `lib/api/supabase.ts:104–121` `listCustomers`, `lib/mock/api.ts` `listCustomers` |
+| .t  | ✅ Regression test added at `tests/api/list-customers.test.ts` (commit `ddf6ea3`): asserts no `!inner` in the select string AND a customer with empty `customer_cycles` array is returned with all cycle fields null. RLS cross-tenant test still pending (covered by P0.3 cross-cutting work). | 🟡 | | 0.25d | B1.i | `tests/api/list-customers.test.ts`, future RLS test |
 | .v  | Manual: switch `USE_MOCK=false`, log in, see RLS-scoped list; search; tab filters. | ❌ | | 0.25d | B1.i | live |
 
-**Today.** Fully wired against mock (see `02-feature-inventory.md` §Page 2). **Verifier finding (V1):** `lib/api/supabase.ts:111` uses `customer_cycles!inner(...)` — a customer without a cycle row is silently excluded from the live list, while the mock returns all customers. Production list will look empty for new customers until they have a cycle. Status downgraded from ✅ to 🟡 to reflect the bug.
+**Today.** Fully wired against mock (see `02-feature-inventory.md` §Page 2). **Bug fixed 2026-04-29 (commit `ddf6ea3`):** `lib/api/supabase.ts` listCustomers now left-joins `customer_cycles` — customers without a cycle row are returned. Vitest regression covers both the query shape and the result shape. Parent stays 🟡 until the cross-tenant RLS test (`.t`) and live verification (`.v`) land.
 
 ---
 
@@ -353,11 +353,11 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 | Sub | Task | Status | Owner | Est | Blocked-by | Code refs |
 |-----|------|--------|-------|-----|------------|-----------|
-| .i  | **Add `.order('sev', {ascending:false})` before the existing `created_at` order** at `lib/api/supabase.ts:168`. AC requires `sev DESC, date DESC` ordering; current code only orders by `created_at DESC`. | 🟡 | | 0.25d | — | `app/[locale]/(dashboard)/alerts/page.tsx`, `lib/api/supabase.ts:162–187` `listAlerts` |
-| .t  | RLS test: cross-tenant alert read returns 0. **Severity sort: high alerts surface above medium/low regardless of date.** | ❌ | | 0.25d | E1.i | `tests/alerts/list.test.ts` |
+| .i  | ✅ Added `.order('sev', {ascending:false})` before `.order('created_at', ...)` at `lib/api/supabase.ts:168–172` (commit `ddf6ea3`). High-severity alerts now surface first regardless of recency. | ✅ | | 0.25d | — | `app/[locale]/(dashboard)/alerts/page.tsx`, `lib/api/supabase.ts:162–189` `listAlerts` |
+| .t  | ✅ Regression test added at `tests/api/list-alerts.test.ts` (commit `ddf6ea3`): asserts the `.order()` chain calls sev first then created_at, both descending. RLS cross-tenant test still pending (covered by P0.3 cross-cutting work). | 🟡 | | 0.25d | E1.i | `tests/api/list-alerts.test.ts`, future RLS test |
 | .v  | Manual against live DB: confirm count matches mock seed; high-severity alert created yesterday surfaces above low-severity alert created today. | ❌ | | 0.25d | E1.i | live |
 
-**Today.** Wired against Supabase ✅ (data fetch + render). **Verifier finding (V3):** `lib/api/supabase.ts:168` orders only by `created_at DESC` — the AC's `sev DESC` primary sort is missing. High-severity alerts may not surface first. Status downgraded from ✅ to 🟡.
+**Today.** Wired against Supabase ✅ (data fetch + render). **Bug fixed 2026-04-29 (commit `ddf6ea3`):** severity sort added; high alerts now surface above medium/low regardless of date. Vitest regression test asserts the exact `.order()` chain. Parent stays 🟡 until cross-tenant RLS test (`.t`) and live verification (`.v`) land.
 
 ---
 
@@ -759,3 +759,84 @@ After the matrix landed, four parallel verifier agents (V1 onboarding/customers/
 - E2, E4, F2, F3, F4 (V3) confirmed.
 
 **Method.** Each verifier was constrained read-only, given a story slice + `Code refs` to grep, and required to cite file:line. Reports archived in conversation history (sonnet, ~100k tokens total). The agents found no ✅-claimed-but-actually-❌ cases — only two over-reads where ✅ should have been 🟡.
+
+---
+
+## Third-pass: pilot landing (2026-04-29, branch `feat/h1-pilot-week0`)
+
+Implementation work completed on this branch:
+
+| Commit | Subject | Stories advanced |
+|---|---|---|
+| `b7fafb8` | docs(spec): align A1 AC with code — 30-day trial, role 'owner' | A1 (AC fix; trial-period drift resolved) |
+| `0fa4489` | feat(roles): reconcile hatchery_role enum with product spec | A2 / A3 / RLS (role-enum drift resolved; migration `007_roles_reconcile.sql`) |
+| `e99511e` | test(infra): add Vitest + Testing Library + jsdom harness | every `.t` row (unblocks test work across the matrix) |
+| `ddf6ea3` | fix(api): B1.i left-join + E1.i severity sort | B1.i ✅, E1.i ✅ (with regression tests) |
+
+**State after this pass:**
+- Vitest harness: 3 test files, 5/5 passing (1 smoke + 2 B1 + 1 E1 + 1 confirms `@/` alias works).
+- `pnpm typecheck`: clean.
+- Both bug fixes land with regression tests so future regressions break CI.
+- Two upstream drift flags resolved (role enum, trial period). Future stories no longer block on these decisions.
+- B1 and E1 parent rows stay at 🟡 because `.t` rows have only the unit-level regression test, not the cross-tenant RLS test (deferred to P0.3 cross-cutting). `.v` rows (live verification) need a real Supabase project — pending for whoever runs the next live-mode session.
+
+**Not landed yet (Week-1 H1 work that needs decisions or external setup):**
+- A1.i bootstrap action — needs Supabase project provisioned to land + verify
+- A3.i settings profile — needs `hatchery-logos/` Storage bucket
+- A2.i team_invites — needs Resend or Supabase Auth Admin email config; spec wants owner-only invite, current RLS allows owner+counter_staff (rls policy still needs to tighten)
+- H3 read-only mutation guard — needs Stripe test mode for live verification
+- G1 / G3' — separate `aquawise-line-bot` repo + LINE OA provisioning
+
+---
+
+## Fourth-pass: team-driven sprint (2026-04-29, team `h1-pilot-week0`)
+
+Spawned 4 parallel sonnet workers via `/oh-my-claudecode:team` on the `feat/h1-pilot-week0` branch. 8 tasks across the 4 workers, all landed in ~20 min wall clock. Lead committed in 2 batches.
+
+**Workers and their slices:**
+
+| Worker | Tasks | Tests added |
+|---|---|---|
+| `worker-auth` | A1.i bootstrap + A3.i settings profile | 6 |
+| `worker-team` | A2.i team invites end-to-end | 7 |
+| `worker-data` | B2.i customer fields + plan persistence; P1.1 dashboard hero stats | 10 |
+| `worker-cross` | H3 mutation guard; D1 configurable thresholds; P2.10 logout button | 13 |
+
+**Commits on the branch:**
+
+| Commit | Subject |
+|---|---|
+| `56a9492` | feat(h1): A1 + A2 + A3 + B2 + P1.1 — H1 pilot batch (5 stories) |
+| `efec382` | feat(h1): H3 + D1 + P2.10 — H1 pilot batch (worker-cross) |
+
+**Status flips (parent rows still 🟡 because `.v` live verification waits on a real Supabase project):**
+
+| Story | `.i` Status before | After | Note |
+|---|---|---|---|
+| A1.i | ❌ | ✅ | `lib/auth/bootstrap.ts` calls `create_hatchery` RPC; idempotent |
+| A2.i | ❌ | ✅ | Migration 008 + invite + accept-invite route + modal submit |
+| A3.i | ❌ | ✅ | Profile inputs controlled; storage helper for logo upload |
+| B2.i | 🟡 | ✅ | Migration 009 + addCustomer maps `plan` → `package_interest` |
+| H3 (mutation guard) | 🟡 | ✅ | `lib/billing/guard.ts` PaywallError + requireActiveSubscription wraps mutations |
+| D1.i | 🟡 | ✅ | Migration 010 + `restock_thresholds` jsonb; restock page reads from settings |
+| P1.1 dashboard hero | (06 P1.1 only) | ✅ | `lib/derive/dashboard-stats.ts` replaces hardcoded `5/8`/`82%`/`3 ฟาร์ม` |
+| P2.10 logout | (06 P2.10) | ✅ | `app/actions/auth.ts` + form action on left-rail button |
+
+**Test suite growth:**
+- Pre-sprint: 5 tests (smoke + B1 regression + E1 regression)
+- Post-sprint: **42 tests across 11 files**, all passing.
+
+**Test infra additions (worker-auth):**
+- `tests/__mocks__/server-only.ts` shim + `vitest.config.ts` alias so server-only files can be imported under jsdom. Pays dividends for every future `.t` row that touches a server action.
+
+**Coordination notes worth remembering:**
+- Cross-worker file overlaps on `lib/api/supabase.ts` (3 workers) and `lib/database.types.ts` (3 workers) resolved without conflicts thanks to ordering — not designed; lucky.
+- worker-team noticed and fixed a pre-existing typecheck error in worker-auth's `settings/actions.ts` mid-flight without being asked. Without that fix, the first commit batch would have failed `pnpm typecheck`.
+- worker-cross stalled around the 10-minute mark mid-H3 and required a status-check ping from the lead. Watchdog policy (5-min stall threshold) earned its keep.
+
+**Still open after this pilot:**
+- Live verification (`.v` rows) for A1/A2/A3/B2/H3 — needs Supabase project provisioned + Stripe test mode + email service.
+- B3.i, C1.i (per-disease PCR), C3.i (real buyers table), C4.i (PCR cert PDF) — next pilot.
+- LINE epic (G1, G2, G3', G4) — different repo, defer.
+- E2 auto-alerts — farm-side schema cross-team coordination.
+- B1.t and E1.t cross-tenant RLS tests — fold into P0.3 cross-cutting work.

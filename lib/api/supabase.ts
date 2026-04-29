@@ -87,17 +87,32 @@ function rowToBatch(row: {
 
 export async function getHatchery(): Promise<Hatchery> {
   const supabase = createClient();
-  const { data } = await supabase
+  // Cast to any so we can read restock_thresholds (added by migration 010)
+  // without waiting for a generated-types regen.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any)
     .from('hatcheries')
-    .select('name, name_en, location, location_en')
+    .select('name, name_en, location, location_en, restock_thresholds')
     .limit(1)
-    .single();
+    .single() as { data: {
+      name: string;
+      name_en: string | null;
+      location: string | null;
+      location_en: string | null;
+      restock_thresholds: { now?: number; week?: number; month?: number } | null;
+    } | null };
   if (!data) return HATCHERY;
+  const raw = data.restock_thresholds;
   return {
     name: data.name,
     nameEn: data.name_en ?? data.name,
     location: data.location ?? '',
     locationEn: data.location_en ?? '',
+    restockThresholds: {
+      now: raw?.now ?? 0,
+      week: raw?.week ?? 14,
+      month: raw?.month ?? 45,
+    },
   };
 }
 
@@ -106,8 +121,11 @@ export async function listCustomers(): Promise<Customer[]> {
   const { data } = await supabase
     .from('customers')
     .select(
+      // Left join on customer_cycles — a customer with no cycle row must
+      // still appear in the list (otherwise net-new customers vanish until
+      // their first cycle is registered). rowToCustomer handles null cycle.
       `id, name, farm, farm_en, zone, status, ltv, last_buy,
-       customer_cycles!inner(cycle_day, expected_harvest, d30, d60, restock_in)`
+       customer_cycles(cycle_day, expected_harvest, d30, d60, restock_in)`
     );
   if (!data) return [];
   return data.map((row) =>
@@ -168,6 +186,9 @@ export async function listAlerts(): Promise<Alert[]> {
        alert_farms(customers(farm))`
     )
     .eq('closed', false)
+    // Severity first, then recency — high alerts must surface above medium/low
+    // regardless of creation date (per 03-user-stories.md §E1 AC).
+    .order('sev', { ascending: false })
     .order('created_at', { ascending: false });
   if (!data) return [];
   return data.map((a) => ({
@@ -290,6 +311,7 @@ export async function addCustomer(input: AddCustomerInput): Promise<Customer> {
       farm: input.farm,
       zone: input.zone,
       phone: input.phone ?? null,
+      package_interest: input.plan ?? null,
     })
     .select(
       `id, name, farm, farm_en, zone, status, ltv, last_buy,
