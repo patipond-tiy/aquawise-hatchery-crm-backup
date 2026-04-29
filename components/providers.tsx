@@ -31,6 +31,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             border: 'none',
             borderRadius: 'var(--radius)',
             fontWeight: 600,
+            fontFamily: 'var(--font-sans)',
           },
         }}
       />

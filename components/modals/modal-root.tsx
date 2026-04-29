@@ -32,7 +32,6 @@ export function ModalRoot() {
         inset: 0,
         zIndex: 100,
         background: 'rgba(13,12,24,0.55)',
-        backdropFilter: 'blur(2px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -40,11 +39,8 @@ export function ModalRoot() {
         animation: 'aw3-fade 0.12s ease-out',
       }}
     >
-      <style>{`
-        @keyframes aw3-fade { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes aw3-slip { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-      `}</style>
       <div
+        className="aw3-scroll"
         onClick={(e) => e.stopPropagation()}
         style={{
           background: '#fff',
@@ -53,8 +49,10 @@ export function ModalRoot() {
           maxWidth: 560,
           width: '100%',
           maxHeight: '88vh',
-          overflow: 'auto',
+          overflowY: 'auto',
+          overscrollBehavior: 'contain',
           animation: 'aw3-slip 0.16s ease-out',
+          willChange: 'transform, opacity',
         }}
       >
         {body}
