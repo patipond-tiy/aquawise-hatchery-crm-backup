@@ -18,15 +18,13 @@ The product-spec author created fine-grained sub-IDs (FR-AUTH-001, FR-WS-002, FR
 
 When working on a story, refer to **both**: the canonical H-id (what business team called it) and the derived FR-id (what the AC tests).
 
-## Schema drift to reconcile
-
-Two known mismatches between spec and code today:
+## Schema drift — both resolved (2026-04-29, branch `feat/h1-pilot-week0`)
 
 
-| Drift            | Spec says                                                                                  | Code says                                                                                       | Reconciliation                                                                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Role enum values | `(owner / counter_staff / lab_tech / auditor)` per `08-roles-and-rls.md` and `FR-TEAM-002` | `(owner / admin / editor / viewer / technician)` in `supabase/migrations/001_init.sql:23`       | New migration to rename values + backfill. **Do this before A2.i (team invite) lands** — the invite modal must accept the spec values. |
-| Trial duration   | `14-day` per `03-user-stories.md` §A1 AC list and `FR-AUTH-003`                            | `30-day` per repo `README.md` and product-spec `00-overview.md` (mentions 30-day no-card trial) | Confirm with business team. README/overview wins — A1 should target 30-day. Update `03-user-stories.md` AC if confirmed.               |
+| Drift            | Resolution                                                                                                                                                                                                                                                                                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Role enum values | ✅ Migration `007_roles_reconcile.sql` (commit `0fa4489`) renamed enum to `(owner / counter_staff / lab_tech / auditor)`. Mapping: admin/editor → counter_staff, viewer → auditor, technician → lab_tech. RLS policies that admitted 'admin' now admit 'counter_staff'. TS layer (database.types, rbac, types, mock data, invite modal) all updated. |
+| Trial duration   | ✅ 30-day chosen as canonical (commit `b7fafb8`). `03-user-stories.md` §A1 AC updated from 14-day → 30-day. Code already said 30 days in `004_billing.sql:5`, README, and 00-overview.md — only the AC text was lagging.                                                                                                                                |
 
 
 ---
