@@ -11,6 +11,7 @@ import { V3Chip } from '@/components/aw/v3-chip';
 import { V3Avatar } from '@/components/aw/v3-avatar';
 import { V3RoundBtn } from '@/components/aw/v3-round-btn';
 import { V3Photo } from '@/components/aw/v3-photo';
+import { deriveDashboardStats } from '@/lib/derive/dashboard-stats';
 
 const STATS_TONES = ['lav', 'peach', 'mint'] as const;
 const PHOTO_TONES = ['peach', 'lav', 'sky'] as const;
@@ -39,29 +40,32 @@ export default function DashboardPage() {
       chipTone: CHIP_TONES[i],
     }));
 
+  const stats = deriveDashboardStats(customers, batches);
+  const restockPLk = Math.round(stats.restockPL / 1000);
+
   const STATS = [
     {
       tone: 'lav',
       icon: '⌬',
       label: 'ล็อตที่กำลังเลี้ยง',
-      value: '5/8',
-      sub: 'ลูกค้า 47 ฟาร์ม',
+      value: `${stats.activeCycles}/${stats.totalCustomers}`,
+      sub: `ลูกค้า ${stats.totalCustomers} ฟาร์ม`,
       goto: () => router.push('/batches'),
     },
     {
       tone: 'peach',
       icon: '◇',
       label: 'D30 อัตรารอดเฉลี่ย',
-      value: '82%',
-      sub: 'สูงกว่าค่ากลาง 11%',
+      value: stats.avgD30 !== null ? `${stats.avgD30}%` : '—',
+      sub: 'อัตรารอดเฉลี่ยจากล็อตล่าสุด',
       goto: () => router.push('/scorecard'),
     },
     {
       tone: 'mint',
       icon: '◈',
       label: 'ต้องสั่งใหม่ใน 14 วัน',
-      value: '3 ฟาร์ม',
-      sub: 'รวม ~620k PL',
+      value: `${stats.restockCount} ฟาร์ม`,
+      sub: restockPLk > 0 ? `รวม ~${restockPLk}k PL` : 'ไม่มีฟาร์มที่ต้องสั่ง',
       goto: () => router.push('/restock'),
     },
   ];

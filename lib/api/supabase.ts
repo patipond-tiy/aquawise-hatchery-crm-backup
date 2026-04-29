@@ -296,6 +296,7 @@ export async function addCustomer(input: AddCustomerInput): Promise<Customer> {
       farm: input.farm,
       zone: input.zone,
       phone: input.phone ?? null,
+      package_interest: input.plan ?? null,
     })
     .select(
       `id, name, farm, farm_en, zone, status, ltv, last_buy,

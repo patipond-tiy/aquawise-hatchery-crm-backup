@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { useModal } from '@/lib/store/modal';
 import { ModalShell, Field } from './modal-shell';
+import { inviteTeamMember } from '@/app/[locale]/(dashboard)/settings/team/actions';
 
 const PERMS = [
   { id: 'counter_staff', label: 'พนักงานเคาน์เตอร์', desc: 'จัดการลูกค้า ล็อต และส่งข้อความ' },
@@ -21,9 +22,18 @@ export function InviteTeamModal() {
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) =>
     setF((s) => ({ ...s, [k]: v }));
 
+  const [pending, startTransition] = useTransition();
+
   const send = () => {
-    toast.success(`ส่งคำเชิญถึง ${f.email || f.name} แล้ว`);
-    close();
+    startTransition(async () => {
+      const result = await inviteTeamMember(f.email, f.perm);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(`ส่งคำเชิญถึง ${f.email} แล้ว`);
+      close();
+    });
   };
 
   return (
@@ -39,9 +49,9 @@ export function InviteTeamModal() {
             className="aw3-btn aw3-btn-hero"
             type="button"
             onClick={send}
-            disabled={!f.email && !f.name}
+            disabled={!f.email || pending}
           >
-            ส่งคำเชิญ
+            {pending ? 'กำลังส่ง...' : 'ส่งคำเชิญ'}
           </button>
         </>
       }
