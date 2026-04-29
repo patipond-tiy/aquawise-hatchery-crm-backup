@@ -14,6 +14,7 @@ export const HATCHERY: Hatchery = {
   nameEn: 'Fasai Hatchery',
   location: 'สมุทรสาคร',
   locationEn: 'Samut Sakhon',
+  restockThresholds: { now: 0, week: 14, month: 45 },
 };
 
 export const CUSTOMERS: Customer[] = [

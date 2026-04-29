@@ -2,6 +2,7 @@
 
 import { randomBytes } from 'crypto';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { requireActiveSubscription } from '@/lib/billing/guard';
 
 type HatcheryRole = 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
 
@@ -15,6 +16,8 @@ export async function inviteTeamMember(
   email: string,
   role: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  await requireActiveSubscription();
+
   // Validate inputs
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false, error: 'อีเมลไม่ถูกต้อง' };

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { uploadHatcheryLogo } from '@/lib/supabase/storage';
+import { requireActiveSubscription } from '@/lib/billing/guard';
 
 export interface ProfileFields {
   name: string;
@@ -18,6 +19,8 @@ export async function updateProfile(
   fields: Omit<ProfileFields, 'logoFile'>,
   logoFile?: File | null
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  await requireActiveSubscription();
+
   const supabase = await createClient();
 
   const {

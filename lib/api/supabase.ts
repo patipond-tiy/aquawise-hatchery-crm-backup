@@ -87,17 +87,32 @@ function rowToBatch(row: {
 
 export async function getHatchery(): Promise<Hatchery> {
   const supabase = createClient();
-  const { data } = await supabase
+  // Cast to any so we can read restock_thresholds (added by migration 010)
+  // without waiting for a generated-types regen.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any)
     .from('hatcheries')
-    .select('name, name_en, location, location_en')
+    .select('name, name_en, location, location_en, restock_thresholds')
     .limit(1)
-    .single();
+    .single() as { data: {
+      name: string;
+      name_en: string | null;
+      location: string | null;
+      location_en: string | null;
+      restock_thresholds: { now?: number; week?: number; month?: number } | null;
+    } | null };
   if (!data) return HATCHERY;
+  const raw = data.restock_thresholds;
   return {
     name: data.name,
     nameEn: data.name_en ?? data.name,
     location: data.location ?? '',
     locationEn: data.location_en ?? '',
+    restockThresholds: {
+      now: raw?.now ?? 0,
+      week: raw?.week ?? 14,
+      month: raw?.month ?? 45,
+    },
   };
 }
 

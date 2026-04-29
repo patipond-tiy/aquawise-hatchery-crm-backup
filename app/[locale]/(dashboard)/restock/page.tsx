@@ -3,7 +3,7 @@
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from '@/i18n/navigation';
-import { listCustomers } from '@/lib/api';
+import { listCustomers, getHatchery } from '@/lib/api';
 import { useModal } from '@/lib/store/modal';
 import type { Customer } from '@/lib/types';
 import { V3Card } from '@/components/aw/v3-card';
@@ -29,6 +29,12 @@ export default function RestockPage() {
     queryKey: ['customers'],
     queryFn: listCustomers,
   });
+  const { data: hatchery } = useQuery({
+    queryKey: ['hatchery'],
+    queryFn: getHatchery,
+  });
+
+  const thresholds = hatchery?.restockThresholds ?? { now: 0, week: 14, month: 45 };
 
   const due = customers
     .filter((c) => c.restockIn != null)
@@ -40,7 +46,7 @@ export default function RestockPage() {
       label: 'วันนี้',
       tone: 'bad',
       icon: '⚠',
-      items: due.filter((c) => (c.restockIn ?? 0) <= 0),
+      items: due.filter((c) => (c.restockIn ?? 0) <= thresholds.now),
     },
     {
       id: 'week',
@@ -48,7 +54,7 @@ export default function RestockPage() {
       tone: 'amber',
       icon: '◔',
       items: due.filter(
-        (c) => (c.restockIn ?? 0) > 0 && (c.restockIn ?? 0) <= 14
+        (c) => (c.restockIn ?? 0) > thresholds.now && (c.restockIn ?? 0) <= thresholds.week
       ),
     },
     {
@@ -57,7 +63,7 @@ export default function RestockPage() {
       tone: 'sky',
       icon: '◐',
       items: due.filter(
-        (c) => (c.restockIn ?? 0) > 14 && (c.restockIn ?? 0) <= 45
+        (c) => (c.restockIn ?? 0) > thresholds.week && (c.restockIn ?? 0) <= thresholds.month
       ),
     },
     {
@@ -65,7 +71,7 @@ export default function RestockPage() {
       label: 'หลังจากนั้น',
       tone: 'lav',
       icon: '◯',
-      items: due.filter((c) => (c.restockIn ?? 0) > 45),
+      items: due.filter((c) => (c.restockIn ?? 0) > thresholds.month),
     },
   ];
 
