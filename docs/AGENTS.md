@@ -14,6 +14,7 @@ Project planning + integration runbooks. Hand-written, not auto-generated.
 | `CHECKLIST.md` | Granular per-phase task list. Tick boxes as work lands |
 | `STRIPE.md` | Stripe Pro plan setup runbook (price provisioning, webhook config, env-var checklist) |
 | `MIRROR.md` | CI-driven personal backup repo (mirror to a secondary remote on every push + daily cron) |
+| `work-breakdown/` | Team-assignable execution layer — every user story × FR-ID × code state, decomposed into implement/test/verify subtasks. Forward-looking H1/H2/H3 paying-tenant work; complements (does not replace) `PLAN.md`/`CHECKLIST.md`. See `work-breakdown/AGENTS.md` |
 
 ## For AI Agents
 
