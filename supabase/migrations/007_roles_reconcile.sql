@@ -1,0 +1,85 @@
+-- Roles reconcile — align hatchery_role enum with product spec.
+--
+-- Old enum (from 001_init.sql): ('owner', 'admin', 'editor', 'viewer', 'technician')
+-- New enum (per 08-roles-and-rls.md and FR-TEAM-002): ('owner', 'counter_staff', 'lab_tech', 'auditor')
+--
+-- Mapping for any existing rows:
+--   owner       → owner          (unchanged)
+--   admin       → counter_staff  (managerial day-to-day)
+--   editor      → counter_staff  (generic write access — collapses with admin)
+--   viewer      → auditor        (read-only)
+--   technician  → lab_tech       (PCR work)
+--
+-- This migration is a pure rename of role *names* with permission semantics
+-- preserved (where old policies admitted 'admin', new policies admit
+-- 'counter_staff'). Tightening 'subscription_events' to owner-only and
+-- inserts to owner-only per spec is deferred to story H3 / A2 work
+-- so we don't bundle behaviour changes into a rename.
+
+-- 1. Create the new enum type alongside the old one.
+create type public.hatchery_role_new as enum ('owner', 'counter_staff', 'lab_tech', 'auditor');
+
+-- 2. Drop the column default so we can change the column type cleanly.
+alter table public.hatchery_members alter column role drop default;
+
+-- 3. Recast the column with explicit per-value mapping.
+alter table public.hatchery_members
+  alter column role type public.hatchery_role_new
+  using (case role::text
+    when 'owner'      then 'owner'::public.hatchery_role_new
+    when 'admin'      then 'counter_staff'::public.hatchery_role_new
+    when 'editor'     then 'counter_staff'::public.hatchery_role_new
+    when 'viewer'     then 'auditor'::public.hatchery_role_new
+    when 'technician' then 'lab_tech'::public.hatchery_role_new
+  end);
+
+-- 4. New default is 'counter_staff' (was 'editor' — same general meaning).
+alter table public.hatchery_members alter column role set default 'counter_staff';
+
+-- 5. Drop the old type and rename the new one to take its place.
+drop type public.hatchery_role;
+alter type public.hatchery_role_new rename to hatchery_role;
+
+-- ============================================================
+-- RLS policies that referenced the old role names
+-- ============================================================
+--
+-- Old policies admitted ('owner', 'admin'). New mapping makes admin ≡
+-- counter_staff, so we admit ('owner', 'counter_staff') to preserve
+-- behaviour. This file does NOT tighten policies — that's separate work.
+
+drop policy if exists hatcheries_update on public.hatcheries;
+create policy hatcheries_update on public.hatcheries
+  for update using (
+    id in (
+      select hatchery_id from public.hatchery_members
+      where user_id = auth.uid() and role in ('owner', 'counter_staff')
+    )
+  );
+
+drop policy if exists members_insert on public.hatchery_members;
+create policy members_insert on public.hatchery_members
+  for insert with check (
+    hatchery_id in (
+      select hatchery_id from public.hatchery_members
+      where user_id = auth.uid() and role in ('owner', 'counter_staff')
+    )
+  );
+
+drop policy if exists members_delete on public.hatchery_members;
+create policy members_delete on public.hatchery_members
+  for delete using (
+    hatchery_id in (
+      select hatchery_id from public.hatchery_members
+      where user_id = auth.uid() and role in ('owner', 'counter_staff')
+    )
+  );
+
+drop policy if exists subscription_events_select on public.subscription_events;
+create policy subscription_events_select on public.subscription_events
+  for select using (
+    hatchery_id in (
+      select hatchery_id from public.hatchery_members
+      where user_id = auth.uid() and role in ('owner', 'counter_staff')
+    )
+  );

@@ -6,9 +6,9 @@ import { useModal } from '@/lib/store/modal';
 import { ModalShell, Field } from './modal-shell';
 
 const PERMS = [
-  { id: 'admin', label: 'แอดมิน', desc: 'แก้ไขข้อมูลทั้งหมด + เชิญสมาชิก' },
-  { id: 'editor', label: 'แก้ไขได้', desc: 'จัดการลูกค้า ล็อต และข้อความ' },
-  { id: 'viewer', label: 'ดูเท่านั้น', desc: 'เปิดดูข้อมูลแต่แก้ไขไม่ได้' },
+  { id: 'counter_staff', label: 'พนักงานเคาน์เตอร์', desc: 'จัดการลูกค้า ล็อต และส่งข้อความ' },
+  { id: 'lab_tech', label: 'เจ้าหน้าที่ PCR', desc: 'อัปโหลดผล PCR และออกใบรับรอง' },
+  { id: 'auditor', label: 'ผู้ตรวจสอบ', desc: 'เปิดดูข้อมูลแต่แก้ไขไม่ได้' },
 ] as const;
 
 export function InviteTeamModal() {
@@ -16,7 +16,7 @@ export function InviteTeamModal() {
   const [f, setF] = useState({
     name: '',
     email: '',
-    perm: 'editor' as (typeof PERMS)[number]['id'],
+    perm: 'counter_staff' as (typeof PERMS)[number]['id'],
   });
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) =>
     setF((s) => ({ ...s, [k]: v }));

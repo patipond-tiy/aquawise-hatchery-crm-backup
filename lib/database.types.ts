@@ -62,7 +62,7 @@ export type Database = {
         Row: {
           hatchery_id: string;
           user_id: string;
-          role: 'owner' | 'admin' | 'editor' | 'viewer' | 'technician';
+          role: 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
           created_at: string;
         };
         Insert: Database['public']['Tables']['hatchery_members']['Row'];
@@ -255,7 +255,7 @@ export type Database = {
       };
     };
     Enums: {
-      hatchery_role: 'owner' | 'admin' | 'editor' | 'viewer' | 'technician';
+      hatchery_role: 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
       customer_status:
         | 'active'
         | 'restock-soon'

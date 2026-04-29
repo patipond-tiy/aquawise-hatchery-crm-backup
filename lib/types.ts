@@ -91,7 +91,7 @@ export type NotificationSettings = {
 export type TeamMember = {
   name: string;
   role: string;
-  perm: 'admin' | 'editor' | 'viewer';
+  perm: 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
   tone?: string;
 };
 
