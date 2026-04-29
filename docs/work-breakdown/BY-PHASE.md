@@ -16,9 +16,9 @@ Target: hatchery owner can sign up, configure the workspace, register batches wi
 
 | ID  | Title                                       | Status | §06 priority | Suggested owner profile |
 |-----|---------------------------------------------|--------|--------------|-------------------------|
-| A1  | Sign up & create workspace                  | 🟡     | P0.1         | Backend (auth + Supabase RPC) |
-| A3  | Set up hatchery profile                     | ❌     | P0.5         | Full-stack (form + Storage) |
-| —   | RLS audit harness (continuous from W1)      | —      | P0.3         | Backend / DB |
+| A1  | Sign up & create workspace                  | 🟡 (.i ✅) | P0.1     | ✅ Code complete (commit `56a9492`) — pending Supabase project for live verify |
+| A3  | Set up hatchery profile                     | 🟡 (.i ✅) | P0.5     | ✅ Code complete (commit `56a9492`) — pending Supabase + Storage bucket |
+| —   | RLS audit harness (continuous from W1)      | —      | P0.3         | Still TBD; tightening migration 011 landed |
 
 **Sprint goal:** New auth users land on `/th` with a working trial. Owner can name the hatchery + upload a logo. Cross-tenant RLS audit infrastructure exists and runs in CI. **Nothing else compiles without these.**
 
@@ -26,8 +26,8 @@ Target: hatchery owner can sign up, configure the workspace, register batches wi
 
 | ID  | Title                                       | Status | §06 priority | Suggested owner profile |
 |-----|---------------------------------------------|--------|--------------|-------------------------|
-| H3  | Subscribe / manage billing (read-only banner)| 🟡     | P0.4         | Backend (Stripe + mutation guard) |
-| A2  | Invite team members                         | 🟡     | P1.5/P1.6    | Full-stack (modal + email + reconcile role enum) |
+| H3  | Subscribe / manage billing (read-only banner)| 🟡 (.i ✅) | P0.4    | ✅ Mutation guard `lib/billing/guard.ts` + tests landed (commit `efec382`); read-only enforcement wired on the two new mutation actions. Awaiting Stripe test mode for `.v` |
+| A2  | Invite team members                         | 🟡 (.i ✅) | P1.5/P1.6 | ✅ Code + tests complete (commit `56a9492`); role enum reconciled in `0fa4489`; RLS tightened in `18d4d9e`. Awaiting email service for `.v` |
 
 **Sprint goal:** Trial countdown + read-only-with-banner enforcement at every mutation boundary. Owner can invite a counter_staff/lab_tech, who joins via magic link with the correct role. **Reconcile the role-enum drift in the same migration.**
 
@@ -55,10 +55,10 @@ Target: hatchery owner can sign up, configure the workspace, register batches wi
 
 | ID  | Title                                       | Status | §06 priority | Suggested owner profile |
 |-----|---------------------------------------------|--------|--------------|-------------------------|
-| C1  | Register a new batch (with real PCR rows)   | 🟡     | P1.4         | Full-stack + Storage |
-| C3  | Batch detail with distribution + D30 dist   | 🟡     | P1.4         | Front-end |
-| B2  | Add a new customer (schema fields)          | 🟡     | P1.2         | Backend (migration) |
-| B3  | View customer detail (real contact + history)| 🟡    | P1.2/P1.3    | Full-stack |
+| C1  | Register a new batch (with real PCR rows)   | 🟡     | P1.4         | Full-stack + Storage — still pending |
+| C3  | Batch detail with distribution + D30 dist   | 🟡     | P1.4         | Front-end — still pending |
+| B2  | Add a new customer (schema fields)          | 🟡 (.i ✅) | P1.2     | ✅ Code + migration 009 + tests landed (commit `56a9492`); awaiting Supabase project for `.v` |
+| B3  | View customer detail (real contact + history)| 🟡    | P1.2/P1.3    | Full-stack — still pending |
 
 **Sprint goal:** No more hardcoded data. Customer detail and batch detail both read everything from Supabase.
 
@@ -66,14 +66,15 @@ Target: hatchery owner can sign up, configure the workspace, register batches wi
 
 | ID  | Title                                       | Status | §06 priority | Suggested owner profile |
 |-----|---------------------------------------------|--------|--------------|-------------------------|
-| —   | Dashboard hero stats from real data         | (P1.1) | —            | Front-end |
-| H1  | Edit notification preferences (delivery enforcement) | 🟡 | P1.10  | Backend + bot worker |
-| B1  | See all customers (live verification)       | 🟡     | —            | QA |
-| C2  | Browse batches (live + auditor RBAC)        | 🟡     | —            | Full-stack (after A2 reconciles auditor role) |
-| E1  | See active alerts (live verification)       | 🟡     | —            | QA |
-| E3  | Close an alert (with note + actions)        | 🟡     | —            | Full-stack |
+| P1.1 | Dashboard hero stats from real data        | ✅     | P1.1         | ✅ `lib/derive/dashboard-stats.ts` + 8 tests (commit `56a9492`) |
+| H1  | Edit notification preferences (delivery enforcement) | 🟡 | P1.10  | Backend + bot worker — still pending |
+| B1  | See all customers (live verification)       | 🟡 (.i ✅) | —    | ✅ Inner-join bug fixed + regression test (commit `ddf6ea3`); awaiting `.v` |
+| C2  | Browse batches (live + auditor RBAC)        | 🟡     | —            | Full-stack (auditor role now in enum, RLS view still TBD) |
+| E1  | See active alerts (live verification)       | 🟡 (.i ✅) | —    | ✅ Severity sort fixed + regression test (commit `ddf6ea3`); awaiting `.v` |
+| E3  | Close an alert (with note + actions)        | 🟡     | —            | Full-stack — still pending |
 | F1  | Toggle scorecard visibility (live verify)   | 🟡     | —            | QA |
 | —   | i18n sweep (no hardcoded Thai in JSX)       | (tech debt) | —      | Full-stack |
+| P2.10| Logout button                              | ✅     | P2.10        | ✅ Form action + redirect (commit `efec382`) |
 
 **Sprint goal:** Every H1 story has all three subtasks at ✅. The product is a paying-tenant-ready CRM for one hatchery. **This is the H1 cut.**
 
@@ -111,12 +112,12 @@ Target: a second hatchery onboarded without bespoke work. Public scorecard live.
 
 | ID  | Title                                       | Status | §06 priority | Suggested owner profile |
 |-----|---------------------------------------------|--------|--------------|-------------------------|
-| H2  | Export customer / PCR data                  | ❌     | P2.7         | Backend (streaming, Storage) |
-| X1  | Dead-letter retry / escalate UI             | ❌     | P2.11        | Full-stack |
-| D1  | Configurable restock thresholds             | 🟡     | P2.8         | Full-stack |
-| B4  | Schedule a callback                         | 🟡     | P2.6         | Full-stack |
+| H2  | Export customer / PCR data                  | ❌     | P2.7         | Backend (streaming, Storage) — still pending |
+| X1  | Dead-letter retry / escalate UI             | ❌     | P2.11        | Full-stack — still pending |
+| D1  | Configurable restock thresholds             | 🟡 (.i ✅) | P2.8     | ✅ Migration 010 + data path threaded; Settings UI is a follow-up (commit `efec382`) |
+| B4  | Schedule a callback                         | 🟡     | P2.6         | Full-stack — still pending |
 | —   | Top-bar real search + notifications         | (P2.9) | —            | Front-end |
-| —   | Logout button                               | (P2.10)| —            | Front-end (5-min change) |
+| —   | Logout button                               | ✅     | P2.10        | ✅ Done in week-0 pilot (commit `efec382`) |
 
 **Sprint goal:** A second hatchery can sign up, configure, run a cycle, and the team can observe failures + export records. **This is the H2 cut — second-tenant-ready.**
 

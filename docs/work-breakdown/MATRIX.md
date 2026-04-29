@@ -67,11 +67,11 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 | Sub | Task | Status | Owner | Est | Blocked-by | Code refs |
 |-----|------|--------|-------|-----|------------|-----------|
-| .i  | Implement first-login bootstrap that inserts `hatcheries` + `hatchery_members(owner)` + Stripe trial when an unknown auth user redirects through `/auth/callback`. Use service-role client; idempotent on `auth.users.id`. | ❌ | | 1d  | — | `app/auth/callback/route.ts` (extend), new server action `app/auth/callback/bootstrap.ts` |
-| .t  | Vitest: never-seen email → bootstraps row + membership + trial. Re-call → no double-create. RLS: created user can read only their own hatchery. | ❌ | | 0.5d | A1.i | `tests/auth/bootstrap.test.ts` (new) |
-| .v  | Manual: send magic link to a fresh email, click, expect `/th` dashboard with empty state and 30-day trial banner. | ❌ | | 0.5d | A1.i | live `pnpm dev` w/ `USE_MOCK=false` |
+| .i  | ✅ Landed in commit `56a9492` (worker-auth). `lib/auth/bootstrap.ts` is idempotent (checks `hatchery_members` membership first); `app/auth/callback/route.ts` calls it after `exchangeCodeForSession`. Uses the existing `create_hatchery` RPC for atomicity. Mock-mode no-op added in `04d025e`. | ✅ | | — | — | `app/auth/callback/route.ts`, `lib/auth/bootstrap.ts`, `lib/utils/mock-mode.ts` |
+| .t  | ✅ Landed in commit `56a9492`. `tests/auth/bootstrap.test.ts` covers idempotency + new-user bootstrap. Cross-tenant RLS test still pending (rolls into P0.3). | 🟡 | | 0.25d | — | `tests/auth/bootstrap.test.ts`, future RLS test |
+| .v  | Pending — needs Supabase project provisioned to actually run. | ❌ | | 0.5d | A1.i + Supabase project | live `pnpm dev` w/ `USE_MOCK=false` |
 
-**Today.** `app/[locale]/login/page.tsx` exists. `app/auth/callback/route.ts` exists but only does `exchangeCodeForSession` — no bootstrap server action. New auth users land in a broken state (RLS hides everything; no trial counter).
+**Today.** Implementation complete (commit `56a9492`); awaiting live verification with a real Supabase project. In the meantime mock-mode short-circuit (`04d025e`) keeps the demo deploy clean.
 
 ---
 
@@ -87,11 +87,11 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 | Sub | Task | Status | Owner | Est | Blocked-by | Code refs |
 |-----|------|--------|-------|-----|------------|-----------|
-| .i  | Migration: `team_invites` table + RLS (owner-only). Server action `inviteTeamMember(email, role)` that inserts + sends email (Supabase Auth admin or Resend). Acceptance route `app/auth/accept-invite/route.ts` consumes token, inserts `hatchery_members`. Wire `invite-team-modal.tsx` submit. **Reconcile role enum** to `(owner / counter_staff / lab_tech / auditor)` per spec — current schema uses `(owner / admin / editor / viewer / technician)`; migration must rename + backfill. | ❌ | | 2d  | A1.i | new `supabase/migrations/007_team_invites.sql` (or 008), new `app/[locale]/(dashboard)/settings/team/actions.ts`, `components/modals/invite-team-modal.tsx`, new `app/auth/accept-invite/route.ts` |
-| .t  | Vitest: invite token expires at 7d; reuse blocked. Email format validated. Role enum rejects unknown values. RLS: only `owner` can insert into `team_invites`. | ❌ | | 1d  | A2.i | `tests/team/invite.test.ts` (new) |
-| .v  | Manual: invite a second account, click email link, confirm role assignment + joined-hatchery scope. | ❌ | | 0.5d | A2.i | live |
+| .i  | ✅ Landed in commit `56a9492` (worker-team). Role enum reconciled in `0fa4489` (migration 007). Migration 008 creates `team_invites` (owner-only RLS). Server action validates email + role + caller-is-owner, inserts row with hex token, calls `admin.inviteUserByEmail` if service-role key present, otherwise dev-mode console log. Acceptance route at `/auth/accept-invite?token=` upserts membership and redirects. Modal submit wired with `useTransition`. RLS tightened to owner-only in `18d4d9e` (migration 011). | ✅ | | — | A1.i ✅ | `supabase/migrations/008_team_invites.sql`, `supabase/migrations/011_rls_tighten.sql`, `app/[locale]/(dashboard)/settings/team/actions.ts`, `app/auth/accept-invite/route.ts`, `components/modals/invite-team-modal.tsx` |
+| .t  | ✅ Landed in commit `56a9492`. `tests/team/invite.test.ts` — 7 cases: invalid email/role, valid invite path, token shape, non-owner blocked, 7-day expiry, accepted-already, expired. | 🟡 | | 0.25d | — | `tests/team/invite.test.ts`, future RLS cross-tenant test |
+| .v  | Pending — needs email service (Supabase Admin or Resend) configured. | ❌ | | 0.5d | A2.i + email config | live |
 
-**Today.** `components/modals/invite-team-modal.tsx` opens (verified) but has no submit handler. `team_invites` table does not exist. No email send wired. Settings → Team list reads from `TEAM` constant in `lib/mock/data.ts` (P1.5).
+**Today.** Implementation + tests complete (commit `56a9492`). Settings → Team list now reads from `hatchery_members` join when not in mock mode (gated). Awaiting live email service to verify end-to-end.
 
 ---
 
@@ -108,11 +108,11 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 | Sub | Task | Status | Owner | Est | Blocked-by | Code refs |
 |-----|------|--------|-------|-----|------------|-----------|
-| .i  | Convert all 6 inputs in Settings → Profile to controlled. Add `updateProfile()` server action writing to `hatcheries` + `hatchery_brand`. Wire logo upload to Storage bucket `hatchery-logos/`. Color picker writes `brand_color`. | ❌ | | 1d  | A1.i | `app/[locale]/(dashboard)/settings/page.tsx` (Profile tab), new `app/[locale]/(dashboard)/settings/actions.ts`, `lib/supabase/storage.ts` (new) |
-| .t  | Vitest: bad image type rejected. Storage URL persists to `hatchery_brand.logo_url`. RLS: non-owner cannot update brand. | ❌ | | 0.5d | A3.i | `tests/settings/profile.test.ts` |
-| .v  | Manual: change name → reload → persists. Upload logo → renders in left rail. Brand color flows into mock Flex preview. | ❌ | | 0.25d | A3.i | live |
+| .i  | ✅ Landed in commit `56a9492` (worker-auth). Profile inputs controlled with `useState`; `updateProfile()` server action upserts to `hatcheries` + `hatchery_brand`. Logo upload via `lib/supabase/storage.ts` `uploadHatcheryLogo()` with MIME validation. Mock-mode short-circuit added in `04d025e`. | ✅ | | — | A1.i ✅ | `app/[locale]/(dashboard)/settings/page.tsx`, `app/[locale]/(dashboard)/settings/actions.ts`, `lib/supabase/storage.ts` |
+| .t  | ✅ Landed in commit `56a9492`. `tests/settings/profile.test.ts` — 3 cases. RLS test deferred to P0.3. | 🟡 | | 0.25d | — | `tests/settings/profile.test.ts`, future RLS test |
+| .v  | Pending — needs Supabase project + `hatchery-logos/` Storage bucket provisioned. | ❌ | | 0.25d | A3.i + Storage bucket | live |
 
-**Today.** Every Profile input is `defaultValue=` only with no `onChange`. "บันทึก" has no handler. Storage bucket `hatchery-logos/` does not exist. `hatchery_brand` table exists in migration 006 ✅.
+**Today.** Implementation + tests complete (commit `56a9492`). Awaiting Storage bucket creation in Supabase dashboard for live logo upload verification.
 
 ---
 
@@ -148,11 +148,11 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 | Sub | Task | Status | Owner | Est | Blocked-by | Code refs |
 |-----|------|--------|-------|-----|------------|-----------|
-| .i  | Migration: add `phone`, `zone`, `farm_en`, `package_interest` to `customers`. Server action `addCustomer()` with Zod validation, slug generation, `audit_log` write. Update `add-customer-modal.tsx` submit + optimistic insert via TanStack Query. | 🟡 | | 1d  | — | new `supabase/migrations/00X_customer_fields.sql`, new `app/[locale]/(dashboard)/customers/actions.ts`, `components/modals/add-customer-modal.tsx`, `lib/api/supabase.ts` `addCustomer` |
-| .t  | Vitest: required fields enforced. Slug uniqueness per hatchery. Optimistic rollback on RLS-denied insert. | ❌ | | 0.5d | B2.i | `tests/customers/add.test.ts` |
-| .v  | Manual: add a customer; appears at top; refresh persists; bad zone rejected. | ❌ | | 0.25d | B2.i | live |
+| .i  | ✅ Landed in commit `56a9492` (worker-data). Migration 009 adds `package_interest text` (nullable). `addCustomer()` in `lib/api/supabase.ts` now maps `input.plan` → `package_interest` in the insert payload. Other modal fields (phone, zone, farm_en) were already in 001_init schema. | ✅ | | — | — | `supabase/migrations/009_customer_fields.sql`, `lib/api/supabase.ts` `addCustomer`, `lib/database.types.ts` |
+| .t  | ✅ Landed in commit `56a9492`. `tests/api/add-customer.test.ts` — 2 cases (plan persisted, nullable when omitted). | 🟡 | | 0.25d | — | `tests/api/add-customer.test.ts`, future required-field test |
+| .v  | Pending — needs Supabase project. | ❌ | | 0.25d | B2.i + Supabase | live |
 
-**Today.** Modal is mock-wired (UI works against in-memory store). **Verifier finding (V1):** schema is *not* missing four fields — `phone`, `zone`, `farm_en` already exist in `001_init.sql:54–56`. Only `package_interest` is missing. Separately, `lib/api/supabase.ts:287–293` accepts `plan` in input type but silently drops it. Migration only needs `package_interest` + the `plan` field needs to be persisted by `addCustomer()`.
+**Today.** Implementation + tests complete (commit `56a9492`). Schema migration ready to apply once Supabase project lands.
 
 ---
 
@@ -292,11 +292,12 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 | Sub | Task | Status | Owner | Est | Blocked-by | Code refs |
 |-----|------|--------|-------|-----|------------|-----------|
-| .i  | Move thresholds from inline constants to `hatchery_settings.restock_thresholds jsonb`. Read from settings in restock page. | 🟡 | | 0.5d | A1.i | `app/[locale]/(dashboard)/restock/page.tsx`, new column in migration |
-| .t  | Vitest: re-grouping correct after threshold change. RLS scopes thresholds. | ❌ | | 0.25d | D1.i | `tests/restock/list.test.ts` |
-| .v  | Manual: change thresholds in Settings; refresh restock page; groupings update. | ❌ | | 0.25d | D1.i | live |
+| .i  | ✅ Landed in commit `efec382` (worker-cross). Migration 010 adds `restock_thresholds jsonb` (default `{"now":0,"week":14,"month":45}`) to hatcheries. `getHatchery()` returns thresholds; `lib/types.ts` Hatchery includes them; `restock/page.tsx` reads via `useQuery` and applies. Settings UI to edit thresholds is a follow-up. | ✅ | | — | — | `supabase/migrations/010_restock_thresholds.sql`, `lib/types.ts`, `lib/api/supabase.ts` `getHatchery`, `app/[locale]/(dashboard)/restock/page.tsx`, `lib/mock/data.ts` |
+| .t  | ✅ Landed in commit `efec382`. `tests/restock/threshold.test.ts` — 5 cases (default + custom thresholds). | ✅ | | — | — | `tests/restock/threshold.test.ts` |
+| .v  | Pending — needs Supabase project to verify against live data. | ❌ | | 0.25d | D1.i + Supabase | live |
+| —   | **Follow-up:** add Settings UI for editing thresholds (form posts to a new `updateRestockThresholds()` server action). Not in this pilot. | ❌ | | 0.5d | D1.i ✅ | new server action + Settings tab UI |
 
-**Today.** Wired against mock ✅. Thresholds hardcoded (now ≤0, week ≤14, month ≤45, later).
+**Today.** Implementation + tests complete (commit `efec382`). Data path threaded through; UI to edit thresholds remains a follow-up.
 
 ---
 
@@ -656,11 +657,11 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 | Sub | Task | Status | Owner | Est | Blocked-by | Code refs |
 |-----|------|--------|-------|-----|------------|-----------|
-| .i  | Implement read-only enforcement at every mutation server action: check `subscription.status` ∈ `(trial_expired, past_due)` → return 402 + Thai/English banner copy. Cover: addCustomer, addBatch, sendLineEvent, sendQuote, sendCertificate, scheduleCallback, broadcast, exports. Confirm webhook handles all 5 event types correctly with live secret. | 🟡 | | 1.5d | — | `app/[locale]/(dashboard)/**/actions.ts` (all), `lib/billing/guard.ts` (new), `app/api/webhooks/stripe/route.ts` |
-| .t  | Vitest: `MOCK_BILLING_STATE=trial_expired` blocks every mutation but allows reads. Webhook idempotency on `subscription_events.stripe_event_id`. | ❌ | | 1d  | H3.i | `tests/billing/guard.test.ts`, `tests/billing/webhook.test.ts` |
-| .v  | Manual: complete a real Stripe Checkout in test mode; trial → active; let trial expire; confirm read-only behavior. | ❌ | | 0.5d | H3.i | live (requires Stripe Dashboard provision) |
+| .i  | ✅ Landed in commit `efec382` (worker-cross). `lib/billing/guard.ts` exports `PaywallError` (status 402) and `requireActiveSubscription()`. Reads `MOCK_BILLING_STATE` in mock mode, falls back to `hatcheries.subscription_status` in production. Wired into the two mutation actions added this sprint (updateProfile, inviteTeamMember). Future actions follow the same pattern. | ✅ | | — | — | `lib/billing/guard.ts`, `app/[locale]/(dashboard)/settings/actions.ts`, `app/[locale]/(dashboard)/settings/team/actions.ts` |
+| .t  | ✅ Landed in commit `efec382`. `tests/billing/guard.test.ts` — 6 cases (trial_expired/canceled throw 402; active/trialing/past_due pass). Webhook idempotency test still TBD. | 🟡 | | 0.25d | — | `tests/billing/guard.test.ts`, future webhook idempotency test |
+| .v  | Pending — needs Stripe Dashboard provision (test mode price + webhook secret) to verify trial-expiry behavior end-to-end. | ❌ | | 0.5d | H3.i + Stripe test mode | live |
 
-**Today.** Subscribe / Manage / Portal redirects all work ✅. Webhook handler exists ✅ (verified `app/api/webhooks/stripe/route.ts` — 237 lines, **6 event types** handled: `checkout.session.completed`, `customer.subscription.{created,updated,deleted}`, `invoice.{paid,payment_failed}`; idempotency via `subscription_events.stripe_event_id` unique check at lines 65–70). `lib/billing/trial.ts` exports `requiresPaywall()`/`effectiveStatus()`/`viewFromRow()` but grep across `app/**/actions.ts` returns zero hits — no mutation boundary enforces the guard yet. Read-only enforcement NOT implemented. (**Code ref note:** `lib/billing/guard.ts` listed below is a *new* file to be created, not an existing one.)
+**Today.** Subscribe / Manage / Portal redirects all work ✅. Webhook handler exists ✅ (`app/api/webhooks/stripe/route.ts`, 6 event types, idempotent). Guard now wired and unit-tested (commit `efec382`); awaiting live Stripe test-mode flow to verify the user-facing read-only banner UX.
 
 ---
 
