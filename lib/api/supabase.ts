@@ -106,8 +106,11 @@ export async function listCustomers(): Promise<Customer[]> {
   const { data } = await supabase
     .from('customers')
     .select(
+      // Left join on customer_cycles — a customer with no cycle row must
+      // still appear in the list (otherwise net-new customers vanish until
+      // their first cycle is registered). rowToCustomer handles null cycle.
       `id, name, farm, farm_en, zone, status, ltv, last_buy,
-       customer_cycles!inner(cycle_day, expected_harvest, d30, d60, restock_in)`
+       customer_cycles(cycle_day, expected_harvest, d30, d60, restock_in)`
     );
   if (!data) return [];
   return data.map((row) =>
@@ -168,6 +171,9 @@ export async function listAlerts(): Promise<Alert[]> {
        alert_farms(customers(farm))`
     )
     .eq('closed', false)
+    // Severity first, then recency — high alerts must surface above medium/low
+    // regardless of creation date (per 03-user-stories.md §E1 AC).
+    .order('sev', { ascending: false })
     .order('created_at', { ascending: false });
   if (!data) return [];
   return data.map((a) => ({
