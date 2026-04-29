@@ -1,5 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
+// Force live-mode path; the action short-circuits in mock mode.
+vi.mock('@/lib/utils/mock-mode', () => ({ isMockMode: () => false }));
+
 // ---- Supabase mock ----
 // We track inserts so we can assert on them.
 type InsertedInvite = {

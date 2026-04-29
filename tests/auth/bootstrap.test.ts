@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+// Force live-mode path; bootstrap is a no-op in mock mode.
+vi.mock('@/lib/utils/mock-mode', () => ({ isMockMode: () => false }));
+
 // Use vi.fn() directly in the factory — no top-level vars referenced from factory.
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { uploadHatcheryLogo } from '@/lib/supabase/storage';
 import { requireActiveSubscription } from '@/lib/billing/guard';
+import { isMockMode } from '@/lib/utils/mock-mode';
 
 export interface ProfileFields {
   name: string;
@@ -19,6 +20,9 @@ export async function updateProfile(
   fields: Omit<ProfileFields, 'logoFile'>,
   logoFile?: File | null
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (isMockMode()) {
+    return { ok: false, error: 'โหมดเดโม — ยังไม่บันทึกจริง' };
+  }
   await requireActiveSubscription();
 
   const supabase = await createClient();

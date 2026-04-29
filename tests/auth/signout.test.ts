@@ -5,6 +5,9 @@ import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 
+// Force live-mode path; the action short-circuits in mock mode.
+vi.mock('@/lib/utils/mock-mode', () => ({ isMockMode: () => false }));
+
 const mockSignOut = vi.fn().mockResolvedValue({ error: null });
 const mockRedirect = vi.fn();
 

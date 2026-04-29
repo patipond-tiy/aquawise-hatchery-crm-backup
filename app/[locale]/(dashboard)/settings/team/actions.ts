@@ -3,6 +3,7 @@
 import { randomBytes } from 'crypto';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { requireActiveSubscription } from '@/lib/billing/guard';
+import { isMockMode } from '@/lib/utils/mock-mode';
 
 type HatcheryRole = 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
 
@@ -16,6 +17,9 @@ export async function inviteTeamMember(
   email: string,
   role: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (isMockMode()) {
+    return { ok: false, error: 'โหมดเดโม — ยังไม่ส่งคำเชิญจริง' };
+  }
   await requireActiveSubscription();
 
   // Validate inputs

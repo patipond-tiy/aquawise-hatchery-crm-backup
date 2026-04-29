@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+// Force live-mode path; the action short-circuits in mock mode.
+vi.mock('@/lib/utils/mock-mode', () => ({ isMockMode: () => false }));
+
 // vi.mock factories must NOT reference variables defined outside them (hoisting).
 vi.mock('@/lib/supabase/storage', () => ({
   uploadHatcheryLogo: vi.fn(),
