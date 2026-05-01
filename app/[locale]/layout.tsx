@@ -56,6 +56,7 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       className={`${jakarta.variable} ${noto.variable} ${jetbrains.variable}`}
+      suppressHydrationWarning
     >
       <body
         style={{

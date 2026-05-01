@@ -4,7 +4,8 @@ import { effectiveStatus } from '@/lib/billing/trial';
 import type { Subscription, SubscriptionStatus } from '@/lib/types';
 
 const useMock =
-  process.env.USE_MOCK !== 'false' || !process.env.NEXT_PUBLIC_SUPABASE_URL;
+  (process.env.NEXT_PUBLIC_USE_MOCK ?? process.env.USE_MOCK) !== 'false' ||
+  !process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 async function getSubscriptionForServer(): Promise<Subscription> {
   if (useMock) {

@@ -9,8 +9,11 @@
 import * as mock from '../mock/api';
 import * as live from './supabase';
 
+// Read NEXT_PUBLIC_USE_MOCK first so the dispatch is correct in client bundles
+// (regular USE_MOCK is server-only and reads as undefined in the browser).
 const useMock =
-  process.env.USE_MOCK !== 'false' || !process.env.NEXT_PUBLIC_SUPABASE_URL;
+  (process.env.NEXT_PUBLIC_USE_MOCK ?? process.env.USE_MOCK) !== 'false' ||
+  !process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 const impl = useMock ? mock : live;
 

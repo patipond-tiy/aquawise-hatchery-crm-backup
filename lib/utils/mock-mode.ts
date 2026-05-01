@@ -9,6 +9,7 @@
  */
 export function isMockMode(): boolean {
   return (
-    process.env.USE_MOCK !== 'false' || !process.env.NEXT_PUBLIC_SUPABASE_URL
+    (process.env.NEXT_PUBLIC_USE_MOCK ?? process.env.USE_MOCK) !== 'false' ||
+    !process.env.NEXT_PUBLIC_SUPABASE_URL
   );
 }
