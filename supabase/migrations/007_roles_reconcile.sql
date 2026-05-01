@@ -16,13 +16,22 @@
 -- inserts to owner-only per spec is deferred to story H3 / A2 work
 -- so we don't bundle behaviour changes into a rename.
 
--- 1. Create the new enum type alongside the old one.
+-- 1. Drop policies that reference the role column. The column-type change in
+--    step 3 fails if any policy still depends on `role`; the recreated
+--    policies at the bottom of this file restore the same behaviour against
+--    the new enum.
+drop policy if exists hatcheries_update           on public.hatcheries;
+drop policy if exists members_insert              on public.hatchery_members;
+drop policy if exists members_delete              on public.hatchery_members;
+drop policy if exists subscription_events_select  on public.subscription_events;
+
+-- 2. Create the new enum type alongside the old one.
 create type public.hatchery_role_new as enum ('owner', 'counter_staff', 'lab_tech', 'auditor');
 
--- 2. Drop the column default so we can change the column type cleanly.
+-- 3. Drop the column default so we can change the column type cleanly.
 alter table public.hatchery_members alter column role drop default;
 
--- 3. Recast the column with explicit per-value mapping.
+-- 4. Recast the column with explicit per-value mapping.
 alter table public.hatchery_members
   alter column role type public.hatchery_role_new
   using (case role::text
@@ -33,10 +42,10 @@ alter table public.hatchery_members
     when 'technician' then 'lab_tech'::public.hatchery_role_new
   end);
 
--- 4. New default is 'counter_staff' (was 'editor' — same general meaning).
+-- 5. New default is 'counter_staff' (was 'editor' — same general meaning).
 alter table public.hatchery_members alter column role set default 'counter_staff';
 
--- 5. Drop the old type and rename the new one to take its place.
+-- 6. Drop the old type and rename the new one to take its place.
 drop type public.hatchery_role;
 alter type public.hatchery_role_new rename to hatchery_role;
 
