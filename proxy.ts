@@ -13,5 +13,6 @@ export default function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
+  // Exclude /auth/* — Supabase callbacks land there without a locale prefix.
+  matcher: ['/((?!api|auth|_next|_vercel|.*\\..*).*)'],
 };
