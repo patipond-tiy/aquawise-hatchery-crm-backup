@@ -1,20 +1,52 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getSubscription } from '@/lib/api';
 import { effectiveStatus } from '@/lib/billing/trial';
-import type { Subscription } from '@/lib/types';
+import type { Subscription, SubscriptionStatus } from '@/lib/types';
 
-export async function getCurrentSubscription(): Promise<Subscription> {
-  return getSubscription();
+const useMock =
+  process.env.USE_MOCK !== 'false' || !process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+async function getSubscriptionForServer(): Promise<Subscription> {
+  if (useMock) {
+    const { getSubscription } = await import('@/lib/mock/billing');
+    return getSubscription();
+  }
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('hatcheries')
+    .select(
+      `subscription_status, trial_ends_at, stripe_customer_id, stripe_subscription_id,
+       subscription_current_period_end, subscription_cancel_at_period_end`
+    )
+    .limit(1)
+    .single();
+  if (!data) {
+    return {
+      status: 'trialing',
+      plan: 'pro',
+      trialEndsAt: null,
+      currentPeriodEnd: null,
+      cancelAtPeriodEnd: false,
+      customerId: null,
+      subscriptionId: null,
+    };
+  }
+  return {
+    status: data.subscription_status as SubscriptionStatus,
+    plan: 'pro',
+    trialEndsAt: data.trial_ends_at,
+    currentPeriodEnd: data.subscription_current_period_end,
+    cancelAtPeriodEnd: data.subscription_cancel_at_period_end,
+    customerId: data.stripe_customer_id,
+    subscriptionId: data.stripe_subscription_id,
+  };
 }
 
-/**
- * Server-side paywall: if the trial expired (or status was already
- * trial_expired/canceled), redirect everywhere except /settings to the
- * trial-expired landing page so the user can subscribe to continue.
- *
- * Settings is accessible during paywall so they can reach Billing.
- */
+export async function getCurrentSubscription(): Promise<Subscription> {
+  return getSubscriptionForServer();
+}
+
 export async function BillingGate({
   locale,
   children,
@@ -22,7 +54,7 @@ export async function BillingGate({
   locale: string;
   children: React.ReactNode;
 }) {
-  const sub = await getSubscription();
+  const sub = await getSubscriptionForServer();
   const status = effectiveStatus(sub.status, sub.trialEndsAt);
 
   if (status === 'trial_expired' || status === 'canceled') {
