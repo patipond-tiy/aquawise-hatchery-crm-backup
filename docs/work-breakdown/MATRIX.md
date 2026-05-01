@@ -69,9 +69,9 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 |-----|------|--------|-------|-----|------------|-----------|
 | .i  | ✅ Landed in commit `56a9492` (worker-auth). `lib/auth/bootstrap.ts` is idempotent (checks `hatchery_members` membership first); `app/auth/callback/route.ts` calls it after `exchangeCodeForSession`. Uses the existing `create_hatchery` RPC for atomicity. Mock-mode no-op added in `04d025e`. | ✅ | | — | — | `app/auth/callback/route.ts`, `lib/auth/bootstrap.ts`, `lib/utils/mock-mode.ts` |
 | .t  | ✅ Landed in commit `56a9492`. `tests/auth/bootstrap.test.ts` covers idempotency + new-user bootstrap. Cross-tenant RLS test still pending (rolls into P0.3). | 🟡 | | 0.25d | — | `tests/auth/bootstrap.test.ts`, future RLS test |
-| .v  | Pending — needs Supabase project provisioned to actually run. | ❌ | | 0.5d | A1.i + Supabase project | live `pnpm dev` w/ `USE_MOCK=false` |
+| .v  | Walk through sign-up → workspace creation against live Supabase. Confirm trial deadline, owner membership, default settings rows are created via `create_hatchery` RPC. | ❌ | | 0.5d | A1.i | live `pnpm dev` w/ `USE_MOCK=false` |
 
-**Today.** Implementation complete (commit `56a9492`); awaiting live verification with a real Supabase project. In the meantime mock-mode short-circuit (`04d025e`) keeps the demo deploy clean.
+**Today.** Implementation complete (commit `56a9492`); live Supabase project provisioned in `0b4a112` (migrations 001–011 + storage bucket applied via MCP). Ready for `.v` walkthrough — set live env vars in `.env.local` and run sign-up flow.
 
 ---
 
@@ -110,9 +110,9 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 |-----|------|--------|-------|-----|------------|-----------|
 | .i  | ✅ Landed in commit `56a9492` (worker-auth). Profile inputs controlled with `useState`; `updateProfile()` server action upserts to `hatcheries` + `hatchery_brand`. Logo upload via `lib/supabase/storage.ts` `uploadHatcheryLogo()` with MIME validation. Mock-mode short-circuit added in `04d025e`. | ✅ | | — | A1.i ✅ | `app/[locale]/(dashboard)/settings/page.tsx`, `app/[locale]/(dashboard)/settings/actions.ts`, `lib/supabase/storage.ts` |
 | .t  | ✅ Landed in commit `56a9492`. `tests/settings/profile.test.ts` — 3 cases. RLS test deferred to P0.3. | 🟡 | | 0.25d | — | `tests/settings/profile.test.ts`, future RLS test |
-| .v  | Pending — needs Supabase project + `hatchery-logos/` Storage bucket provisioned. | ❌ | | 0.25d | A3.i + Storage bucket | live |
+| .v  | Walk through Settings → upload logo → render. Confirm path layout `{hatchery_id}/logo.{ext}` and that public URL is accessible. | ❌ | | 0.25d | A3.i | live |
 
-**Today.** Implementation + tests complete (commit `56a9492`). Awaiting Storage bucket creation in Supabase dashboard for live logo upload verification.
+**Today.** Implementation + tests complete (commit `56a9492`). `hatchery-logos` bucket (public, 2 MB, image MIME) + tenant-scoped RLS landed in migration `012_storage_logos.sql` / commit `0b4a112`. Ready for `.v` walkthrough.
 
 ---
 
@@ -150,9 +150,9 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 |-----|------|--------|-------|-----|------------|-----------|
 | .i  | ✅ Landed in commit `56a9492` (worker-data). Migration 009 adds `package_interest text` (nullable). `addCustomer()` in `lib/api/supabase.ts` now maps `input.plan` → `package_interest` in the insert payload. Other modal fields (phone, zone, farm_en) were already in 001_init schema. | ✅ | | — | — | `supabase/migrations/009_customer_fields.sql`, `lib/api/supabase.ts` `addCustomer`, `lib/database.types.ts` |
 | .t  | ✅ Landed in commit `56a9492`. `tests/api/add-customer.test.ts` — 2 cases (plan persisted, nullable when omitted). | 🟡 | | 0.25d | — | `tests/api/add-customer.test.ts`, future required-field test |
-| .v  | Pending — needs Supabase project. | ❌ | | 0.25d | B2.i + Supabase | live |
+| .v  | Walk through Customers → New → submit. Confirm row lands in `customers` table with `package_interest`, hatchery scoping, RLS on read. | ❌ | | 0.25d | B2.i | live |
 
-**Today.** Implementation + tests complete (commit `56a9492`). Schema migration ready to apply once Supabase project lands.
+**Today.** Implementation + tests complete (commit `56a9492`). Schema migration 009 applied to live project in `0b4a112`. Ready for `.v` walkthrough.
 
 ---
 
@@ -294,7 +294,7 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 |-----|------|--------|-------|-----|------------|-----------|
 | .i  | ✅ Landed in commit `efec382` (worker-cross). Migration 010 adds `restock_thresholds jsonb` (default `{"now":0,"week":14,"month":45}`) to hatcheries. `getHatchery()` returns thresholds; `lib/types.ts` Hatchery includes them; `restock/page.tsx` reads via `useQuery` and applies. Settings UI to edit thresholds is a follow-up. | ✅ | | — | — | `supabase/migrations/010_restock_thresholds.sql`, `lib/types.ts`, `lib/api/supabase.ts` `getHatchery`, `app/[locale]/(dashboard)/restock/page.tsx`, `lib/mock/data.ts` |
 | .t  | ✅ Landed in commit `efec382`. `tests/restock/threshold.test.ts` — 5 cases (default + custom thresholds). | ✅ | | — | — | `tests/restock/threshold.test.ts` |
-| .v  | Pending — needs Supabase project to verify against live data. | ❌ | | 0.25d | D1.i + Supabase | live |
+| .v  | Walk through restock page against live thresholds. Confirm bucketing matches `restock_thresholds` jsonb. | ❌ | | 0.25d | D1.i | live |
 | —   | **Follow-up:** add Settings UI for editing thresholds (form posts to a new `updateRestockThresholds()` server action). Not in this pilot. | ❌ | | 0.5d | D1.i ✅ | new server action + Settings tab UI |
 
 **Today.** Implementation + tests complete (commit `efec382`). Data path threaded through; UI to edit thresholds remains a follow-up.

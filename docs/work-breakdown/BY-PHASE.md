@@ -16,8 +16,8 @@ Target: hatchery owner can sign up, configure the workspace, register batches wi
 
 | ID  | Title                                       | Status | §06 priority | Suggested owner profile |
 |-----|---------------------------------------------|--------|--------------|-------------------------|
-| A1  | Sign up & create workspace                  | 🟡 (.i ✅) | P0.1     | ✅ Code complete (commit `56a9492`) — pending Supabase project for live verify |
-| A3  | Set up hatchery profile                     | 🟡 (.i ✅) | P0.5     | ✅ Code complete (commit `56a9492`) — pending Supabase + Storage bucket |
+| A1  | Sign up & create workspace                  | 🟡 (.i ✅) | P0.1     | ✅ Code complete (commit `56a9492`); live Supabase provisioned in `0b4a112` — awaiting `.v` walkthrough |
+| A3  | Set up hatchery profile                     | 🟡 (.i ✅) | P0.5     | ✅ Code complete (commit `56a9492`); `hatchery-logos` bucket + tenant RLS landed in `0b4a112` — awaiting `.v` walkthrough |
 | —   | RLS audit harness (continuous from W1)      | —      | P0.3         | Still TBD; tightening migration 011 landed |
 
 **Sprint goal:** New auth users land on `/th` with a working trial. Owner can name the hatchery + upload a logo. Cross-tenant RLS audit infrastructure exists and runs in CI. **Nothing else compiles without these.**
@@ -57,7 +57,7 @@ Target: hatchery owner can sign up, configure the workspace, register batches wi
 |-----|---------------------------------------------|--------|--------------|-------------------------|
 | C1  | Register a new batch (with real PCR rows)   | 🟡     | P1.4         | Full-stack + Storage — still pending |
 | C3  | Batch detail with distribution + D30 dist   | 🟡     | P1.4         | Front-end — still pending |
-| B2  | Add a new customer (schema fields)          | 🟡 (.i ✅) | P1.2     | ✅ Code + migration 009 + tests landed (commit `56a9492`); awaiting Supabase project for `.v` |
+| B2  | Add a new customer (schema fields)          | 🟡 (.i ✅) | P1.2     | ✅ Code + migration 009 + tests landed (commit `56a9492`); live Supabase provisioned in `0b4a112` — awaiting `.v` walkthrough |
 | B3  | View customer detail (real contact + history)| 🟡    | P1.2/P1.3    | Full-stack — still pending |
 
 **Sprint goal:** No more hardcoded data. Customer detail and batch detail both read everything from Supabase.
