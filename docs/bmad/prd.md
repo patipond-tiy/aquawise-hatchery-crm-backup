@@ -137,7 +137,7 @@ AquaWise Hatchery CRM is a Thai/English SaaS cockpit for shrimp and fish hatcher
 |---|---|---|---|
 | A | Onboarding & workspace bootstrap | First sign-in creates hatchery row; profile + logo saved to `hatcheries` + `hatchery_brand`; BillingGate trial wired end-to-end | H1 |
 | B | Customer management | Customer detail reads from DB (phone, LINE ID, address); batch history filtered from `batches`; D30 trend from real cycle data; Cmd-K search | H1–H2 |
-| C | Batch register & PCR | PCR step in Add Batch persists disease rows; batch detail buyers table from `batch_distributions`; PCR cert PDF generated and delivered via LINE queue | H1 |
+| C | Batch register & PCR | PCR step in Add Batch persists disease rows; batch detail buyers table from `batch_buyers`; PCR cert PDF generated and delivered via LINE queue | H1 |
 | D | Restock pipeline | Cron 09:00 ICT fan-out; restock thresholds configurable per hatchery; broadcast wired to LINE queue; quote modal submits | H1–H2 |
 | E | Alerts & disease tracking | Auto-trigger from farm-side D30 breach; alert message fan-out wired; `closeAlert` audit log | H1–H2 |
 | F | Public scorecard | Public route `/{locale}/h/{slug}` with ISR; real QR encoding slug URL; scorecard PDF; SEO-indexable | H2 — ⚠ full scorecard is a 2027+ hypothesis |

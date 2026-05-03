@@ -32,15 +32,15 @@ so that Phase H1 has working outbound LINE delivery on day one — without yet e
 2. The bot worker (Cloud Run, `aquawise-line-bot` repo) subscribes to `line_outbound_events` filtered to hatchery-type rows; it processes events in batches, rendering a co-branded Flex Message using `hatchery_brand` (logo, display name TH/EN, brand color) from the shared Supabase project
 3. The worker pushes the Flex via the @aquawise LINE OA using the bound `customers.line_id` as the recipient
 4. Status transitions are visible in the CRM: `pending → sending → sent` (on success) or `failed → dead` (after 3 retries with backoff 1m → 5m → 30m)
-5. "เปิดแชท" CTA in every Flex points to a temporary LIFF placeholder — Phase H3 will swap the target to the real LIFF inbox
-6. Farmer-initiated replies in LINE chat are logged to `line_message_logs` but are NOT surfaced in the CRM in this phase; full two-way chat is Phase H3
+5. "เปิดแชท" CTA in every Flex points to a temporary LIFF placeholder — story G3 (deferred, see `_hypotheses/G3.two-way-chat-liff-inbox.md`) will swap the target to the real LIFF inbox when capacity allows
+6. Farmer-initiated replies in LINE chat are logged to `line_message_logs` but are NOT surfaced in the CRM in this phase; full two-way chat is deferred to story G3
 7. Tenant isolation is guaranteed: the worker reads `hatchery_brand` keyed by `event.hatchery_id` — no Flex message ever renders with the wrong hatchery's branding
 8. High-severity disease alerts (`payload.severity = 'high'`) bypass quiet hours; all other events respect `notification_settings.quiet_hours_start/end` (default 21:00–07:00 ICT) per story H4
 
 ## Tasks / Subtasks
 
 - [ ] Task 1 — CRM-side: Confirm `line_outbound_events` insert shape (AC: #1)
-  - [ ] Read `supabase/migrations/006_line_integration.sql` and confirm columns: `id`, `hatchery_id`, `customer_id`, `template`, `payload jsonb`, `status line_event_status`, `kind line_event_kind`, `attempt_count int`, `last_error text`, `created_at`, `updated_at`
+  - [ ] Read `supabase/migrations/006_line_integration.sql` and confirm columns: `id`, `hatchery_id`, `customer_id`, `template`, `payload jsonb`, `status line_event_status`, `kind line_event_kind`, `attempts int`, `last_error text`, `created_at`, `updated_at`
   - [ ] Confirm both idempotency indexes are in place:
     - Cron pushes: `UNIQUE (customer_id, template, payload->>'cycle_id') WHERE status IN ('pending','sending','sent') AND template IN ('restock_reminder','harvest_window')`
     - Alert pushes: `UNIQUE (customer_id, payload->>'alert_id') WHERE status IN ('pending','sending','sent') AND template = 'disease_alert'`
@@ -63,7 +63,7 @@ so that Phase H1 has working outbound LINE delivery on day one — without yet e
   - [ ] Subscribe to `line_outbound_events` via Supabase Realtime WHERE `status='pending'` (or poll at 5s interval as fallback if Realtime quota is a concern)
   - [ ] Pull events in batches of 10 (respects LINE rate limits); set `status='sending'` before processing
   - [ ] For each event: fetch `hatchery_brand` by `event.hatchery_id`; render the matching Flex template; push to `line_users.line_user_id` via LINE Push Message API; set `status='sent'`
-  - [ ] On failure: increment `attempt_count`; apply backoff (1m → 5m → 30m); after 3 attempts set `status='dead'`
+  - [ ] On failure: increment `attempts`; apply backoff (1m → 5m → 30m); after 3 attempts set `status='dead'`
   - [ ] Respect quiet hours: before pushing, check `notification_settings.quiet_hours_start/end` for the recipient's hatchery; if outside window, leave `status='pending'` and skip; re-evaluate on next poll. Exception: `payload.severity='high'` events bypass quiet hours and log the bypass to `line_message_logs`
   - [ ] "เปิดแชท" CTA URL in every Flex: use a fixed LIFF placeholder path (e.g., `liff.line.me/{LIFF_ID}/placeholder`) — Phase H3 swaps this to the real inbox
   - [ ] Tenant isolation: always select `hatchery_brand` by `event.hatchery_id`; never cache brand across different hatchery events

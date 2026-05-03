@@ -156,7 +156,7 @@ All rows carry `hatchery_id` directly or via FK chain. RLS is enforced at the Po
 | `line_outbound_events` | Y (006) | All roles, own hatchery | Server actions only | Service role (worker) | — | |
 | `subscription_events` | Y (004) | `owner` only | Service role (Stripe webhook) | Service role | — | Spec formerly called `subscriptions`; idempotent |
 | `hatchery_brand` | Y (001) | Own hatchery + public for `/h/{slug}` | `owner` | `owner` | — | Public when `scorecard_settings.public = true` |
-| `batch_distributions` | *(planned)* | All roles, own hatchery | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only | Not yet in migrations |
+| `batch_buyers` | Y (001) | All roles, own hatchery | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only | Spec formerly called `batch_distributions` |
 | `quotes` | *(planned)* | All roles, own hatchery | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only | Not yet in migrations |
 | `prices` | *(planned)* | All roles, own hatchery | `owner` only | `owner` only | `owner` only | Not yet in migrations |
 | `customer_callbacks` | *(planned)* | All roles, own hatchery | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only | Not yet in migrations |

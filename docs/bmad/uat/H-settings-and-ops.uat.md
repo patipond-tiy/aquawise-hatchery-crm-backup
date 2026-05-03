@@ -93,24 +93,25 @@ Manual — `USE_MOCK=false`.
 
 ---
 
-### Scenario 3: H2-rbac — Only `auditor` and `owner` can trigger an export; `counter_staff` is blocked
+### Scenario 3: H2-rbac — `owner`, `counter_staff`, and `auditor` can export; `lab_tech` is blocked
 
-**Given:** Three authenticated sessions: `owner`, `auditor`, and `counter_staff`
+**Given:** Four authenticated sessions: `owner`, `auditor`, `counter_staff`, and `lab_tech`
 
 **When:** Each session attempts to call `exportCustomersCsv` (directly or via the Settings → Data UI)
 
 **Then:**
 - `owner` export succeeds; file downloads
 - `auditor` export succeeds; file downloads
-- `counter_staff` attempt returns HTTP 403; no file is returned and no `data_exports` row is created
+- `counter_staff` export succeeds; file downloads
+- `lab_tech` attempt returns HTTP 403; no file is returned and no `data_exports` row is created
 
 **Verification:**
 ```bash
-pnpm vitest run tests/settings/export.test.ts -t "counter_staff blocked"
+pnpm vitest run tests/settings/export.test.ts -t "lab_tech blocked"
 ```
-Or: Manual (mock mode). Switch session role to `counter_staff`; navigate to Settings → Data; confirm the export button is disabled or clicking it returns an error toast.
+Or: Manual (mock mode). Switch session role to `lab_tech`; navigate to Settings → Data; confirm the export button is disabled or clicking it returns an error toast.
 
-**Pass/Fail:** PASS if `counter_staff` is blocked and `owner`/`auditor` can export. FAIL if `counter_staff` successfully downloads a CSV.
+**Pass/Fail:** PASS if `lab_tech` is blocked and `owner`/`auditor`/`counter_staff` can export. FAIL if `lab_tech` successfully downloads a CSV.
 
 ---
 
@@ -253,15 +254,15 @@ Or: Manual — `USE_MOCK=false` + bot worker deployed.
 
 ## X1: Dead-Letter Retry / Escalate UI
 
-### Scenario 1: X1-retry — Retry action flips `status` to `pending`, increments `retry_count`, and creates `audit_log` row
+### Scenario 1: X1-retry — Retry action flips `status` to `pending`, increments `attempts`, and creates `audit_log` row
 
-**Given:** A `line_outbound_events` row exists with `status = 'dead'` and `retry_count = 3`; the authenticated user is an `owner`; the user is on `/th/settings/messaging-failures`
+**Given:** A `line_outbound_events` row exists with `status = 'dead'` and `attempts = 3`; the authenticated user is an `owner`; the user is on `/th/settings/messaging-failures`
 
 **When:** The owner clicks "ลองใหม่" (Retry) on that event row
 
 **Then:**
 - The event `status` is updated to `pending`
-- `retry_count` is incremented to `4`
+- `attempts` is incremented to `4`
 - An `audit_log` row is inserted with `action = 'dead_letter_retry'` and `entity_id` matching the event's `id`
 - The bot worker can now attempt re-delivery (status is `pending` again)
 
@@ -274,10 +275,10 @@ Or: Manual — `USE_MOCK=false`.
 1. Insert a `dead` event row directly in Supabase.
 2. Navigate to `/th/settings/messaging-failures`; confirm the row appears.
 3. Click "ลองใหม่".
-4. Query `line_outbound_events` — confirm `status = 'pending'` and `retry_count` incremented.
+4. Query `line_outbound_events` — confirm `status = 'pending'` and `attempts` incremented.
 5. Query `audit_log` — confirm `action = 'dead_letter_retry'` row exists.
 
-**Pass/Fail:** PASS if `status = 'pending'`, `retry_count` incremented, and `audit_log` row created. FAIL if any of the three conditions is not met.
+**Pass/Fail:** PASS if `status = 'pending'`, `attempts` incremented, and `audit_log` row created. FAIL if any of the three conditions is not met.
 
 ---
 

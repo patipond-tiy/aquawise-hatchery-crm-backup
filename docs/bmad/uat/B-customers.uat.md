@@ -4,11 +4,11 @@
 
 ## Prerequisites
 
-- Migrations `001`–`014` applied; `customer_cycles`, `batch_distributions`, and `customer_callbacks` tables exist
+- Migrations `001`–`014` applied; `customer_cycles`, `batch_buyers`, and `customer_callbacks` tables exist
 - Two separate hatchery workspaces provisioned: **Hatchery A** (owner email A) and **Hatchery B** (owner email B), each with at least 3 customer rows in `customers`
 - A `counter_staff` member exists in Hatchery A (created via A2-happy path)
 - A `lab_tech` member exists in Hatchery A
-- At least one customer in Hatchery A has at least two `customer_cycles` rows and at least two `batch_distributions` rows
+- At least one customer in Hatchery A has at least two `customer_cycles` rows and at least two `batch_buyers` rows
 - At least one customer in Hatchery A has zero `customer_cycles` rows
 - At least one customer in Hatchery A has `restockIn <= 14`
 
@@ -181,11 +181,11 @@ Manual — `USE_MOCK=false`:
 
 ---
 
-### Scenario 2: B3-history — Batch history rows match batch_distributions for that customer
+### Scenario 2: B3-history — Batch history rows match batch_buyers for that customer
 
-**Given:** A customer in Hatchery A has at least two rows in `batch_distributions` joined to `batches`
+**Given:** A customer in Hatchery A has at least two rows in `batch_buyers` joined to `batches`
 **When:** The user opens that customer's detail page
-**Then:** The batch history table shows exactly the rows present in `batch_distributions` for that `customer_id`; row count and D30 values match the DB
+**Then:** The batch history table shows exactly the rows present in `batch_buyers` for that `customer_id`; row count and D30 values match the DB
 
 **Verification:**
 
@@ -198,7 +198,7 @@ Manual — `USE_MOCK=false`:
 1. In Supabase, query:
    ```sql
    SELECT bd.id, b.id AS batch_id, cc.d30
-   FROM batch_distributions bd
+   FROM batch_buyers bd
    JOIN batches b ON b.id = bd.batch_id
    LEFT JOIN customer_cycles cc ON cc.batch_id = b.id AND cc.customer_id = bd.customer_id
    WHERE bd.customer_id = '{customer_id}';

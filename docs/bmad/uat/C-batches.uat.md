@@ -4,11 +4,11 @@
 
 ## Prerequisites
 
-- Migrations `001`–`014` applied; `batches`, `pcr_results`, `batch_distributions`, `customer_cycles`, `batch_certs` tables exist
+- Migrations `001`–`014` applied; `batches`, `pcr_results`, `batch_buyers`, `customer_cycles`, `batch_certs` tables exist
 - Storage buckets `pcr-reports` and `pcr-certificates` exist in the Supabase project
 - A `batches_auditor_v` SECURITY INVOKER view exists (migration `013_auditor_batch_view.sql`)
-- At least one batch exists with real `pcr_results` rows (at least 4 diseases) and at least 3 `batch_distributions` rows with linked `customer_cycles.d30` values
-- At least one batch exists with zero `batch_distributions` rows
+- At least one batch exists with real `pcr_results` rows (at least 4 diseases) and at least 3 `batch_buyers` rows with linked `customer_cycles.d30` values
+- At least one batch exists with zero `batch_buyers` rows
 - A `lab_tech` member and a `counter_staff` member exist for Hatchery A
 - An `auditor` member exists for Hatchery A
 - Font files `Plus Jakarta Sans` and `Noto Sans Thai` exist in `public/fonts/`
@@ -61,9 +61,11 @@ No additional manual step is required; the unit test covers this scenario by ass
 
 ### Scenario 3: C1-rbac — counter_staff cannot insert pcr_results rows
 
-**Given:** A `counter_staff` user is signed in; the Add Batch wizard step 2 is reached with a PCR file and disease results filled in
+> **RBAC note:** Today `lib/rbac.ts` has no `pcr:write` action — `batch:write` includes `counter_staff`. Story C1 requires adding `pcr:write: ['owner', 'lab_tech']` to `lib/rbac.ts`. This scenario validates that the new `pcr:write` gate is enforced.
+
+**Given:** A `counter_staff` user is signed in; the Add Batch wizard step 2 is reached with a PCR file and disease results filled in; `pcr:write` action has been added to `lib/rbac.ts` per C1 story notes
 **When:** The user submits the final wizard step, causing the `addBatch()` server action to run
-**Then:** The server action returns a role-rejection error for the `pcr_results` insert; no `pcr_results` row is created; the `batches` row is rolled back
+**Then:** The server action returns a role-rejection error for the `pcr_results` insert (gated by `can(role, 'pcr:write')`); no `pcr_results` row is created; the `batches` row is rolled back
 
 **Verification:**
 
@@ -87,7 +89,7 @@ Manual — `USE_MOCK=false`:
 
 ### Scenario 1: C2-auditor — Auditor sees batch list but unit_price is null/hidden
 
-**Given:** An `auditor` member is signed in; batches exist with `unit_price` values in `batch_distributions`
+**Given:** An `auditor` member is signed in; batches exist with `unit_price` values in `batch_buyers`
 **When:** The auditor navigates to `/th/batches`
 **Then:** The batch list loads and shows all batch cards; `unit_price` and commercial LTV fields are null or absent in the API response; no commercial data is visible in the UI for the auditor
 
@@ -139,7 +141,7 @@ Manual — `USE_MOCK=true`:
 
 ### Scenario 1: C3-mean-d30 — Mean D30 computed correctly for batch with 3 buyers
 
-**Given:** A batch exists with exactly 3 `batch_distributions` rows, each linked to a `customer_cycles` row with distinct `d30` values: 60, 80, 90
+**Given:** A batch exists with exactly 3 `batch_buyers` rows, each linked to a `customer_cycles` row with distinct `d30` values: 60, 80, 90
 **When:** The user navigates to that batch's detail page
 **Then:** The "D30 เฉลี่ย" stat card shows 76.67% (or 76.7% rounded to one decimal)
 
@@ -162,7 +164,7 @@ Manual — `USE_MOCK=false`:
 
 ### Scenario 2: C3-empty — Batch with no distributions shows empty buyers table, not error
 
-**Given:** A batch exists with zero rows in `batch_distributions`
+**Given:** A batch exists with zero rows in `batch_buyers`
 **When:** The user navigates to that batch's detail page
 **Then:** The buyers table renders an empty state message ("ยังไม่มีข้อมูลการจำหน่าย"); no JavaScript error is thrown; the page does not error-boundary
 
@@ -212,7 +214,7 @@ Manual — `USE_MOCK=false`:
 
 ### Scenario 2: C4-line-blocked — "Send via LINE" communicates pending delivery
 
-**Given:** G3' (bot worker) is not yet deployed; a batch with at least one buyer in `batch_distributions` exists
+**Given:** G3' (bot worker) is not yet deployed; a batch with at least one buyer in `batch_buyers` exists
 **When:** The user clicks "ส่งใบรับรอง LINE" on the batch detail page; the cert modal opens; the user selects at least one buyer and submits
 **Then:** A `line_outbound_events` row with `template = 'pcr_certificate'` and `status = 'pending'` is inserted; the modal shows the informational note "จะส่งเมื่อระบบ LINE พร้อม"; the toast confirms the enqueue count; no actual LINE message is delivered
 

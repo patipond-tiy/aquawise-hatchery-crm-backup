@@ -170,7 +170,7 @@ Manual — `USE_MOCK=false` + live LINE OA + bot worker deployed.
 
 ---
 
-### Scenario 2: G3p-status-fail — Bot worker failure flips status to `failed`; retry increments `attempt_count`
+### Scenario 2: G3p-status-fail — Bot worker failure flips status to `failed`; retry increments `attempts`
 
 > Requires: live bot worker deployed. Cannot pass until G3p.i is complete.
 
@@ -179,18 +179,18 @@ Manual — `USE_MOCK=false` + live LINE OA + bot worker deployed.
 **When:** The bot worker attempts to process the event
 
 **Then:**
-- After the first failure: `status` remains `failed` (not `dead`) and `attempt_count = 1`
-- After the second failure: `attempt_count = 2`
-- After the third failure: `status = 'dead'`, `attempt_count = 3`, `last_error` contains the failure message
+- After the first failure: `status` remains `failed` (not `dead`) and `attempts = 1`
+- After the second failure: `attempts = 2`
+- After the third failure: `status = 'dead'`, `attempts = 3`, `last_error` contains the failure message
 
 **Verification:**
 Manual — `USE_MOCK=false` + bot worker deployed.
 1. Insert a `line_outbound_events` row with an intentionally invalid `line_id` (e.g., a fake LINE user ID).
 2. Poll the row in Supabase dashboard every 2 minutes.
-3. Confirm `attempt_count` increments from 1 to 2 to 3 with appropriate backoff (1m → 5m → 30m).
+3. Confirm `attempts` increments from 1 to 2 to 3 with appropriate backoff (1m → 5m → 30m).
 4. Confirm final `status = 'dead'` and `last_error` is non-null.
 
-**Pass/Fail:** PASS if `status='dead'` and `attempt_count=3` after three delivery attempts, with `last_error` populated. FAIL if the status skips states unexpectedly or `attempt_count` does not increment.
+**Pass/Fail:** PASS if `status='dead'` and `attempts=3` after three delivery attempts, with `last_error` populated. FAIL if the status skips states unexpectedly or `attempts` does not increment.
 
 ---
 
