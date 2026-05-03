@@ -1,3 +1,5 @@
+> Refreshed 2026-05-02 against `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md` and current `docs/PLAN.md`.
+
 # 06 — Production Gap: punch-list to ship
 
 This is the cut-list. Everything below is something the prototype either
@@ -14,7 +16,7 @@ Each item cross-references:
 
 - The user story in `03-user-stories.md` it satisfies
 - The flow in `04-flows.md` if applicable
-- The FR-ID(s) from `docs/business-guide/aquawise-hatchery-functional-requirements (2).md`
+- The FR-ID(s) from `docs/aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`
 
 ## Decisions baked into this list (per business-guide reconciliation)
 
@@ -24,24 +26,21 @@ Each item cross-references:
 | Two-way chat scope | **Phase H3 (deferred)**. Phase H1 ships send-only Flex per FR-LINE-001/002. Migration 007 + LIFF inbox + CRM `/inbox` defer. | Story G3 / G3' |
 | Dead-letter retry/escalate UI | **P2.11 (was P3.7)**. FR doc treats observability + retry as multi-tenant ops. | Story X1, Flow 10 |
 | Persona ↔ auth role model | Keep **5 personas** (behavioral) and **3 implementation roles** (`owner`/`counter_staff`/`lab_tech`) + reserved `auditor`. Don't collapse. | `08-roles-and-rls.md` |
+| Hatchery sequencing | Hatchery product is **2027+**. The current CRM is a scaffold. Do not invest in hatchery-specific features (lineage tracking, cross-nursery outcome data, broodstock scorecard) before 2027 validation with P'Bunjong. | `docs/aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md` §10 |
 | Brand voice in product-spec prose | Stay technical here. Brand voice (`07-brand-and-voice.md`) governs **user-facing strings**, Flex copy, certs, and the public scorecard. | `07` |
 
 ---
 
 ## P0 — Blockers (cannot ship without)
 
-### P0.1 — Workspace bootstrap on first sign-in
+### P0.1 — Workspace bootstrap on first sign-in ✅ (code-complete; verify in live Supabase)
 **FR:** FR-AUTH-001, FR-WS-001, FR-AUTH-003 · **Story:** A1
 
-A new email signing in via magic link must end up with a `hatcheries`
-row, a `hatchery_members` row (role `owner`), and a Stripe trial
-subscription. Today this happens via no automated path; the dashboard
-breaks for any new auth user.
-
-- Files: new server action in `app/auth/callback/route.ts` (or
-  `app/[locale]/login/actions.ts`)
-- Test: sign in with a never-seen email; land on `/th` dashboard with
-  empty state and 14-day trial counter
+Auth callback now handles PKCE + implicit-flow callbacks (`app/auth/callback/`). Bootstrap
+logic creates `hatcheries` + `hatchery_members` (role `owner`) on first sign-in. Stripe trial
+subscription creation is wired via Phase 6 (code-complete; awaiting Stripe Dashboard
+provisioning). **Remaining verification:** sign in with a never-seen email against a live
+Supabase project (not mock) and confirm dashboard loads with empty state and trial counter.
 
 ### P0.2 — Wire the LINE outbound queue
 **FR:** FR-LINE-001/002/003 · **Story:** G2, G3' · **Flow:** 5
@@ -63,45 +62,40 @@ listed in `08`. Add a scripted test: as `hatchery_a` user, attempt to
 read every row belonging to `hatchery_b`; expect 0 rows on every
 table. **Continuous from week 1; runs on every deploy.**
 
-### P0.4 — Stripe webhook hardening + trial behavior
+### P0.4 — Stripe webhook hardening + trial behavior ✅ (code-complete; awaiting Stripe Dashboard provisioning)
 **FR:** FR-AUTH-002, FR-BILLING-001 · **Story:** H3
 
-Subscription state must be authoritative from Stripe. Today, the webhook
-handler exists at `app/api/webhooks/stripe/route.ts` but:
+Webhook handler at `app/api/webhooks/stripe/route.ts` handles
+`customer.subscription.deleted`, `invoice.payment_failed`, `invoice.paid`.
+Uses service-role client + `subscription_events` table for idempotency.
+`BillingGate` (server component) redirects expired/canceled tenants.
+Trial-expired behavior is **read-only with banner** (not full lockout);
+mutation handlers and LINE event server action return 402 for
+`trial_expired` / `past_due`. `MOCK_BILLING_STATE` env var exercises all
+states in mock mode.
 
-- Handle `customer.subscription.deleted`, `invoice.payment_failed`,
-  `invoice.paid`
-- Verify webhook signature with live secret
-- Trial countdown correct after a real Checkout flow
-- **Trial-expired = read-only with banner.** Implement a server-side
-  guard in mutation handlers and the LINE event server action that
-  returns 402 if `subscription.status` is `trial_expired` or
-  `past_due`. UI surfaces a banner with "Subscribe to continue."
-  Reads remain unblocked.
+**Remaining:** Provision Stripe Dashboard (Pro plan price ID, webhook endpoint
+with live secret); validate end-to-end Checkout → `subscription_events` → `BillingGate`
+redirect flow in production.
 
-### P0.5 — Settings → Profile inputs (currently dead)
+### P0.5 — Settings → Profile inputs ✅
 **FR:** FR-WS-002 · **Story:** A3
 
-Every input on Settings → Profile is `defaultValue`-only. A new tenant
-cannot rename their hatchery. Hatchery name flows into every Flex
-co-branding header, so this is not optional.
-
-- Wire all 6 inputs with `useState` + `updateProfile()`
-- Wire logo upload to Supabase Storage `hatchery-logos/`
-- Persist to `hatcheries` and `hatchery_brand` tables
+All inputs are wired with `useState` + `updateProfile()` (server action in
+`app/[locale]/(dashboard)/settings/actions.ts`). Logo upload wired to Supabase
+Storage. Persists to `hatcheries` + `hatchery_brand`. Mock mode returns a
+"demo mode" notice; live mode fully functional.
 
 ---
 
 ## P1 — First paying tenant (Phase H1)
 
-### P1.1 — Replace dashboard hero hardcoded values
+### P1.1 — Replace dashboard hero hardcoded values ✅
 **FR:** FR-BATCH-003 · **Story:** (no dedicated story; tied to all dashboard stories)
 
-`5/8`, `82%`, `3 ฟาร์ม · ~620k PL` are literal strings. Compute from
-`customers` + `batches`.
-
-- File: `app/[locale]/(dashboard)/page.tsx` lines 42–67
-- Optional: extract to `lib/derive/dashboard-stats.ts` for testability
+Dashboard stats are now computed from live `customers` + `batches` data via
+`lib/derive/dashboard-stats.ts`. Active cycles, avg D30, restock count and PL
+totals are all derived. No more literal strings.
 
 ### P1.2 — Customer detail: real contact, real batch history
 **FR:** FR-CUST-001/003 · **Story:** B3
@@ -132,21 +126,20 @@ flag-on-EHP logic is fake.
 - Update Add Batch step 2 to capture per-disease results
 - Update Batch detail to read from new table
 
-### P1.5 — Unify team list with actual auth members
+### P1.5 — Unify team list with actual auth members ✅
 **FR:** FR-TEAM-003 · **Story:** A2
 
-Settings → Team renders the `TEAM` constant (5 hardcoded). Should read
-from `hatchery_members` joined with `auth.users`.
+Settings → Team reads from `hatchery_members` joined with `auth.users`.
+Team actions live in `app/[locale]/(dashboard)/settings/team/actions.ts`.
 
-### P1.6 — Team invite flow
+### P1.6 — Team invite flow ✅
 **FR:** FR-TEAM-001/002 · **Story:** A2
 
-`invite` modal opens but submission is unwired.
-
-- Schema: `team_invites(id, hatchery_id, email, role, token, expires_at, accepted_at)`
-- Server action: `inviteTeamMember(email, role)`
-- Email send via Supabase Auth admin API or Resend
-- Acceptance handler at `/auth/accept-invite?token=...`
+`inviteTeamMember(email, role)` server action exists in
+`app/[locale]/(dashboard)/settings/team/actions.ts`. Inserts into
+`team_invites`, sends email via Supabase Auth admin API. Acceptance handler
+at `app/auth/accept-invite/route.ts` validates token + creates membership.
+Migration 012 covers the `team_invites` schema.
 
 ### P1.7 — Quote send (LINE template + persistence)
 **FR:** FR-QUOTE-001/002/003 · **Story:** D2 · **Flow:** 5
@@ -269,10 +262,10 @@ Search input has no handler; notifications + profile buttons are
 no-ops. Either wire them or remove them — fake controls erode trust
 (violates "Truth over comfort" pillar from `07`).
 
-### P2.10 — Logout button (currently dead)
+### P2.10 — Logout button ✅
 
-Left rail logout is a `<button>` with no handler. Must call
-`supabase.auth.signOut()` then redirect to `/login`.
+Left rail logout calls `signOut` server action (`app/actions/auth.ts`),
+which invokes `supabase.auth.signOut()` and redirects to `/login`.
 
 ### P2.11 — Dead-letter retry / escalate UI · *promoted from P3.7*
 **FR:** operational (no explicit FR ID; FR doc treats as multi-tenant
@@ -339,6 +332,58 @@ that fails the build if either file has keys the other lacks.
 
 ---
 
+## 2027+ Hatchery gaps ⚠ (hypotheses only — do not build before validation)
+
+These items emerge from `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`
+(v0.5, pending deep validation with P'Bunjong). Every item here carries a ⚠ — none
+are confirmed customer reality. **Do not invest engineering time before the 2027
+validation conversations.**
+
+### HG.1 — Broodstock lineage performance dashboard ⚠
+**Source:** Customer doc §3 Job 2, Scene 2
+
+A dashboard view showing per-lineage Day-30 survival averages, standard deviations,
+and trend across all downstream nursery/farm cycles. P'Bunjong's core feedback loop.
+Requires cross-nursery outcome data flowing at meaningful scale (200+ cycles/hatchery/year).
+⚠ We have not validated whether P'Bunjong wants or trusts this kind of feedback; the
+data-quality bar is high. Do not begin schema work until 2027 validation.
+
+### HG.2 — Cross-nursery batch traceability (two steps upstream) ⚠
+**Source:** Customer doc §3 Job 1, Scene 1
+
+Map each nauplii batch → nurseries that received it → downstream farm cycle outcomes.
+Surfaced on the hatchery dashboard when a nursery calls with a dispute. Requires the
+nursery and farm data flywheel to be operating at scale first. ⚠ The P2.4 cross-service
+dependency (farm-side writes `farm_cycle_metrics`) is a prerequisite; this feature is a
+further step upstream.
+
+### HG.3 — Hatchery-tier pricing model ⚠
+**Source:** Customer doc §5
+
+Updated doc hypothesizes ฿5,000–15,000/mo (vs. the current ฿5,000/mo scaffold).
+Also raises a per-defended-dispute pricing structure as the most strategically
+interesting unit of billing. ⚠ Both the tier and the structure need validation in
+conversation with P'Bunjong before any Stripe price IDs are created. The current
+฿5,000/mo Pro plan is a placeholder, not a confirmed hatchery price point.
+
+### HG.4 — Hatchery public scorecard (verified-careful tier) ⚠
+**Source:** Customer doc §3 Job 4, Scene 3
+
+Extends P2.1 (public scorecard) with hatchery-specific verified-careful tier signal,
+lineage performance summary, and discoverability by new nursery customers. ⚠ The
+2027+ scenario (Scene 3) — nursery owners finding hatcheries via AquaWise scorecard — is
+the most aspirational path and depends on AquaWise reaching critical mass on the
+nursery and farm sides first. Do not scope before 2027.
+
+### HG.5 — Industry trend reports ⚠
+**Source:** Customer doc §3 Job 5, Scene 4
+
+Aggregated cross-hatchery disease patterns, lineage trends, regulatory shifts,
+published as an annual report (Scene 4: 2028+). ⚠ Most distant job; requires years
+of operating data and industry credibility. Out of scope until further notice.
+
+---
+
 ## Cross-cutting tech debt
 
 - **`USE_MOCK` flag.** Mock + live both bundle today. Production should
@@ -346,49 +391,57 @@ that fails the build if either file has keys the other lacks.
 - **`lib/database.types.ts` is a placeholder.** Run
   `supabase gen types typescript --linked > lib/database.types.ts` after
   schema is final.
-- **Tests.** No unit/integration tests exist. Vitest harness mentioned
-  in README but not set up. P0.3 RLS audit is the highest-leverage
-  test to add first.
+- **Tests.** Vitest harness is set up (`pnpm test` runs). Coverage is thin — mostly
+  smoke. P0.3 RLS audit is the highest-leverage test to add. A `tests/team/invite.test.ts`
+  exists; broader coverage is still missing.
 - **Loading + error states.** Most pages show "กำลังโหลด…" or nothing.
   Standardize a `<PageState loading|error|empty>` component.
 - **i18n keys.** Some strings hardcoded Thai in JSX rather than
   `messages/th.json` keys. Sweep before locking the UI.
-- **Modal submission handlers (4 of 8 missing).** `sendLine`, `quote`,
-  `cert`, `invite`, `schedule`, `closeAlert`-with-note all need wired
-  `onSubmit`. See P1.7, P1.8, P1.6, P2.6.
-- **Dashboard hero stats (3 hardcoded values).** P1.1.
+- **Modal submission handlers (partially resolved).** `invite` ✅ (P1.6 done).
+  Still unwired: `sendLine`, `quote`, `cert`, `schedule`,
+  `closeAlert`-with-note. See P1.7, P1.8, P2.6.
 
 ---
 
-## Suggested sequencing (revised per business-guide reconciliation)
+## Suggested sequencing (revised 2026-05-02)
+
+Items marked ✅ above are complete. Remaining open work:
 
 ```
-Week 1   P0.1 P0.5 + P0.3 (RLS audit baseline)
-Week 2   P0.4 (Stripe + read-only-with-banner)
-Week 2   P1.5 P1.6 (team list + invite)
-Week 3   P1.9 (LINE bind — unblocks all push features)
-Week 4   P0.2 (queue + worker)  + P1.11 (quiet hours) + P1.12 (activity)
-Week 4   P1.7 P1.8 (quote + cert)
-Week 5   P1.4 P1.2 P1.3 (per-batch PCR; real customer detail)
-Week 6   P1.1 P1.10 (dashboard stats; notif respect)
+Now      P0.3 (RLS audit baseline — continuous from week 1)
+Now      P0.4 Stripe Dashboard provisioning (code done; live keys needed)
+         P0.1 verify live Supabase bootstrap (code done; needs live project)
+
+Next     P1.9 (LINE bind — unblocks all push features)
+         P0.2 (queue + worker)
+         P1.11 (quiet hours) + P1.12 (activity panel)
+         P1.7 P1.8 (quote + cert)
+         P1.4 P1.2 P1.3 (per-batch PCR; real customer detail)
+         P1.10 (notification delivery respect)
 
 — Phase H1 cut here (first paying tenant) —
 
-Week 7   P2.3 P2.5 (cron pushes; restock fan-out)
-Week 8   P2.4 (farm-side trigger — depends on cross-service sync)
-Week 9   P2.1 + P2.1b (public scorecard + ISR/SEO)
-Week 10  P2.7 P2.9 P2.10 P2.11 (exports; topbar; logout; dead-letter UI)
+         P2.3 P2.5 (cron pushes; restock fan-out)
+         P2.4 (farm-side trigger — depends on cross-service sync)
+         P2.1 + P2.1b (public scorecard + ISR/SEO)
+         P2.6 (schedule callback)
+         P2.7 P2.8 (exports; restock thresholds)
+         P2.9 (topbar: wire search + notifications)
+         P2.11 (dead-letter retry UI)
 
 — Phase H2 cut here (second tenant ready) —
 
 Phase H3: P3.1 (two-way chat) + P3.2 (reviews) + P3.3 (auditor) +
           P3.4–P3.8 as the brand journey demands them.
 
-P0.3 (RLS audit) runs continuously on every deploy from week 1.
+2027+:   HG.1–HG.5 (hatchery-specific features) — validate with P'Bunjong first.
+
+P0.3 (RLS audit) runs continuously on every deploy.
 ```
 
-This sequencing reaches "first paying tenant on real LINE" by end of
-week 6, "second tenant + cron + public scorecard" by end of week 10,
-and reserves Phase H3 for the chat surface and post-GA polish without
-over-scoping Phase H1. It matches the business team's "slow is right"
+This sequencing reaches "first paying tenant on real LINE" once P1.9 + P0.2
+are complete, with billing live after Stripe Dashboard provisioning. The 2027+
+hatchery gaps (HG.1–HG.5) are placeholders only — do not begin until validation
+conversations with P'Bunjong. It matches the business team's "slow is right"
 pillar — we don't ship features ahead of customer demand.

@@ -1,7 +1,9 @@
+> Refreshed 2026-05-02 against `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`.
+
 # 02 — Feature Inventory: What's wired today
 
 > Cross-references the Functional Requirements doc at
-> `docs/business-guide/aquawise-hatchery-functional-requirements (2).md`.
+> `docs/aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`.
 > Each page section below is tagged with the **module ID** (H1–H10
 > hatchery-facing, F1–F9 farmer-facing) it implements, and the
 > **FR-ID → page** reverse map lives at the bottom of this file.
@@ -43,8 +45,8 @@ punch-list).
 
 ### Right rail
 
-Not currently used. Reserved for future "AI assistant" or "today's tasks"
-panel — design hooks exist in `Shell` but no content.
+Not currently used. Reserved for a future contextual-information or "today's tasks"
+panel — design hooks exist in `Shell` but no content. (The hatchery voice is "informational, never editorial" per brand doc; avoid "AI assistant" framing on professional surfaces.)
 
 ---
 
@@ -296,6 +298,8 @@ generatePcrCertPdf(batchId)        // for batch detail print cert
 |---|---|---|
 | **F8 — Water Quality** (farmer-facing) | Phase H2 (deferred) | FR-doc lists water test results + quality trend graphs sourced from farm IoT. Not in hatchery-CRM scope for H1; the data ingest path is on the farm-side AquaWise app. CRM may surface aggregate water-quality flags later as a customer-detail signal. |
 | **F-chat (two-way LIFF inbox)** | Phase H3 (deferred) | Schema migration 007 + LIFF inbox + CRM `/inbox` panel + nudges. Demoted from P2.2 → P3.x; FR doc treats messaging as send-only Flex for H1. |
+| ⚠ **H-LINEAGE — Broodstock lineage performance analytics** | 2027+ hypothesis | Source doc §3 Job 2, Scene 2: cross-nursery outcome variance broken down by lineage (e.g., Alpha-9 vs Alpha-12 Day-30 comparison). Most uncertain feature in the source doc — explicitly flagged ⚠ awaiting P'Bunjong validation. Do not design or build until validated. |
+| ⚠ **H-DISPUTE — Cross-chain defended-dispute dashboard** | 2027+ hypothesis | Source doc §3 Job 1, Scene 1: batch-to-nursery-to-farm outcome mapping for upstream exoneration. Depends on nursery + farm data flywheel reaching scale first. |
 
 These are the surfaces production needs to add. See
 [`06-production-gap.md`](./06-production-gap.md) for prioritization.
@@ -324,7 +328,7 @@ These are the surfaces production needs to add. See
 ## FR-ID → page reverse map
 
 Quick lookup for "where does FR-XYZ live in the prototype?" Pulled from
-`docs/business-guide/aquawise-hatchery-functional-requirements (2).md`.
+`docs/aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`.
 
 | FR-ID | What it requires | Where it lives now |
 |---|---|---|
@@ -354,12 +358,12 @@ Quick lookup for "where does FR-XYZ live in the prototype?" Pulled from
 | FR-TEAM-003 | List from `hatchery_members` join `auth.users` | Currently reads `TEAM` constant — `06` P1.5 |
 | FR-AUTH-001 | Magic-link signup | Login page exists ✅; bootstrap missing — `06` P0.1 |
 | FR-AUTH-002 | Stripe webhook reconciliation | Handler exists; needs hardening — `06` P0.4 |
-| FR-AUTH-003 | 14-day trial + countdown | Settings billing wired ✅ |
+| FR-AUTH-003 | 30-day no-card trial + countdown | Settings billing wired ✅ |
 | FR-BILLING-001 | Block features on trial expired/unpaid | Read-only-with-banner decision — `06` P0.4, story H3 |
 | FR-SEARCH-001 | Cmd-K palette over customers/batches/alerts | **Not implemented** — `06` P2.9 |
 | FR-SEARCH-002 | Export CSV / ZIP / backup | All buttons no-op — `06` P2.7 |
 | FR-DATA-001 | `data_exports` audit log | Schema + table missing — `06` P2.7 |
 | FR-DATA-002 | Stream exports + signed URLs | Implementation note — `06` P2.7 |
-| FR-PUBLIC-001 | Public scorecard at `/{locale}/h/{slug}` | **Not implemented** — `06` P2.1 |
-| FR-PUBLIC-002 | Show verified credentials | Same — story F2 in `03` |
-| FR-PUBLIC-003 | ISR 6h + SEO indexable | Same — story F4 in `03` |
+| FR-PUBLIC-001 | ⚠ Public scorecard at `/{locale}/h/{slug}` (2027+ hypothesis — source §4 Scene 3, Job 4) | **Not implemented** — `06` P2.1 |
+| FR-PUBLIC-002 | ⚠ Show verified credentials (same caveat as FR-PUBLIC-001) | Same — story F2 in `03` |
+| FR-PUBLIC-003 | ⚠ ISR 6h + SEO indexable (same caveat as FR-PUBLIC-001) | Same — story F4 in `03` |

@@ -1,9 +1,11 @@
+> Refreshed 2026-05-02 against `aquawise-updated-docs/00-aquawise-brand-foundation.md`.
+
 # 07 — Brand and Voice (engineering digest)
 
-This file is a **digest** of `docs/business-guide/aquawise-hatchery-cbbe (1).md`
+This file is a **digest** of `docs/aquawise-updated-docs/00-aquawise-brand-foundation.md`
 for the people writing code, copy, Flex JSON, and certificate text. The
-CBBE doc is the source of truth — read it for the full positioning, the
-5-year journey, the brand metrics, and the strategic rationale. This file
+brand foundation doc is the source of truth — read it for the full positioning, the
+geographic arc, the operating values, and the strategic rationale. This file
 exists so an engineer making a UI string decision has the relevant excerpts
 in one place.
 
@@ -43,7 +45,7 @@ foreign expert. **Not** a slick salesperson.
 
 | Trait | Means | Rules out |
 |---|---|---|
-| Educated, humble | Plain words. No jargon walls. | "Innovative AI-powered" / "revolutionary" |
+| Educated, humble | Plain words. No jargon walls. | "AI-powered," "revolutionary," "disruptive," "innovative," "platform," "synergy," "leverage," "ecosystem" |
 | Calm under pressure | Steadier than the user when something breaks. | Breathless urgency. Crisis-mode CTAs. |
 | Direct, not flashy | "I don't know yet, I'll find out by 6pm." | Hedged corporate-speak. Marketing fluff. |
 | Patient with people, impatient with noise | Long calls with owners; short patience for hype. | "Always-on" / "low-touch SaaS" framing. |
@@ -52,10 +54,12 @@ foreign expert. **Not** a slick salesperson.
 
 - **No motion graphics, no splash screens, no hero animations.**
 - **No glassmorphism, no neumorphism, no "fashionable" styles.**
-- **No emoji-heavy professional surfaces.** A 💬 on a customer card is
+- **No emoji on professional surfaces.** A 💬 on a customer card is
   fine; emojis in a PCR certificate are not.
 - **No AI iconography.** No glowing brains, no neural-network
   decorations, no "AI" badges.
+- **No dark mode** (v1 and beyond unless explicitly revisited).
+- **No customization or theming** — every customer sees the same AquaWise.
 - **No breathless verbs in CTAs.** "Send LINE" — not "Blast LINE!"
   "Register batch" — not "Launch batch!"
 
@@ -161,7 +165,7 @@ is the protagonist."
 
 ## Source of truth
 
-For full brand position, customer journey, brand health KPIs, growth
-channels (association meetings > digital ads), and the EOY-2026 metrics
-table, read **`docs/business-guide/aquawise-hatchery-cbbe (1).md`**.
+For full brand position, operating values, geographic arc, the "industry
+letter" scene, and the complete anti-commitments, read
+**`docs/aquawise-updated-docs/00-aquawise-brand-foundation.md`** (v3, April 30, 2026).
 This file is the engineering digest only.

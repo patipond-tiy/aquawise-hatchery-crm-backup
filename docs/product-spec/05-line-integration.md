@@ -1,3 +1,5 @@
+> Refreshed 2026-05-02 against `aquawise-updated-docs/03-aquawise-farmer-customer-doc.md`.
+
 # 05 — LINE Integration: Hatchery ↔ Farm via @aquawise
 
 This is the operational summary of how the CRM connects to farms through
@@ -52,6 +54,15 @@ and never call each other's HTTP endpoints.
   Gemini 3.1 Flash Lite handles weather / shrimp prices / news / Q&A
   inside `@aquawise` chat.
 - **Existing Flex templates.** Weather card, price card, news card.
+- **Farmer usage modes (from farmer customer doc v1).** Two natural
+  phone-in-hand windows per day: *pre-dawn pond walk* (one-tap inputs,
+  fast acknowledgment, action-oriented — farmer will not sit and read)
+  and *evening review* (longer messages, full charts, Day-30 check-ins).
+  Hatchery-originated Flex Messages must respect this split: restock
+  reminders and PCR certificates suit the evening window; disease alerts
+  must be legible at a glance at 5 AM. The farmer friction budget is one
+  minute of active effort per day — anything that demands more will erode
+  participation and starve the data flywheel.
 - **Cloud Scheduler push pipeline.** Batched pushes every minute, groups
   of 10, 1-second inter-batch delay (LINE rate limits).
 - **Rich menu (6 buttons).** One slot will be repurposed for

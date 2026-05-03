@@ -1,3 +1,5 @@
+> Refreshed 2026-05-02. Stale `business-guide/` links rewritten to `aquawise-updated-docs/`.
+
 # Product Spec — AquaWise Hatchery CRM
 
 This folder is the bridge between the **prototype** (what's clickable today)
@@ -19,16 +21,16 @@ Read in this order:
 | 07 | [`07-brand-and-voice.md`](./07-brand-and-voice.md) | Engineering digest of the CBBE brand doc — voice, anti-commitments, where to apply |
 | 08 | [`08-roles-and-rls.md`](./08-roles-and-rls.md) | Auth model, persona↔role mapping, RLS strategy |
 
-## Relationship to `docs/business-guide/`
+## Relationship to `docs/aquawise-updated-docs/`
 
 The business team owns the **intent** layer:
 
-- [`../business-guide/aquawise-hatchery-cbbe (1).md`](../business-guide/aquawise-hatchery-cbbe%20%281%29.md) — Customer-Based Brand Equity: positioning, brand pillars, voice, 5-year customer journey, EOY-2026 KPIs
-- [`../business-guide/aquawise-hatchery-functional-requirements (2).md`](../business-guide/aquawise-hatchery-functional-requirements%20%282%29.md) — Formal FRs (F1–F9 farmer / H1–H10 hatchery), NFRs, data model, integrations
+- [`../aquawise-updated-docs/00-aquawise-brand-foundation.md`](../aquawise-updated-docs/00-aquawise-brand-foundation.md) — Brand foundation: positioning, brand pillars, voice, 5-year customer journey, EOY-2026 KPIs
+- [`../aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`](../aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md) — Hatchery customer document v0.5: jobs-to-be-done, scenes, pricing hypotheses, what we will never build
 
 This `product-spec/` folder is the **execution** layer — it reconciles
 that intent with the prototype's actual state and produces a punch-list.
-Where the two layers disagree, the business-guide intent wins; this
+Where the two layers disagree, the updated-docs intent wins; this
 folder explains how to get there.
 
 ## Companion docs (already in `docs/`)

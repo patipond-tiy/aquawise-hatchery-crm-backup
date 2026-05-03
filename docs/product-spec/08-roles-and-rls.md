@@ -1,3 +1,5 @@
+> Refreshed 2026-05-02 against `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md` and `lib/rbac.ts`.
+
 # 08 — Roles, Permissions, and RLS
 
 The product-spec uses **two different lenses** that we keep separate on
@@ -22,7 +24,7 @@ This file is the contract for the auth model and the RLS strategy.
 ## Implementation roles
 
 These are the values stored in `hatchery_members.role`. They come from
-`docs/business-guide/aquawise-hatchery-functional-requirements (2).md`
+`docs/aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`
 (FR-TEAM-002).
 
 | Role | Capabilities | Constraints |
@@ -67,18 +69,18 @@ Postgres Row-Level Security enforces tenancy. Every row carries either a
 | `customers` | own hatchery (all roles) | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only |
 | `customer_bind_tokens` | service role only (LIFF reads) | `owner` + `counter_staff` | service role | service role |
 | `batches` | own hatchery (all roles) | `owner` + `counter_staff` | `owner` + `counter_staff` (basic fields) + `lab_tech` (PCR fields) | `owner` only |
-| `batch_pcr_tests` | own hatchery (all roles) | `lab_tech` + `owner` | `lab_tech` + `owner` | `owner` only |
-| `batch_distributions` | own hatchery (all roles) | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only |
-| `quotes` | own hatchery (all roles) | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only |
-| `prices` | own hatchery (all roles) | `owner` only | `owner` only | `owner` only |
+| `pcr_results` *(spec previously called `batch_pcr_tests` — corrected to match migration 001)* | own hatchery (all roles) | `lab_tech` + `owner` | `lab_tech` + `owner` | `owner` only |
+| `batch_distributions` *(planned — not yet in migrations)* | own hatchery (all roles) | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only |
+| `quotes` *(planned — not yet in migrations)* | own hatchery (all roles) | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only |
+| `prices` *(planned — not yet in migrations)* | own hatchery (all roles) | `owner` only | `owner` only | `owner` only |
 | `alerts` | own hatchery (all roles) | `owner` + `counter_staff` + system trigger | `owner` + `counter_staff` (close/note) | `owner` only |
 | `notification_settings` | own hatchery (all roles) | `owner` | `owner` | `owner` |
 | `scorecard_settings` | own hatchery (all roles) | `owner` | `owner` | `owner` |
-| `customer_callbacks` | own hatchery (all roles) | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only |
+| `customer_callbacks` *(planned — not yet in migrations)* | own hatchery (all roles) | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only |
 | `line_outbound_events` | own hatchery (all roles) | server actions only | service role (worker) | — |
-| `line_message_logs` | own hatchery (all roles) | service role only | — | — |
-| `subscriptions` | `owner` only | service role only (Stripe webhook) | service role only | — |
-| `data_exports` | own hatchery (all roles) | server actions only | — | `owner` only |
+| `line_message_logs` *(planned — not yet in migrations)* | own hatchery (all roles) | service role only | — | — |
+| `subscription_events` *(spec previously called `subscriptions` — corrected to match migration 004)* | `owner` only | service role only (Stripe webhook) | service role only | — |
+| `data_exports` *(planned — not yet in migrations)* | own hatchery (all roles) | server actions only | — | `owner` only |
 
 ### Field-level (Phase H3, for `auditor`)
 
@@ -146,7 +148,7 @@ project). Failure of any row returning > 0 is a P0 stop-the-line bug.
 ## Cross-references
 
 - Personas: `01-personas.md`
-- FR doc: `docs/business-guide/aquawise-hatchery-functional-requirements (2).md`
+- FR doc: `docs/aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`
   (FR-WS-003, FR-TEAM-001..003)
 - LINE bind / `line_users` flow: `05-line-integration.md` Flow 4
 - Public scorecard policy: `04-flows.md` Flow 9 (added in this revision)

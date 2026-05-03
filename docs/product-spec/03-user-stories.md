@@ -1,3 +1,5 @@
+> Refreshed 2026-05-02 against `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`. Stale `business-guide/` links rewritten.
+
 # 03 — User Stories
 
 Stories are grouped by **epic**. Each story uses the form:
@@ -5,7 +7,8 @@ Stories are grouped by **epic**. Each story uses the form:
 > **As** {persona}, **I want to** {capability}, **so that** {value}.
 
 …followed by **Acceptance criteria** (AC), the **FR-IDs** the story
-satisfies (from `docs/business-guide/aquawise-hatchery-functional-requirements (2).md`),
+satisfies (see `docs/aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md` for
+current hatchery scope; original FR reference doc archived),
 and a pointer to the prototype state.
 
 Personas: Owner (P1), Manager (P2), Rep (P3), Lab (P4), Auditor (P5),
@@ -78,6 +81,11 @@ in migration 006. Storage bucket not created.
 ---
 
 ## Epic B — Customer management
+
+> ⚠ Per `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md` (v0.5, unvalidated): the hatchery's
+> "customers" are nursery operators (≈20–40), not farm operators. The source doc frames this as a
+> *relationship dashboard*, not a sales-pipeline CRM. Story ACs below use the scaffolded "customer/farm"
+> vocabulary; treat the exact UX framing as a hypothesis pending validation with P'Bunjong in 2027.
 
 ### B1. See all customers at a glance · **H1** · FR-CUST-001/004
 
@@ -201,7 +209,9 @@ their D30 outcomes, **so that** if a complaint comes I have full context.
 **AC:**
 - Header: batch ID, PCR chip, spawn date, source
 - Stats: produced, sold, buyer farm count, mean D30
-- D30 distribution histogram: 10 bins, real data from buyer cycles
+- D30 distribution histogram: 10 bins, real data from buyer cycles ⚠ (cross-nursery lineage
+  performance feedback is the most uncertain feature per source doc §3 Job 2 — validate
+  data analysis quality and whether P'Bunjong wants/trusts this feedback before scaling)
 - PCR section: 4 disease rows with pass/fail, lab name, test date
 - Buyers table: real `batch_distributions` rows joined with customers
 
@@ -354,6 +364,11 @@ know we're handling it.
 
 ## Epic F — Public scorecard
 
+> ⚠ The public hatchery scorecard is a 2027+ hypothesis per
+> `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md` §3 Job 4 and Scene 3.
+> It is contingent on the nursery and farmer sides reaching data scale first.
+> ACs below describe the intended mechanics; do not treat as confirmed product direction.
+
 ### F1. Toggle scorecard visibility · **H1**
 
 **As** an Owner, **I want to** flip the public scorecard on/off and pick
@@ -382,7 +397,7 @@ their D30 / PCR claims.
 - No farmer-side auth required
 - RLS policy: `hatchery_brand` row public-readable WHERE
   `scorecard_settings.public = true`; aggregates computed server-side
-- Voice: brand-surface tier (Plus Jakarta Sans family per `07`) — no
+- Voice: brand-surface tier (Plus Jakarta Sans family per `docs/product-spec/07-brand-and-voice.md`) — no
   emojis, no marketing copy
 
 **Today.** Page does not exist ❌. Only the *editor view* at `/scorecard`.
@@ -572,8 +587,12 @@ PCR reports, **so that** I can satisfy compliance requests.
 
 ### H3. Subscribe / manage billing · **H1** · FR-AUTH-002/003, FR-BILLING-001
 
-**As** an Owner, **I want to** subscribe to Pro after my 14-day trial and
+**As** an Owner, **I want to** subscribe to Pro after my 30-day trial and
 manage my subscription via Stripe, **so that** I keep using the CRM.
+
+> ⚠ Pricing tier (THB 5,000/mo) and trial length are hatchery-side hypotheses per
+> `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md` §5. Validate with P'Bunjong
+> before committing to a Stripe price object for the hatchery plan.
 
 **AC:**
 - Trial state shows days-left + "Subscribe" CTA → Stripe Checkout
@@ -584,7 +603,7 @@ manage my subscription via Stripe, **so that** I keep using the CRM.
   batches, alerts, scorecard) remain accessible; all mutations and LINE
   pushes are gated with a "Subscribe to continue" inline action. Less
   destructive than a full lockout; fits the ลูกหลานที่เรียนมา voice
-  (calm, declarative — see `07`).
+  (calm, declarative — see `docs/product-spec/07-brand-and-voice.md`).
 - Read-only banner copy is plain Thai/English, not crisis-mode
 
 **Today.** Mostly wired ✅ (Subscribe / Manage / Portal redirects work,

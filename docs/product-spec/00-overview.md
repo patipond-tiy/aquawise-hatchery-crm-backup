@@ -1,3 +1,5 @@
+> Refreshed 2026-05-02 against `aquawise-updated-docs/02-aquawise-what-we-build-first.md` and `06-aquawise-hatchery-customer-doc.md`.
+
 # 00 — Product Overview
 
 ## Jobs to be done
@@ -22,6 +24,7 @@ will be defended · you will be recognized.*
 
 ### The five functional jobs (drives every feature in `03-user-stories.md`)
 
+> ⚠ The jobs below reflect the current CRM scaffold (nursery-style vocabulary). The updated hatchery customer doc (`aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`) defines five distinct hatchery-specific jobs (defend lineages, genetic feedback, manage small customer base, prove careful-tier status, adapt to industry changes) that differ materially from J1–J5 below. These jobs are hypotheses pending validation with P'Bunjong in 2027. Do not treat J1–J5 as confirmed hatchery requirements — they will need reconciliation once serious hatchery work begins.
 
 | #      | When (situation)                                         | I want to (motivation)                                                                                          | So that (outcome)                               | Owner's words               |
 | ------ | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------- |
@@ -85,10 +88,12 @@ above) — not "leverage AI to optimize cycle outcomes."
 
 That's the promise the brand team made to the hatchery owner — and it's
 the lens every product decision in this folder is filtered through. Full
-brand context lives in `docs/business-guide/aquawise-hatchery-cbbe (1).md`;
+brand context lives in `docs/aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`;
 the engineering digest is in `[07-brand-and-voice.md](./07-brand-and-voice.md)`.
 
 ## What this product is
+
+> ⚠ **Sequencing note (2027, not now).** Per `aquawise-updated-docs/02-aquawise-what-we-build-first.md`, the hatchery is stakeholder #4 in the AquaWise sequence — after farmer (2026) and nursery (2026). Serious hatchery product investment begins in **2027**, once nursery and farm cycle data exists at scale. The repo today is a nursery-style CRM scaffolded against hatchery vocabulary. Do not over-invest in hatchery-specific features before the 2027 validation conversations with P'Bunjong.
 
 **AquaWise Hatchery CRM** is a Thai/English SaaS for shrimp and fish
 hatchery operators in Southeast Asia. A hatchery sells *post-larvae* (PL —
@@ -180,6 +185,8 @@ how that voice translates to UI strings, Flex copy, and certificates.
 
 ## Two-sided market
 
+> ⚠ **Chain framing updated.** The updated hatchery customer doc (`06-aquawise-hatchery-customer-doc.md` v0.5) clarifies that this product sits at the *upstream* end of a three-tier chain: hatchery → nursery → farm. The diagram below reflects the current CRM architecture (hatchery ↔ farm app direct). In 2027, when serious hatchery work begins, the nursery tier must be inserted explicitly into this picture — the hatchery dashboard's primary data source will be nursery cycle outcomes, not direct farm outcomes.
+
 This product sits **between two existing AquaWise surfaces**:
 
 ```
@@ -192,6 +199,8 @@ This product sits **between two existing AquaWise surfaces**:
         └────────────── shared Supabase ───────────────┘
                   (one project, RLS by hatchery + farm)
 ```
+
+⚠ Full three-tier chain (2027 target architecture): hatchery → nursery → farm. Cross-nursery cycle data attributed to hatchery broodstock lineages is the core hatchery value proposition. This requires nursery and farm sides to be running at scale first.
 
 The hatchery never calls the LINE Messaging API directly. It writes events
 into a shared `line_outbound_events` queue, and the existing Cloud Run bot
@@ -221,7 +230,7 @@ facade — they never know which is live.
 
 The business team's FR doc commits to specific NFR budgets. Engineers
 should treat these as gates, not aspirations. Full text:
-`docs/business-guide/aquawise-hatchery-functional-requirements (2).md`.
+`docs/aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`.
 
 
 | Category          | Commitment                                                                                                                                                                                   |
@@ -232,7 +241,7 @@ should treat these as gates, not aspirations. Full text:
 | **i18n**          | Thai-first, English secondary · all UI strings in `messages/{th,en}.json` (no hardcoded literals) · per-locale number + date formatting · CI fails if either file has keys the other lacks   |
 | **Scalability**   | Multi-tenant via RLS · Supabase connection pooling · Cron fan-out via Cloud Run · LINE worker scaled horizontally · signed URLs for all Storage access                                       |
 | **Observability** | Every LINE push logged in `line_message_logs` · dead-letter UI for `status='dead'` (P2) · cron error logs streamed to Cloud Logging                                                          |
-| **Brand health**  | EOY-2026 KPIs in CBBE doc — 80% aided awareness in beachhead, 99%+ data accuracy, 9/10 uptime, 4.5/5 quality rating                                                                          |
+| **Brand health**  | ⚠ EOY-2027 KPIs (hatchery side) — target 1 paying hatchery (P'Bunjong) by end of Q1 2027, 200+ cross-nursery cycles flowing to hatchery dashboard, 1+ documented exoneration case. KPIs are hypotheses pending 2027 validation. See `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md` §6. |
 
 
 ## What "done" means for production

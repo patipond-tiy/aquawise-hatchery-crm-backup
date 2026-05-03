@@ -1,3 +1,5 @@
+> Refreshed 2026-05-02 against `aquawise-updated-docs/01-aquawise-stakeholder-map.md` and `06-aquawise-hatchery-customer-doc.md`.
+
 # 01 — Personas
 
 The CRM is built around **one buyer archetype** (the person whose
@@ -7,13 +9,15 @@ shrimp farmer they message), and **one influence persona** (the
 association president whose endorsement we need).
 
 > **Personas describe behavior. Auth roles describe permissions.** This
-> file is about behavior. The mapping to the three implementation roles
-> (`owner` / `counter_staff` / `lab_tech`) lives in
+> file is about behavior. The mapping to the four implementation roles
+> (`owner` / `counter_staff` / `lab_tech` / `auditor`) lives in
 > [`08-roles-and-rls.md`](./08-roles-and-rls.md).
 
 ---
 
 ## The buyer we're building for (target archetype)
+
+> ⚠ Hatchery is a 2027+ product. These personas and the buyer archetype below are planned, not yet validated with real customers. Everything in this section is a hypothesis pending the 2027 P'Bunjong conversation and further hatchery discovery. Do not treat any specific job, scene, or pricing claim as confirmed customer reality. See `06-aquawise-hatchery-customer-doc.md` (v0.5) for the full framing.
 
 > The careful, modern, association-affiliated mid-sized hatchery owner.
 
@@ -51,7 +55,7 @@ later, after the careful operators have made AquaWise the default.
 
 The buyer above hires (or is) the people below. They live in the CRM
 day-to-day. Permission roles in the data model: `owner`, `counter_staff`,
-`lab_tech` — see [`08-roles-and-rls.md`](./08-roles-and-rls.md). Seed
+`lab_tech`, `auditor` — see [`08-roles-and-rls.md`](./08-roles-and-rls.md). Seed
 list lives in `lib/mock/data.ts` → `TEAM`.
 
 ### P1 — Owner / Hatchery boss · "คุณสุเทพ"
@@ -210,14 +214,21 @@ matters most, even though they never see the dashboard.
 
 ### P7 — Association President · "P'Pong"
 
-**Auth role:** `owner` of his own hatchery — but his **role in this
+**Auth role:** `owner` of his own operation — but his **role in this
 product** is brand-shaped, not feature-shaped.
 
 **Why he's named.** P'Pong is the President of the Thai Shrimp Larvae
-Hatchery Association in Chachoengsao and the first hatchery customer.
+Hatchery Association in Chachoengsao and the **first nursery pilot customer**
+(the association name uses older terminology; P'Pong operationally runs a
+nursery — โรงอนุบาล — not a true broodstock hatchery).
 The CBBE doc places him at the center of the brand growth motion: AquaWise
 spreads through associations, not digital ads. Owners trust other owners.
-P'Pong's endorsement is what makes the next 25 hatcheries adopt.
+P'Pong's endorsement is what makes the next 25 nurseries adopt.
+
+> Note: The hatchery archetype (broodstock-to-nauplii, upstream of P'Pong's
+> nursery) is **P'Bunjong**, President of the Thai Aquaculture Federation.
+> P'Bunjong is the target of the 2027 hatchery pilot; see
+> `06-aquawise-hatchery-customer-doc.md` for his profile.
 
 **Implications for product decisions.**
 - The public scorecard must look credible enough that an association
@@ -269,7 +280,7 @@ might find embarrassing as a P0 stop.
 | P4 Lab | `lab_tech` | Narrow surface |
 | P5 Auditor | `auditor` *(planned H3)* | Reserved in enum from day one |
 | P6 Farmer | *no CRM role* | Auth via LINE Login; identified by `line_user_id` |
-| P7 P'Pong | `owner` of his own hatchery | Influence persona, not a separate role |
+| P7 P'Pong | `owner` of his own nursery operation | Influence persona, not a separate role; operationally a nursery (โรงอนุบาล), not a broodstock hatchery |
 
 Full RLS policies and the cross-tenant audit test in
 [`08-roles-and-rls.md`](./08-roles-and-rls.md).

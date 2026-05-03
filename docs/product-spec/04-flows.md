@@ -1,3 +1,5 @@
+> Refreshed 2026-05-02 against `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`.
+
 # 04 — End-to-end flows
 
 The eight flows below cover every cross-system interaction. Sequence
@@ -49,7 +51,7 @@ User             CRM              Supabase Auth      Stripe
 ```
 
 **Persistence.** `hatcheries`, `hatchery_members`, `subscriptions`
-(`status='trialing'`, `trial_ends_at = now() + 14d`).
+(`status='trialing'`, `trial_ends_at = now() + 30d`).
 
 **Gap today.** First-login bootstrap server action doesn't exist. Stripe
 trial creation works but isn't tied to the auth callback.
@@ -83,7 +85,9 @@ are in the modal but not yet in the production schema migration.
 
 ---
 
-## Flow 3 — Register batch with PCR
+## Flow 3 — Register batch with PCR ⚠
+
+> ⚠ PCR batch tracking and lineage-level outcome attribution are hypotheses awaiting validation with P'Bunjong (hatchery customer doc v0.5, Jobs 1 & 2). Do not treat the schema or UX here as confirmed requirements.
 
 **Trigger.** Manager clicks "+ ลงทะเบียนล็อตใหม่" on `/batches`.
 
@@ -302,7 +306,9 @@ Idempotency index does ✅.
 
 ---
 
-## Flow 8 — Auto-alert from farm-side D30 dip
+## Flow 8 — Auto-alert from farm-side D30 dip ⚠
+
+> ⚠ Cross-stakeholder D30 feedback to hatcheries is a 2027+ hypothesis (hatchery customer doc v0.5, Job 2). The `farm_cycle_metrics` schema and ingest path are unconfirmed cross-team dependencies.
 
 **Trigger.** AquaWise farm app posts a `farm_cycle_metrics` row with a low D30.
 
@@ -350,7 +356,9 @@ across both products.
 
 ---
 
-## Flow 9 — Public scorecard view (ISR + revalidation)
+## Flow 9 — Public scorecard view (ISR + revalidation) ⚠
+
+> ⚠ The public hatchery scorecard is a 2027+ feature (hatchery customer doc v0.5, Job 4 / Scene 3). It is dependent on cross-nursery cycle data at meaningful scale. Do not build this ahead of the nursery and farm data flywheel.
 
 **Trigger.** Farmer (or anyone) hits `/{locale}/h/{slug}` from the QR
 code on the hatchery's tank sticker, Facebook, or counter poster.

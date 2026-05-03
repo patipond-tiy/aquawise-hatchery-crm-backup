@@ -1,6 +1,8 @@
+> Refreshed 2026-05-02 against `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`. Row IDs unchanged. AC text patched where refresh found drift.
+
 # MATRIX — Master Work Breakdown
 
-Every story from `product-spec/03-user-stories.md` decomposed into `implement / test / verify` subtasks, with verified status against the codebase as of **2026-04-29**.
+Every story from `product-spec/03-user-stories.md` decomposed into `implement / test / verify` subtasks, with verified status against the codebase as of **2026-04-29** (AC text refreshed 2026-05-02).
 
 **Status rolls UP from children:** parent story takes the lowest of `.i`, `.t`, `.v` (❌ < 🟡 < ✅). Don't mark a parent ✅ until all three are ✅.
 
@@ -30,10 +32,10 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 | E2  | Auto-create alerts from farm-side D30 dips  | H2    | Alerts      | J2         | P2          | ❌     | P2.4  |
 | E3  | Close an alert                              | H1    | Alerts      | J2         | P1          | 🟡     | —     |
 | E4  | Notify affected farms                       | H2    | Alerts      | J2         | P1          | 🟡     | —     |
-| F1  | Toggle scorecard visibility                 | H1    | Scorecard   | J3         | P1          | 🟡     | —     |
-| F2  | Public scorecard page                       | H2    | Scorecard   | J3, J5     | P6          | ❌     | P2.1  |
-| F3  | Scorecard PDF / send via LINE               | H2    | Scorecard   | J3         | P1          | 🟡     | —     |
-| F4  | Public scorecard ISR + SEO                  | H2    | Scorecard   | J5         | P1          | ❌     | P2.1b |
+| F1  | Toggle scorecard visibility ⚠               | H1    | Scorecard   | J3         | P1          | 🟡     | —     |
+| F2  | Public scorecard page ⚠ 2027+              | H2    | Scorecard   | J3, J5     | P6          | ❌     | P2.1  |
+| F3  | Scorecard PDF / send via LINE ⚠            | H2    | Scorecard   | J3         | P1          | 🟡     | —     |
+| F4  | Public scorecard ISR + SEO ⚠ 2027+        | H2    | Scorecard   | J5         | P1          | ❌     | P2.1b |
 | G1  | Bind customer LINE account                  | H1    | LINE        | J1, J2, J3 | P3          | 🟡     | P1.9  |
 | G2  | Send one-off LINE message                   | H1    | LINE        | J1, J2     | P3          | 🟡     | P0.2  |
 | G3' | Send-only Flex messaging (worker + queue)   | H1    | LINE        | J1, J2, J3 | P3          | ❌     | P0.2  |
@@ -48,6 +50,10 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 > **Drift flag — H1 stories not yet at ✅:** Of the 19 H1 parents above, **0 are fully ✅**. Mock layer gives the illusion of completion for B1, D1, E1, E3, F1, H1 but every one of those needs a Supabase swap + RLS audit (P0.3) before it can be marked ✅. Reflect this in sprint planning.
 
 > **Drift flag — schema vs spec roles: ✅ RESOLVED** (2026-04-29). Migration `007_roles_reconcile.sql` renamed the enum to `(owner, counter_staff, lab_tech, auditor)` per spec. `lib/database.types.ts`, `lib/rbac.ts`, `lib/types.ts`, `lib/mock/data.ts`, `components/modals/invite-team-modal.tsx` updated. Per-value mapping: admin/editor → counter_staff, viewer → auditor, technician → lab_tech. Permission semantics preserved (RLS that admitted 'admin' now admits 'counter_staff'); tightening to owner-only on team/billing per `08-roles-and-rls.md` is in `lib/rbac.ts` already; equivalent RLS tightening tracked under H3 / A2 stories.
+
+> **Drift flag — Epic F scorecard = 2027+ hypothesis** (2026-05-02). All four F-epic stories (F1–F4) are unvalidated hypotheses contingent on nursery/farm data scale per `aquawise-updated-docs/06` §3 Job 4 / Scene 3. Do not invest in F-epic before validation with P'Bunjong. Stories are annotated ⚠ throughout.
+
+> **Drift flag — batch_pcr_tests table name: ✅ RESOLVED** (2026-05-02). C1 previously referenced a non-existent `batch_pcr_tests` table; the actual table is `pcr_results` (migration 001). C1 AC and implementation task corrected. C1.i does not need a new migration for the table — confirm column shape, then use existing table.
 
 > **Drift flag — trial period: ✅ RESOLVED** (2026-04-29). 30-day trial chosen as canonical (matches `004_billing.sql:5`, `README.md`, `00-overview.md`). `03-user-stories.md` §A1 AC updated from 14-day → 30-day; A1 AC also corrected from role `admin` → role `owner`.
 
@@ -117,6 +123,8 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 ---
 
 ### B1 · See all customers at a glance · 🟡
+
+> ⚠ **Framing note (2026-05-02 refresh):** In the hatchery context "customers" are the ~20–40 nursery operators the hatchery sells PL to — not end farms. The customer list is a relationship dashboard, not a sales-pipeline CRM. See `product-spec/03-user-stories.md` Epic B callout.
 
 **Phase** H1 · **Epic** Customers · **JTBD** J1 · **FR-IDs** FR-CUST-001, FR-CUST-004 · **Personas** P3 (Rep)
 
@@ -206,11 +214,11 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 - Step 1: source strain, spawn date, PL count
 - Step 2: drop PDF/JPG/PNG → uploaded to `pcr-reports/{batch_id}/`; OCR-or-form per-disease results
 - Step 3: confirmation summary, register button
-- Insert `batches` + `batch_pcr_tests` (one row per disease)
+- Insert `batches` + `pcr_results` (one row per disease) — table exists in migration 001; no new migration needed for the table itself
 
 | Sub | Task | Status | Owner | Est | Blocked-by | Code refs |
 |-----|------|--------|-------|-----|------------|-----------|
-| .i  | Migration: `batch_pcr_tests(batch_id, disease, result, lab, tested_at, file_url)`. Storage bucket `pcr-reports/`. Wire step 2 file upload to Storage. Replace hardcoded "✓ ผ่าน" results with real per-disease capture form. Server action `addBatch()` writes both tables atomically. Strain dropdown: read from `prices` table (or new `strains` table). | ❌ | | 2d  | A1.i | new migration, `components/modals/add-batch-modal.tsx`, new `app/[locale]/(dashboard)/batches/actions.ts`, `lib/supabase/storage.ts` |
+| .i  | Storage bucket `pcr-reports/`. Wire step 2 file upload to Storage. Replace hardcoded "✓ ผ่าน" results with real per-disease capture form. Server action `addBatch()` writes `batches` + `pcr_results` atomically (`pcr_results` exists in migration 001 — confirm column shape before adding migration). Strain dropdown: read from `prices` table (or new `strains` table). | ❌ | | 2d  | A1.i | `components/modals/add-batch-modal.tsx`, new `app/[locale]/(dashboard)/batches/actions.ts`, `lib/supabase/storage.ts` |
 | .t  | Vitest: missing PCR file rejected. Atomic rollback if `batch_pcr_tests` insert fails. RLS: counter_staff inserts batch (no PCR), lab_tech inserts PCR rows, owner can do both. | ❌ | | 1d  | C1.i | `tests/batches/register.test.ts` |
 | .v  | Manual: complete wizard end-to-end with real PCR PDF; verify rows in both tables; cert generation becomes available (C4). | ❌ | | 0.5d | C1.i, C4.i | live |
 
@@ -245,7 +253,7 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 **AC:**
 - Header: batch ID, PCR chip, spawn date, source
 - Stats: produced, sold, buyer count, mean D30
-- D30 distribution: 10 bins, real data from buyer cycles
+- D30 distribution: 10 bins, real data from buyer cycles ⚠ (cross-nursery lineage feedback = most uncertain feature per source §3 Job 2; do not block story on this if data is unavailable)
 - PCR section: 4 disease rows with pass/fail, lab, test date
 - Buyers table: real `batch_distributions` join
 
@@ -418,7 +426,7 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 ---
 
-### F1 · Toggle scorecard visibility · 🟡
+### F1 · Toggle scorecard visibility · 🟡 ⚠ 2027+ hypothesis
 
 **Phase** H1 · **Epic** Scorecard · **JTBD** J3 · **Personas** P1
 
@@ -437,7 +445,7 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 ---
 
-### F2 · Public scorecard page · ❌
+### F2 · Public scorecard page · ❌ ⚠ 2027+ hypothesis
 
 **Phase** H2 · **Epic** Scorecard · **JTBD** J3, J5 · **FR-IDs** FR-PUBLIC-001, FR-PUBLIC-002 · **Personas** P6 (Farmer scanning QR) · **§06 P2.1**
 
@@ -458,7 +466,7 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 ---
 
-### F3 · Generate scorecard PDF / send via LINE · 🟡
+### F3 · Generate scorecard PDF / send via LINE · 🟡 ⚠ 2027+ hypothesis
 
 **Phase** H2 · **Epic** Scorecard · **JTBD** J3 · **FR-IDs** FR-LINE-001, FR-LINE-002 · **Personas** P1
 
@@ -476,7 +484,7 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 
 ---
 
-### F4 · Public scorecard ISR + SEO · ❌
+### F4 · Public scorecard ISR + SEO · ❌ ⚠ 2027+ hypothesis
 
 **Phase** H2 · **Epic** Scorecard · **JTBD** J5 · **FR-IDs** FR-PUBLIC-003 · **Personas** P1 (acquisition) · **§06 P2.1b**
 
