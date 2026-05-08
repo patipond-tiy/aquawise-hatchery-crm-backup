@@ -17,12 +17,14 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 | A1  | Sign up & create workspace                  | H1    | Onboarding  | J4         | P1          | 🟡     | P0.1  |
 | A2  | Invite team members                         | H1    | Onboarding  | J4         | P1          | 🟡     | P1.5/6|
 | A3  | Set up hatchery profile                     | H1    | Onboarding  | J4         | P1          | ❌     | P0.5  |
+| A4  | Sign out                                    | H1    | Onboarding  | J4         | all         | ❌     | —     |
+| A5  | Dashboard computed stats                    | H1    | Onboarding  | J4         | P1          | ❌     | P1.1  |
 | B1  | See all customers at a glance               | H1    | Customers   | J1         | P3          | 🟡     | —     |
 | B2  | Add a new customer                          | H1    | Customers   | J1         | P3          | 🟡     | P1.2  |
-| B3  | View customer detail & history              | H1    | Customers   | J1, J2     | P1          | 🟡     | P1.2/3|
+| B3  | View customer detail & history              | H1    | Customers   | J1, J2     | P3          | 🟡     | P1.2/3|
 | B4  | Schedule a callback                         | H2    | Customers   | J1         | P3          | 🟡     | P2.6  |
 | C1  | Register a new batch                        | H1    | Batches     | J2         | P2, P4      | 🟡     | P1.4  |
-| C2  | Browse and review batches                   | H1    | Batches     | J2         | P5          | 🟡     | —     |
+| C2  | Browse and review batches                   | H1    | Batches     | J2         | P2          | 🟡     | —     |
 | C3  | View batch detail with distribution         | H1    | Batches     | J2, J3     | P2          | 🟡     | P1.4  |
 | C4  | Print or send PCR certificate               | H1    | Batches     | J3         | P2          | 🟡     | P1.8  |
 | D1  | See farms by restock urgency                | H1    | Restock     | J1         | P3          | 🟡     | P2.8  |
@@ -41,7 +43,7 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 | G3' | Send-only Flex messaging (worker + queue)   | H1    | LINE        | J1, J2, J3 | P3          | ❌     | P0.2  |
 | G4  | Cron-driven template pushes                 | H2    | LINE        | J1         | P1          | ❌     | P2.3  |
 | G3  | Two-way chat in LIFF inbox                  | H3    | LINE        | J4         | P6          | 🚫     | P3.1  |
-| H1  | Edit notification preferences               | H1    | Settings    | J4         | all         | 🟡     | P1.10 |
+| H1  | Edit notification preferences               | H1    | Settings    | J4         | P1,P2,P3,P4| 🟡     | P1.10 |
 | H2  | Export customer / PCR data                  | H2    | Settings    | J4         | P5          | ❌     | P2.7  |
 | H3  | Subscribe / manage billing                  | H1    | Settings    | J4         | P1          | 🟡     | P0.4  |
 | H4  | Quiet hours respected at delivery           | H1    | Settings    | J1         | P1          | ❌     | P1.11 |
@@ -173,11 +175,11 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 - Stats: total batches, LTV, last D30, restock-in days
 - D30 trend = real series from last 6 cycles (not synthetic)
 - Contact: real `phone`, `lineId`, `address`
-- Batch history: rows from `batch_distributions` joined with batches
+- Batch history: rows from `batch_buyers` joined with batches
 
 | Sub | Task | Status | Owner | Est | Blocked-by | Code refs |
 |-----|------|--------|-------|-----|------------|-----------|
-| .i  | Migration: `customer_cycles(customer_id, batch_id, started_at, d30, d60, harvest)`, `batch_distributions(batch_id, customer_id, quantity, sold_at)`. Replace hardcoded contact + history blocks with reads from new tables. Compute D30 sparkline series from `customer_cycles` last 6 rows. | ❌ | | 1.5d | B2.i | new migration, `app/[locale]/(dashboard)/customers/[id]/page.tsx`, `lib/api/supabase.ts` `getCustomer` |
+| .i  | Migration: `customer_cycles(customer_id, batch_id, started_at, d30, d60, harvest)`, `batch_buyers(batch_id, customer_id, quantity, sold_at)`. Replace hardcoded contact + history blocks with reads from new tables. Compute D30 sparkline series from `customer_cycles` last 6 rows. | ❌ | | 1.5d | B2.i | new migration, `app/[locale]/(dashboard)/customers/[id]/page.tsx`, `lib/api/supabase.ts` `getCustomer` |
 | .t  | Vitest: customer with 0 cycles shows empty sparkline state. RLS scopes `customer_cycles` reads. Batch history join correct for multi-batch customer. | ❌ | | 0.5d | B3.i | `tests/customers/detail.test.ts` |
 | .v  | Manual: walk a customer with history; confirm D30 trend matches DB; bad customer ID 404s. | ❌ | | 0.25d | B3.i | live |
 
@@ -255,11 +257,11 @@ Every story from `product-spec/03-user-stories.md` decomposed into `implement / 
 - Stats: produced, sold, buyer count, mean D30
 - D30 distribution: 10 bins, real data from buyer cycles ⚠ (cross-nursery lineage feedback = most uncertain feature per source §3 Job 2; do not block story on this if data is unavailable)
 - PCR section: 4 disease rows with pass/fail, lab, test date
-- Buyers table: real `batch_distributions` join
+- Buyers table: real `batch_buyers` join
 
 | Sub | Task | Status | Owner | Est | Blocked-by | Code refs |
 |-----|------|--------|-------|-----|------------|-----------|
-| .i  | Replace hardcoded buyers table with `batch_distributions` query. Replace hardcoded PCR section + disease names with `batch_pcr_tests` query. Replace "DOFR" lab label with `batch_pcr_tests.lab`. Compute mean D30 from `customer_cycles`. | ❌ | | 1d  | C1.i, B3.i | `app/[locale]/(dashboard)/batches/[id]/page.tsx`, `lib/api/supabase.ts` `getBatch` |
+| .i  | Replace hardcoded buyers table with `batch_buyers` query. Replace hardcoded PCR section + disease names with `batch_pcr_tests` query. Replace "DOFR" lab label with `batch_pcr_tests.lab`. Compute mean D30 from `customer_cycles`. | ❌ | | 1d  | C1.i, B3.i | `app/[locale]/(dashboard)/batches/[id]/page.tsx`, `lib/api/supabase.ts` `getBatch` |
 | .t  | Vitest: mean D30 correct for batch with mixed-D30 buyers. PCR table renders no rows when no `batch_pcr_tests`. | ❌ | | 0.5d | C3.i | `tests/batches/detail.test.ts` |
 | .v  | Manual: pick a batch; buyers table matches DB; PCR rows match per-disease results. | ❌ | | 0.25d | C3.i | live |
 

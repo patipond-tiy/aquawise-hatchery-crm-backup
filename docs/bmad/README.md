@@ -20,6 +20,8 @@ docs/bmad/
 
 Story IDs (A1, B2, …) are stable and trace to matching rows in `docs/work-breakdown/MATRIX.md` and stories in `docs/product-spec/03-user-stories.md`.
 
+**Current story count:** 29 ready-for-dev + 5 hypothesis = 34 total.
+
 ---
 
 ## Agent roles
