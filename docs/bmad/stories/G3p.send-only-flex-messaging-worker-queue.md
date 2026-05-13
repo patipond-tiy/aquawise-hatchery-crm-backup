@@ -54,7 +54,7 @@ so that Phase H1 has working outbound LINE delivery on day one — without yet e
     - `quote` — `{hatchery_id, customer_id, quote_id, items, valid_until, lead_time_days}`
     - `pcr_certificate` — `{hatchery_id, customer_id, batch_id, cert_url, summary}`
     - `disease_alert` — `{hatchery_id, customer_id, alert_id, batch_id, severity, recommended_action}`
-    - `chat_nudge` — `{hatchery_id, customer_id, thread_id, preview}`
+    - `chat_nudge` — `{hatchery_id, customer_id, thread_id, preview}` — ⚠ `chat_nudge` payload requires `thread_id` which has no H1 data source (LIFF inbox is H3). Scaffold only; bot worker MUST NOT enqueue this template in H1. Activate when G3 (H3) lands.
   - [ ] Validate payload shape in `enqueueLineEvent()` before insert; reject unknown templates
 - [ ] Task 3 — CRM-side: Customer Activity panel status display (AC: #4)
   - [ ] `lib/api/supabase.ts` — add `listLineEvents(customerId)` returning `line_outbound_events` ordered by `created_at DESC LIMIT 20`
