@@ -13,14 +13,15 @@ docs/bmad/
 ├── README.md            # this file
 ├── prd.md               # sharded PRD — source of product truth for stories
 ├── architecture.md      # sharded architecture — source of tech truth for stories
-├── stories/             # one .md per story (A1..G2), ready-for-dev
-│   └── _hypotheses/     # 2027+ / unvalidated stories (F1-F4, G3) — do not implement
+├── stories/             # one .md per story (A1..G2, K1..K4), ready-for-dev
+│   ├── _hypotheses/     # 2027+ / unvalidated stories (F1-F4, G3) — do not implement
+│   └── _integration-with-line-bot-Epic-K.md  # cross-product brief; not a runnable story
 └── uat/                 # one .md per epic, QA-gate style
 ```
 
-Story IDs (A1, B2, …) are stable and trace to matching rows in `docs/work-breakdown/MATRIX.md` and stories in `docs/product-spec/03-user-stories.md`.
+Story IDs (A1, B2, …, K1..K4) are stable and trace to matching rows in `docs/work-breakdown/MATRIX.md` and stories in `docs/product-spec/03-user-stories.md`. Stories `K1`–`K4` are CRM-side counterparts to the LINE bot v1.1 Epic K (`aquawise-line-bot/docs/bmad/stories/K1..K13`) — see the integration brief for the cross-product contract.
 
-**Current story count:** 29 ready-for-dev + 5 hypothesis = 34 total.
+**Current story count:** 33 ready-for-dev + 5 hypothesis = 38 total (K1–K4 added 2026-05-13 for LINE bot Epic K integration; existing C1, C3, C4, A3, E4, G1 amended).
 
 ---
 
