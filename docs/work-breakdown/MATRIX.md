@@ -1,6 +1,6 @@
 > Refreshed 2026-05-02 against `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`. Row IDs unchanged. AC text patched where refresh found drift.
 >
-> **AUTHORITY (2026-05-15):** This is the **story-ID traceability index**, NOT the authoritative spec. Row **IDs are the stable contract** (`docs/bmad/README.md` §"Story ID stability") — they must never change and they trace `bmad/stories/<ID>` ↔ this row ↔ `product-spec/03-user-stories.md`. Row **AC/status prose is provenance and may lag** the corrected `docs/bmad/stories/<ID>.md` (grep-verified by `docs/bmad/stories/04.executability-audit.md`). Where this disagrees with the bmad story, the bmad story wins. Use this file to resolve IDs/traceability; use the bmad story for content. See `docs/README.md`.
+> **AUTHORITY (2026-05-15):** This is the **story-ID traceability index**, NOT the authoritative spec. Row **IDs are the stable contract** (`docs/bmad/README.md` §"Story ID stability") — they must never change and they trace `bmad/stories/<ID>` ↔ this row ↔ `product-spec/03-user-stories.md`. Row **AC/status prose is provenance and may lag** the corrected `docs/bmad/stories/<ID>.md` (grep-verified by `docs/bmad/qa/04.executability-audit.md`). Where this disagrees with the bmad story, the bmad story wins. Use this file to resolve IDs/traceability; use the bmad story for content. See `docs/README.md`.
 
 # MATRIX — Master Work Breakdown
 

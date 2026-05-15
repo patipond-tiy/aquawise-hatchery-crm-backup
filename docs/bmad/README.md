@@ -15,11 +15,21 @@ docs/bmad/
 ├── architecture.md      # sharded architecture — the rules (declarative invariants)
 ├── code-design.md       # recipes, patterns, anti-patterns, review checklist (how to build)
 ├── security.md          # OWASP-style threat catalog + pre-launch hardening (how to NOT get pwned)
-├── stories/             # one .md per story (A1..G2, K1..K4), ready-for-dev
+├── CHANGELOG.md         # consolidated record of doc-state changes (PRs, durable decisions, gated follow-ups)
+├── decisions-2026-05-15-fix-review.md  # PO/CEO decision record (cited by qa/01-04 + story cascades)
+├── stories/             # one .md per story (A1..S9, K1..K6), ready-for-dev — RUNNABLE stories only
 │   ├── _hypotheses/     # 2027+ / unvalidated stories (F1-F4, G3) — do not implement
 │   └── _integration-with-line-bot-Epic-K.md  # cross-product brief; not a runnable story
+├── qa/                  # QA/audit PROCESS artifacts — NOT runnable stories:
+│   ├── 00.qa-user-story-outline.md       # reusable alignment-audit template
+│   ├── 01.qa-user-story-audit.md         # alignment scorecard (story↔business-plan)
+│   ├── 02.to-fix.md                      # FIX-REVIEW human-decision punch list
+│   ├── 03.fix-auto-ultrawork-command.md  # the /ultrawork FIX-AUTO batch command
+│   └── 04.executability-audit.md         # executability audit + resolution log + SYS-1 ledger
 └── uat/                 # one .md per epic, QA-gate style
 ```
+
+> **`stories/` is runnable stories only.** QA/audit process artifacts live in `qa/` (an agent scanning `stories/` for "what do I implement" never sees process docs). `04.executability-audit.md` (in `qa/`) is the authority that story references were grep-verified — cited by `docs/README.md`, `docs/AGENTS.md`, the provenance banners, and K6.
 
 ### How the four top-level docs relate
 

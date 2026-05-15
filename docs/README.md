@@ -6,7 +6,7 @@
 
 | Tier | Path | What it is | Rule |
 |---|---|---|---|
-| **Source of truth — execution** | `bmad/` | The BMAD execution layer. Stories an agent implements end-to-end, plus the four governing docs. | Start here. Precedence below. |
+| **Source of truth — execution** | `bmad/` | The BMAD execution layer. `bmad/stories/` = runnable stories only; `bmad/qa/` = QA/audit process artifacts (00 outline, 01 alignment audit, 02 to-fix, 03 fix-auto cmd, 04 executability audit) — NOT stories; `bmad/uat/` = QA gates; `bmad/CHANGELOG.md` = change record. Plus the four governing docs. | Start here. Precedence below. |
 | **Load-bearing inputs** | `product-spec/`, `work-breakdown/MATRIX.md`, `aquawise-updated-docs/`, `STRIPE.md` | Referenced by exact path inside story acceptance criteria. | **Never move or rename.** Moving any of these breaks the executability graph and (for the story-ID triple) contractual traceability. |
 | **Operational** | `MIRROR.md`, `task-briefs/` | Backup-repo runbook; historical task briefs. | Reference only. |
 | **Legacy** | `archive/` | Superseded by `bmad/`. Kept for history. | Not authoritative. Each file carries an `ARCHIVED` header. |
@@ -34,6 +34,6 @@
 ## For AI dev agents
 
 1. Enter via `bmad/README.md`, not via any legacy doc.
-2. A story's references (migration files, tables, RPCs, RBAC actions, paths) are **acceptance criteria, not suggestions** — they were grep-verified against the live codebase by the executability audit (`bmad/stories/04.executability-audit.md`). Honor them exactly.
+2. A story's references (migration files, tables, RPCs, RBAC actions, paths) are **acceptance criteria, not suggestions** — they were grep-verified against the live codebase by the executability audit (`bmad/qa/04.executability-audit.md`). Honor them exactly.
 3. Never move a load-bearing input. Never change a story ID.
 4. Cross-product contracts (`aquawise-updated-docs/DSR-SPEC.md`, `K-INTEGRATION-CONTRACT.md`) are read-only mirrors — conform, don't edit; escalate contract changes to the umbrella source.

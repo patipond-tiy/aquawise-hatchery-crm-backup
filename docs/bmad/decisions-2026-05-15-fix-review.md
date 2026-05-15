@@ -1,7 +1,7 @@
 # FIX-REVIEW Decisions — 2026-05-15
 
-> PO decisions on the 3 FIX-REVIEW items extracted in `stories/02.to-fix.md` (C2, D2, D3).
-> Drives the FIX-AUTO batch pass (`stories/03.fix-auto-ultrawork-command.md`) and the cascading PRD / migration / story edits noted under each item.
+> PO decisions on the 3 FIX-REVIEW items extracted in `qa/02.to-fix.md` (C2, D2, D3).
+> Drives the FIX-AUTO batch pass (`qa/03.fix-auto-ultrawork-command.md`) and the cascading PRD / migration / story edits noted under each item.
 > PO: Patipond. Interview captured by Claude Code session, 2026-05-15.
 
 ---
@@ -117,9 +117,9 @@ This decision reverses the explicit H3 deferral baked into:
 Once the §D2 G3-promotion question is settled with CEO:
 
 1. **Apply the C2 + D3 cascades** above (low-risk, no PRD §6/§8 surgery needed).
-2. **Run the FIX-AUTO batch** per `stories/03.fix-auto-ultrawork-command.md` — 20 mechanical items, several touch C2/D2/D3 so this consolidates the edits.
+2. **Run the FIX-AUTO batch** per `qa/03.fix-auto-ultrawork-command.md` — 20 mechanical items, several touch C2/D2/D3 so this consolidates the edits.
 3. **D2 / G3 cascade** runs separately as its own mini-epic (PRD edits + story moves + new G3a–G3e stories) — this is *not* a fix-auto batch item, it's a deliberate scope expansion that needs its own sprint planning pass.
-4. **Update `stories/01.qa-user-story-audit.md`** to reflect the new decisions (the 3 FIX-REVIEW rows become KEEP after these edits).
+4. **Update `qa/01.qa-user-story-audit.md`** to reflect the new decisions (the 3 FIX-REVIEW rows become KEEP after these edits).
 5. **Add a K-batch-integration UAT file** (`uat/K-batch-integration.uat.md`) — gap identified during this review; not part of the FIX-REVIEW set but blocking before K1–K4 land in code.
 
 ---
