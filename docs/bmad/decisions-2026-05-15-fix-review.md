@@ -134,8 +134,10 @@ Once the §D2 G3-promotion question is settled with CEO:
 
 ## Sign-off
 
-- [ ] PO (Patipond) — reviewed and ratifies all 4 decisions above
-- [ ] CEO (Chain) — specifically ratifies the §D2 G3-promotion scope bump
-- [ ] Architect — confirms `line_messages` schema shape + realtime-vs-polling decision before G3 stories are authored
+- [x] PO (Patipond) — reviewed and ratified all 4 decisions (2026-05-15 interview session)
+- [x] CEO (Chain) — ratified 2026-05-15: **G3 stays deferred to H3.** The §D2 promotion was NOT approved. Rationale: promoting two-way LIFF chat to H1 contradicts the nursery customer doc Chain authored — §7 ("No automated customer outreach. P'Pong sends his own messages; we tell him who to send them to") and §10 ("You are not building a CRM. You are building a trust artifact factory"). All 5 nursery jobs in §3 are satisfied by send-only; the moat is Scene 1 (the defended dispute = batch register + PCR + cross-farm D30), not a chat surface. The original `prd.md` §6 "H1 send-only / H3 two-way" sequencing stands unchanged — no PRD edit needed.
+- [ ] Architect — N/A. The `line_messages` schema + realtime-vs-polling question is moot for H1 because G3 is not promoted. Re-open only if/when G3 is reconsidered for a future phase.
 
-Once the three checkboxes above are signed, this doc is the source of truth for the fix pass. Story files and PRD/architecture edits should reference this file in their changelog entries.
+**Final disposition:** C2 (defer auditor view to H3), D3a (broadcast owner-only), D3b (new `broadcast:write` action) — applied in PR #4 (`5c2885e`). D2 (G3 deferred, send-only) — applied in this commit. Audit `01.qa-user-story-audit.md` is now fully resolved: 6 KEEP + 20 DONE-AUTO + 3 DONE-REVIEW, zero open items.
+
+Once the checkboxes above are signed, this doc is the source of truth for the fix pass. Story files and PRD/architecture edits should reference this file in their changelog entries.
