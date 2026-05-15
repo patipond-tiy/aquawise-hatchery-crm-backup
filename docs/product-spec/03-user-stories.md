@@ -50,7 +50,7 @@ specific role, **so that** they can access the right parts of the CRM.
 
 **AC:**
 - "+ เชิญสมาชิก" opens the `invite` modal
-- Fields: email (required), role (admin / editor / viewer), display name
+- Fields: email (required), role (counter_staff / lab_tech / auditor), display name
 - Submit creates a `team_invites` row with a 7-day token, sends an email
 - Recipient clicks link → magic-link sign-in → joined as `hatchery_members`
   with the chosen role
@@ -174,7 +174,7 @@ batch is ready to assign to buyers.
 - Step 2: drop PDF/JPG/PNG → uploaded to `pcr-reports/{batch_id}/` Storage
   bucket; OCR-or-form pulls per-disease results; user can override
 - Step 3: confirmation summary, register button
-- On submit: insert `batches` row + `batch_pcr_tests` rows (one per disease)
+- On submit: insert `batches` row + `pcr_results` rows (one per disease)
 - Toast + invalidate
 
 **Today.** UI wizard works (✅). Step 2 PCR upload is fake ❌. The 4
