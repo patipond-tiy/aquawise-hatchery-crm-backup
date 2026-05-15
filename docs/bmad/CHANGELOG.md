@@ -2,6 +2,35 @@
 
 > Consolidated record of the 2026-05-15 doc-hardening session. One scannable index of *what changed, why, and what's still open*. Authoritative for "what state are the docs in?"; per-PR detail is in git history; durable rationale is in `code-design.md` §19 and `decisions-2026-05-15-fix-review.md`.
 
+## For developers picking this up
+
+> Scannable state-of-the-world. Detail for each item is in the sections below; rationale lives in `code-design.md` §19.
+
+### Verified done — safe to build on
+
+- [x] BMAD doc set is the execution source of truth — enter via `bmad/README.md`; precedence `prd → architecture → code-design → security`.
+- [x] All ready-for-dev stories grep-verified against the live codebase (authority: `bmad/qa/04.executability-audit.md`).
+- [x] 16/16 executability BLOCKERs closed.
+- [x] SYS-1 migration ledger collision-free (013–026, one number ↔ one file).
+- [x] Cross-product contract pinned (`aquawise-updated-docs/K-INTEGRATION-CONTRACT.md`, `DSR-SPEC.md`) — line-bot can't silently drift.
+- [x] Authority/provenance unambiguous (authority map `docs/README.md`; legacy in `docs/archive/` with ARCHIVED headers; product-spec/MATRIX banner = traceability, not authority).
+- [x] Folder roles separated: `bmad/stories/` = runnable only · `bmad/qa/` = QA/audit process · `bmad/uat/` = QA gates.
+
+### Still open — do NOT assume done
+
+- [ ] Smoke-test ONE clean story (`A2` or `H3`) end-to-end through a real BMAD dev agent before scaling the fleet (see "Recommended next action").
+- [ ] line-bot ADR-018 reconcile + line-bot DSR endpoint + umbrella source-of-truth — cross-repo, **gated on explicit approval** (see "Gated follow-ups").
+- [ ] `next@16.2.4` CVE (GHSA-36qx-fr4f-26g5) — patch the live working copy via `pnpm up next@latest` (see "Standing orthogonal item").
+
+### Hard rules — violating these re-breaks the executability graph
+
+- [ ] Never move/rename a load-bearing input (`product-spec/`, `work-breakdown/MATRIX.md`, `aquawise-updated-docs/`, `STRIPE.md`).
+- [ ] Never change a story ID (the `A1` = MATRIX row = product-spec story triple is contractual).
+- [ ] grep-verify every path change to zero stale before commit (the FIX-AUTO-incident rule).
+- [ ] Cross-product mirror docs are read-only — conform; escalate changes to the umbrella; never edit the mirror.
+- [ ] Cross-repo work (line-bot / umbrella) requires explicit user approval.
+- [ ] Merge gate = `code-design.md` §16; green-build gate = `pnpm typecheck && pnpm lint && pnpm test`.
+
 ## Sessions
 
 ### 2026-05-15 — pre-agent-dev doc hardening (PRs #2–#12, merged to `qa/chain+bear+day-2026-05-15`)
