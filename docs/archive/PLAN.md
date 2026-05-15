@@ -1,3 +1,5 @@
+> ARCHIVED 2026-05-15 — superseded by `docs/bmad/`. Historical record; NOT authoritative. Current product truth is `docs/bmad/prd.md`; execution lives in `docs/bmad/stories/`. See `docs/README.md` for the authority map.
+
 # AquaWise Hatchery CRM — Implementation Plan
 
 ## Context

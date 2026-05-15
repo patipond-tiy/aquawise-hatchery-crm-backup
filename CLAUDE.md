@@ -97,7 +97,7 @@ lib/
 i18n/                   routing + getRequestConfig
 messages/               en.json, th.json
 supabase/migrations/    001..012 (init, rls, seed, billing, line, roles, invites, customer fields, restock, rls tighten, storage)
-docs/                   PLAN.md, CHECKLIST.md, STRIPE.md, MIRROR.md, work-breakdown/, product-spec/, business-guide/
+docs/                   README.md (authority map — start here), bmad/ (execution source of truth), product-spec/, work-breakdown/, aquawise-updated-docs/, STRIPE.md, MIRROR.md, archive/ (legacy: PLAN.md, CHECKLIST.md, line-integration-strategy.md)
 prototypes/             V3 standalone HTML — design intent. Read-only.
 ```
 
@@ -148,4 +148,4 @@ This directory is a git submodule of `aquawise-ecosystem`. Inside `hatchery-crm/
 
 ## Status
 
-Per `docs/PLAN.md`: Phases 1–4 done; Phase 5 (polish + deploy) in progress; Phase 6 (Stripe Pro plan + 30-day trial) code-complete, awaiting Stripe Dashboard provisioning. The reference design is `prototypes/AquaWise Hatchery v3 - Standalone.html` — open in a browser to see the design intent.
+Current status and execution live in `docs/bmad/` (start at `docs/README.md` → `docs/bmad/README.md`). Per the archived `docs/archive/PLAN.md` (historical): Phases 1–4 done; Phase 5 (polish + deploy) in progress; Phase 6 (Stripe Pro plan + 30-day trial) code-complete, awaiting Stripe Dashboard provisioning. The reference design is `prototypes/AquaWise Hatchery v3 - Standalone.html` — open in a browser to see the design intent.

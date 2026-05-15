@@ -1,3 +1,5 @@
+> ARCHIVED 2026-05-15 — superseded by `docs/bmad/`. Historical record; NOT authoritative. LINE integration is now specified in `docs/bmad/stories/` (Epic G + Epic K) and the cross-product contract in `docs/aquawise-updated-docs/` (DSR-SPEC, K-INTEGRATION-CONTRACT). See `docs/README.md` for the authority map.
+
 # LINE × Hatchery-CRM: Centralization Strategy
 
 > Comprehensive design doc for connecting the existing `aquawise-line-bot` to the new `hatchery-crm` product so that every farmer↔hatchery interaction flows through Aquawise's single LINE channel — with one-on-one conversations happening inside our own LIFF mini-chat we control.

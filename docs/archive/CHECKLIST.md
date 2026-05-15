@@ -1,3 +1,5 @@
+> ARCHIVED 2026-05-15 — superseded by `docs/bmad/`. Historical record; NOT authoritative. Per-feature execution + acceptance criteria now live in `docs/bmad/stories/` and the UAT gates in `docs/bmad/uat/`. See `docs/README.md` for the authority map.
+
 # Hatchery CRM — Build Checklist
 
 Granular task list. Each phase is an independent demoable milestone. Tick boxes as we go.
