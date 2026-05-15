@@ -17,8 +17,8 @@
 
 ## Load-bearing inputs — why they are pinned
 
-- **`product-spec/`** — 37 bmad files cite it (`[Source: docs/product-spec/03-user-stories.md#<ID>]`, `08-roles-and-rls.md`, etc.).
-- **`work-breakdown/MATRIX.md`** — 29 bmad files cite it. Part of the **story-ID triple**: `bmad/stories/<ID>` = `MATRIX.md` row = `product-spec/03-user-stories.md` story. IDs are contractual and must never change (see `bmad/README.md` "Story ID stability").
+- **`product-spec/`** — 37 bmad files cite it (`[Source: docs/product-spec/03-user-stories.md#<ID>]`, `08-roles-and-rls.md`, etc.). **Provenance + traceability, not authority.** `03-user-stories.md` carries an AUTHORITY banner: where its prose disagrees with a `bmad/stories/<ID>.md`, the bmad story wins and the spec text is stale-by-definition. Follow `[Source:]` for traceability; act on the bmad story.
+- **`work-breakdown/MATRIX.md`** — 29 bmad files cite it. The **story-ID traceability index**: `bmad/stories/<ID>` = `MATRIX.md` row = `product-spec/03-user-stories.md` story. **IDs are the stable contract and must never change** (see `bmad/README.md` "Story ID stability"); row AC/status prose is provenance and may lag the corrected stories — the bmad story wins on content.
 - **`aquawise-updated-docs/`** — 12 bmad files cite it. Mirror of the umbrella `aquawise-ecosystem/aquawise-docs/` founder docs (`00`–`06`), plus the cross-product contracts (`DSR-SPEC.md`, and `K-INTEGRATION-CONTRACT.md` when added). Each carries a "MIRROR — source of truth is the umbrella" header; conform to them, do not edit the mirror.
 - **`STRIPE.md`** — story `H3` cites it as `[Source: docs/STRIPE.md]`. Stays at top level.
 

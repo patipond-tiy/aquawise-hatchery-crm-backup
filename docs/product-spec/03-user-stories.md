@@ -1,4 +1,6 @@
 > Refreshed 2026-05-02 against `aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md`. Stale `business-guide/` links rewritten.
+>
+> **AUTHORITY (2026-05-15):** This file is the **story-ID traceability index + upstream provenance**, NOT the authoritative spec. The authoritative spec for any story is its `docs/bmad/stories/<ID>.md` file (grep-verified against the live codebase by `docs/bmad/stories/04.executability-audit.md`). Where this file's prose disagrees with the bmad story, **the bmad story wins and this text is stale-by-definition**. Story **IDs are the stable contract** (see `docs/bmad/README.md` §"Story ID stability"); their AC prose here may lag the corrected stories. Do not act on this file's content directly — follow the `[Source:]` anchor for traceability, then use the bmad story. See `docs/README.md` for the full authority map.
 
 # 03 — User Stories
 
