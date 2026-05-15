@@ -2,6 +2,8 @@
 
 Status: planning brief — not a runnable story
 
+> **Contract:** the binding wire contract is now pinned at `docs/aquawise-updated-docs/K-INTEGRATION-CONTRACT.md` (mirrored, supersedes line-bot ADR-018 on JWT/key model). This brief is context; the contract is authoritative. CRM stories: K1–K4 + the gap-closers **K5** (`GET /api/v1/batches?active=true`, contract §8 row 1) and **K6** (`batches.species`, migration 026, contract §8 row 2).
+
 This brief summarises the cross-product surface introduced by the LINE bot v1.1 Epic K (`aquawise-line-bot/docs/bmad/stories/K1..K13`). Stories K1–K13 live in the LINE bot repo. They require **CRM-side counterparts** captured below as new stories `K1`–`K4` (this folder) plus six modifications to existing stories.
 
 ---
