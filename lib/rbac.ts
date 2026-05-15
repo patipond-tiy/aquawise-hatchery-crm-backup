@@ -10,12 +10,13 @@ type Action =
   | 'alert:close'
   | 'team:invite'
   | 'settings:write'
+  | 'broadcast:write'
   | 'data:export'
   | 'billing:manage';
 
 // Roles per docs/product-spec/08-roles-and-rls.md:
-//   owner          — full CRUD; manages team, billing, scorecard, thresholds
-//   counter_staff  — customer + batch CRUD; sends quotes/certs/alerts via LINE
+//   owner          — full CRUD; manages team, billing, scorecard, thresholds; broadcasts
+//   counter_staff  — customer + batch CRUD; sends quotes/certs/alerts via LINE (per-customer, not broadcast)
 //   lab_tech       — PCR rows + cert generation; cannot create batches or send alerts
 //   auditor        — read-only on batches, PCR, alerts (Phase H3 surface)
 const RULES: Record<Action, Role[]> = {
@@ -26,6 +27,7 @@ const RULES: Record<Action, Role[]> = {
   'alert:close':     ['owner', 'counter_staff'],
   'team:invite':     ['owner'],
   'settings:write':  ['owner'],
+  'broadcast:write': ['owner'],
   'data:export':     ['owner', 'counter_staff', 'auditor'],
   'billing:manage':  ['owner'],
 };
