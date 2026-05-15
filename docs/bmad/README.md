@@ -11,13 +11,26 @@ Each story file is self-contained: it embeds the exact acceptance criteria, file
 ```
 docs/bmad/
 ├── README.md            # this file
-├── prd.md               # sharded PRD — source of product truth for stories
-├── architecture.md      # sharded architecture — source of tech truth for stories
+├── prd.md               # sharded PRD — source of product truth (what to build)
+├── architecture.md      # sharded architecture — the rules (declarative invariants)
+├── code-design.md       # recipes, patterns, anti-patterns, review checklist (how to build)
+├── security.md          # OWASP-style threat catalog + pre-launch hardening (how to NOT get pwned)
 ├── stories/             # one .md per story (A1..G2, K1..K4), ready-for-dev
 │   ├── _hypotheses/     # 2027+ / unvalidated stories (F1-F4, G3) — do not implement
 │   └── _integration-with-line-bot-Epic-K.md  # cross-product brief; not a runnable story
 └── uat/                 # one .md per epic, QA-gate style
 ```
+
+### How the four top-level docs relate
+
+| File | Answers | When to read |
+|---|---|---|
+| `prd.md` | **What** to build (product truth, scope, NFRs, brand gates) | Before scoping or pushing back on a feature request |
+| `architecture.md` | **Which rules** are enforced (stack, RBAC matrix, RLS tables, file naming) | Before touching code; cite it in review |
+| `code-design.md` | **How** to write code that obeys the rules (recipes, anti-patterns, §16 review checklist) | Before writing your first PR; cite §N in review |
+| `security.md` | **What can go wrong** and how to prevent it (threat catalog, pre-launch hardening, dependency advisories) | Before launch; whenever a PR touches auth, uploads, webhooks, or stores PII |
+
+When two of these disagree, the order of precedence is `prd.md` (what) → `architecture.md` (rules) → `code-design.md` (how) → `security.md` (threats). A disagreement is a bug in the lower-precedence doc, not a license to deviate. `security.md` is authoritative on its own subject (specific threats and their mitigations) — the others cite it.
 
 Story IDs (A1, B2, …, K1..K4) are stable and trace to matching rows in `docs/work-breakdown/MATRIX.md` and stories in `docs/product-spec/03-user-stories.md`. Stories `K1`–`K4` are CRM-side counterparts to the LINE bot v1.1 Epic K (`aquawise-line-bot/docs/bmad/stories/K1..K13`) — see the integration brief for the cross-product contract.
 
@@ -86,6 +99,8 @@ Every story's **Dev Notes** section encodes these project constraints:
 - **Server actions** — anything that writes `audit_log` or calls Stripe lives in `app/[locale]/(dashboard)/<page>/actions.ts`, colocated with its route.
 - **Server components by default** — `'use client'` is opt-in. Add it only when state, effects, or event handlers are needed.
 - **No `any`** — `as` casts are allowed only in adapter functions (`lib/api/supabase.ts` row mappers). App code must be fully typed.
+
+Full recipes, decision trees, and anti-patterns live in **`code-design.md`**. Stories assume you have read it — they cite section numbers (e.g. "follow §5 server-action skeleton") rather than repeating the patterns inline. The §16 code review checklist in `code-design.md` is the merge gate.
 
 ---
 
