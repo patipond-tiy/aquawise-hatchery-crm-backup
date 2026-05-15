@@ -40,7 +40,7 @@ so that Phase H1 has working outbound LINE delivery on day one — without yet e
 ## Tasks / Subtasks
 
 - [ ] Task 1 — CRM-side: Confirm `line_outbound_events` insert shape (AC: #1)
-  - [ ] Read `supabase/migrations/006_line_integration.sql` and confirm columns: `id`, `hatchery_id`, `customer_id`, `template`, `payload jsonb`, `status line_event_status`, `kind line_event_kind`, `attempts int`, `last_error text`, `created_at`, `updated_at`
+  - [ ] Read `supabase/migrations/006_line_integration.sql` and confirm columns: `id`, `hatchery_id`, `customer_id`, `line_user_id`, `template`, `payload jsonb`, `status line_event_status`, `kind line_event_kind`, `attempts int`, `last_error text`, `scheduled_for`, `sent_at`, `created_at`, `created_by`. **Note: `updated_at` does NOT exist on this table — do not reference it.**
   - [ ] Confirm both idempotency indexes are in place:
     - Cron pushes: `UNIQUE (customer_id, template, payload->>'cycle_id') WHERE status IN ('pending','sending','sent') AND template IN ('restock_reminder','harvest_window')`
     - Alert pushes: `UNIQUE (customer_id, payload->>'alert_id') WHERE status IN ('pending','sending','sent') AND template = 'disease_alert'`
@@ -158,7 +158,7 @@ The `payload->>'alert_id'` syntax is a JSONB expression index, not a simple colu
 | `line_outbound_events` | SELECT + UPDATE status | service-role (bot worker) | `006_line_integration.sql` |
 | `hatchery_brand` | SELECT | service-role (bot worker) | `006_line_integration.sql` |
 | `notification_settings` | SELECT | service-role (bot worker, quiet-hours check) | `001_init.sql` |
-| `line_message_logs` | INSERT (inbound log) | service-role (bot worker) | `006_line_integration.sql` |
+| `line_message_logs` | INSERT (inbound log) | service-role (bot worker) | **NEW MIGRATION REQUIRED** — table does not exist in any current migration; bot worker must CREATE it before logging inbound replies |
 
 ### Flex Message Timing Design
 
