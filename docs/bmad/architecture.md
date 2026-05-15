@@ -110,6 +110,7 @@ type Role = 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
 | `alert:close` | Y | Y | — | — |
 | `team:invite` | Y | — | — | — |
 | `settings:write` | Y | — | — | — |
+| `broadcast:write` | Y | — | — | — |
 | `data:export` | Y | Y | — | Y |
 | `billing:manage` | Y | — | — | — |
 
