@@ -25,6 +25,7 @@ export const listBatches = impl.listBatches;
 export const getContinueWatching = impl.getContinueWatching;
 export const getBatch = impl.getBatch;
 export const listAlerts = impl.listAlerts;
+export const listQuotes = impl.listQuotes;
 export const getPrices = impl.getPrices;
 export const listTeam = impl.listTeam;
 export const getScorecardSettings = impl.getScorecardSettings;

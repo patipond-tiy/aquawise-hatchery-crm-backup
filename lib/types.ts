@@ -120,6 +120,26 @@ export type Alert = {
   closed: boolean;
 };
 
+// D2 — one-tap quote.
+export type QuoteLineItem = {
+  sizeLabel: string;
+  unitPrice: number;
+  quantity: number;
+};
+
+export type QuoteStatus = 'sent' | 'accepted' | 'declined' | 'expired';
+
+export type Quote = {
+  id: string;
+  customerId: string;
+  items: QuoteLineItem[];
+  note: string | null;
+  status: QuoteStatus;
+  validUntil: string | null;
+  sentAt: string;
+  decidedAt: string | null;
+};
+
 export type PriceRow = {
   size: number;
   price: number;

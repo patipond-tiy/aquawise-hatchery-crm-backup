@@ -6,6 +6,9 @@ import type {
   CustomerDetail,
   CustomerCallback,
   PcrStatus,
+  Quote,
+  QuoteLineItem,
+  QuoteStatus,
 } from '@/lib/types';
 
 function mockActive(): boolean {
@@ -230,6 +233,46 @@ export async function listCallbacksServer(
     note: r.note,
     completedAt: r.completed_at,
     createdBy: r.created_by,
+  }));
+}
+
+export async function listQuotesServer(
+  customerId: string
+): Promise<Quote[]> {
+  if (mockActive()) {
+    const { listQuotes } = await import('@/lib/mock/api');
+    return listQuotes(customerId);
+  }
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('quotes')
+    .select(
+      'id, customer_id, items, note, status, valid_until, sent_at, decided_at'
+    )
+    .eq('customer_id', customerId)
+    .order('sent_at', { ascending: false });
+  if (!data) return [];
+  return (
+    data as unknown as Array<{
+      id: string;
+      customer_id: string;
+      items: unknown;
+      note: string | null;
+      status: string;
+      valid_until: string | null;
+      sent_at: string;
+      decided_at: string | null;
+    }>
+  ).map((r) => ({
+    id: r.id,
+    customerId: r.customer_id,
+    items: Array.isArray(r.items) ? (r.items as QuoteLineItem[]) : [],
+    note: r.note,
+    status: r.status as QuoteStatus,
+    validUntil: r.valid_until,
+    sentAt: r.sent_at,
+    decidedAt: r.decided_at,
   }));
 }
 

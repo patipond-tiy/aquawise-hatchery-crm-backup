@@ -11,12 +11,16 @@ export type ModalKind =
   | 'cert'
   | 'invite'
   | 'closeAlert'
-  | 'schedule';
+  | 'schedule'
+  | 'broadcastConfirm';
+
+export type BroadcastFilterId = 'now' | 'week' | 'month' | 'later';
 
 export type ModalProps = {
   customer?: Customer;
   batch?: Batch;
   alert?: Alert;
+  broadcast?: { filterId: BroadcastFilterId; farmCount: number };
 };
 
 type ModalState = {

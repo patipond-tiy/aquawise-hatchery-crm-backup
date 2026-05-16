@@ -20,6 +20,7 @@ import type {
   NotificationSettings,
   PcrStatus,
   Prices,
+  Quote,
   ScorecardSettings,
   TeamMember,
 } from '@/lib/types';
@@ -149,6 +150,11 @@ export async function listCallbacks(
 
 export async function listAlerts(): Promise<Alert[]> {
   return delay(state.alerts.filter((a) => !a.closed));
+}
+
+export async function listQuotes(_customerId: string): Promise<Quote[]> {
+  void _customerId;
+  return delay([]);
 }
 
 export async function getPrices(): Promise<Prices> {

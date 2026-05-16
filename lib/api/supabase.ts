@@ -24,6 +24,9 @@ import type {
   TeamMember,
   CustomerStatus,
   PcrStatus,
+  Quote,
+  QuoteLineItem,
+  QuoteStatus,
 } from '@/lib/types';
 import type { AddBatchInput, AddCustomerInput } from '@/lib/mock/api';
 import { PRICES, TEAM, NURSERY } from '@/lib/mock/data';
@@ -392,6 +395,19 @@ export async function getBatch(id: string): Promise<BatchDetail | null> {
   };
 }
 
+// Explicit severity rank. The Postgres `alert_severity` enum is defined
+// `high, medium, low` with `critical` APPENDED (migration 021), so its
+// natural enum order is high<medium<low<critical — a plain `ORDER BY sev`
+// does NOT yield severity order once `critical` exists. Rank explicitly so
+// the highest severity always surfaces first regardless of enum definition
+// order (E1 AC, verified live 2026-05-16).
+const SEV_RANK: Record<string, number> = {
+  critical: 4,
+  high: 3,
+  medium: 2,
+  low: 1,
+};
+
 export async function listAlerts(): Promise<Alert[]> {
   const supabase = createClient();
   const { data } = await supabase
@@ -401,12 +417,18 @@ export async function listAlerts(): Promise<Alert[]> {
        alert_farms(customers(farm))`
     )
     .eq('closed', false)
-    // Severity first, then recency — high alerts must surface above medium/low
-    // regardless of creation date (per 03-user-stories.md §E1 AC).
-    .order('sev', { ascending: false })
     .order('created_at', { ascending: false });
   if (!data) return [];
-  return data.map((a) => ({
+  // Severity first (explicit rank), then recency — high/critical alerts must
+  // surface above medium/low regardless of creation date or enum order.
+  const sorted = [...data].sort((a, b) => {
+    const r = (SEV_RANK[b.sev] ?? 0) - (SEV_RANK[a.sev] ?? 0);
+    if (r !== 0) return r;
+    return (
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  });
+  return sorted.map((a) => ({
     id: a.id,
     sev: a.sev as 'high' | 'medium' | 'low',
     title: a.title,
@@ -419,6 +441,37 @@ export async function listAlerts(): Promise<Alert[]> {
         .filter(Boolean) ?? [],
     action: a.action ?? '',
     closed: a.closed,
+  }));
+}
+
+export async function listQuotes(customerId: string): Promise<Quote[]> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('quotes')
+    .select('id, customer_id, items, note, status, valid_until, sent_at, decided_at')
+    .eq('customer_id', customerId)
+    .order('sent_at', { ascending: false });
+  if (!data) return [];
+  return (
+    data as unknown as Array<{
+      id: string;
+      customer_id: string;
+      items: unknown;
+      note: string | null;
+      status: string;
+      valid_until: string | null;
+      sent_at: string;
+      decided_at: string | null;
+    }>
+  ).map((r) => ({
+    id: r.id,
+    customerId: r.customer_id,
+    items: Array.isArray(r.items) ? (r.items as QuoteLineItem[]) : [],
+    note: r.note,
+    status: r.status as QuoteStatus,
+    validUntil: r.valid_until,
+    sentAt: r.sent_at,
+    decidedAt: r.decided_at,
   }));
 }
 

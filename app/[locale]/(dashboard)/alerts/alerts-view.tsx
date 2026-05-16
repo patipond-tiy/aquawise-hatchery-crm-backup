@@ -1,14 +1,97 @@
 'use client';
 
+import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from '@/i18n/navigation';
 import { listAlerts } from '@/lib/api';
+import {
+  notifyAlertFarms,
+  type NotifyTemplate,
+} from './actions';
 import { useModal } from '@/lib/store/modal';
+import type { Alert } from '@/lib/types';
 import { V3Card } from '@/components/aw/v3-card';
 import { V3Grid } from '@/components/aw/v3-grid';
 import { V3Chip } from '@/components/aw/v3-chip';
 import { V3Section } from '@/components/aw/v3-section';
+
+const NOTIFY_TEMPLATES: { id: NotifyTemplate; label: string }[] = [
+  { id: 'acknowledge', label: 'แจ้งรับทราบปัญหา' },
+  { id: 'remediation_plan', label: 'แจ้งแผนแก้ไข' },
+  { id: 'closure', label: 'แจ้งปิดเคส' },
+];
+
+function NotifyFarmsControl({ alert }: { alert: Alert }) {
+  const [open, setOpen] = useState(false);
+  const [template, setTemplate] = useState<NotifyTemplate>('acknowledge');
+  const [pending, startTransition] = useTransition();
+
+  const send = () => {
+    startTransition(async () => {
+      try {
+        const res = await notifyAlertFarms(alert.id, template);
+        if (res.enqueued === 0 && res.skipped === 0) {
+          toast.message('ไม่มีฟาร์มที่ต้องส่งข้อความ');
+        } else if (res.skipped > 0) {
+          toast.success(
+            `ส่งถึง ${res.enqueued} ฟาร์ม (ข้าม ${res.skipped} ที่ยังไม่ได้เชื่อม LINE)`
+          );
+        } else {
+          toast.success(`ส่งถึง ${res.enqueued} ฟาร์ม`);
+        }
+        setOpen(false);
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : 'เกิดข้อผิดพลาด');
+      }
+    });
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        className="aw3-btn aw3-btn-hero aw3-btn-sm"
+        onClick={() => setOpen(true)}
+      >
+        ส่งข้อความถึงฟาร์ม
+      </button>
+    );
+  }
+
+  return (
+    <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+      <select
+        className="aw3-input"
+        style={{ height: 32, fontSize: 13, padding: '0 8px' }}
+        value={template}
+        onChange={(e) => setTemplate(e.target.value as NotifyTemplate)}
+        aria-label="เลือกข้อความ"
+      >
+        {NOTIFY_TEMPLATES.map((t) => (
+          <option key={t.id} value={t.id}>
+            {t.label}
+          </option>
+        ))}
+      </select>
+      <button
+        type="button"
+        className="aw3-btn aw3-btn-hero aw3-btn-sm"
+        onClick={send}
+        disabled={pending}
+      >
+        {pending ? 'กำลังส่ง…' : 'ส่ง'}
+      </button>
+      <button
+        type="button"
+        className="aw3-btn aw3-btn-ghost aw3-btn-sm"
+        onClick={() => setOpen(false)}
+      >
+        ยกเลิก
+      </button>
+    </span>
+  );
+}
 
 const SEV: Record<
   'high' | 'medium' | 'low',
@@ -233,15 +316,7 @@ export function AlertsView() {
                           ดูล็อต {a.batch}
                         </button>
                       )}
-                      <button
-                        type="button"
-                        className="aw3-btn aw3-btn-hero aw3-btn-sm"
-                        onClick={() =>
-                          toast.success(`ส่งข้อความถึง ${a.farms.length} ฟาร์มแล้ว`)
-                        }
-                      >
-                        ส่งข้อความถึงฟาร์ม
-                      </button>
+                      <NotifyFarmsControl alert={a} />
                       <button
                         type="button"
                         className="aw3-btn aw3-btn-ghost aw3-btn-sm"

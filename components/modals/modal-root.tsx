@@ -9,6 +9,7 @@ import { CertModal } from './cert-modal';
 import { InviteTeamModal } from './invite-team-modal';
 import { CloseAlertModal } from './close-alert-modal';
 import { ScheduleModal } from './schedule-modal';
+import { BroadcastConfirmModal } from './broadcast-confirm-modal';
 
 export function ModalRoot() {
   const { kind, props, close } = useModal();
@@ -23,6 +24,13 @@ export function ModalRoot() {
   else if (kind === 'invite') body = <InviteTeamModal />;
   else if (kind === 'closeAlert') body = <CloseAlertModal alert={props.alert} />;
   else if (kind === 'schedule') body = <ScheduleModal customer={props.customer} />;
+  else if (kind === 'broadcastConfirm' && props.broadcast)
+    body = (
+      <BroadcastConfirmModal
+        filterId={props.broadcast.filterId}
+        farmCount={props.broadcast.farmCount}
+      />
+    );
 
   return (
     <div

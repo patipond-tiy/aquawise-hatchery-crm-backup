@@ -6,6 +6,8 @@ import { requireActiveSubscription } from '@/lib/billing/guard';
 import { currentNurseryScope } from '@/lib/auth';
 import { can } from '@/lib/rbac';
 import { isMockMode } from '@/lib/utils/mock-mode';
+import { writeAuditLog } from '@/lib/audit';
+import type { RestockThresholds } from '@/lib/types';
 
 export interface ProfileFields {
   name: string;
@@ -69,5 +71,55 @@ export async function updateProfile(
 
   if (brandError) return { ok: false, error: brandError.message };
 
+  return { ok: true };
+}
+
+/**
+ * D1 — persist per-nursery restock urgency thresholds.
+ *
+ * Owner-only (`settings:write`). Validates `now <= week <= month`. Writes
+ * `nurseries.restock_thresholds` jsonb under the caller's session (RLS
+ * `nurseries_update` owner policy enforces tenant + role at the DB layer too)
+ * and records an audit_log row. Mock mode no-ops gracefully.
+ */
+export async function updateRestockThresholdsAction(
+  thresholds: RestockThresholds
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { now, week, month } = thresholds;
+  if (
+    !Number.isInteger(now) ||
+    !Number.isInteger(week) ||
+    !Number.isInteger(month) ||
+    now < 0 ||
+    !(now <= week && week <= month)
+  ) {
+    return {
+      ok: false,
+      error: 'ค่าต้องเรียงจากน้อยไปมาก: ด่วน ≤ สัปดาห์ ≤ เดือน',
+    };
+  }
+
+  if (isMockMode()) {
+    return { ok: false, error: 'โหมดเดโม — ยังไม่บันทึกจริง' };
+  }
+
+  await requireActiveSubscription();
+
+  const scope = await currentNurseryScope();
+  if (!scope) return { ok: false, error: 'No nursery membership found' };
+  if (!can(scope.role, 'settings:write')) {
+    return { ok: false, error: 'Forbidden' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('nurseries')
+    .update({
+      restock_thresholds: { now, week, month },
+    } as never)
+    .eq('id', scope.nurseryId);
+  if (error) return { ok: false, error: error.message };
+
+  await writeAuditLog('restock_thresholds.update', { now, week, month });
   return { ok: true };
 }

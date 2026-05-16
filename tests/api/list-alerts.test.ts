@@ -1,56 +1,93 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-// Regression test for E1.i (docs/work-breakdown/MATRIX.md):
-//   listAlerts() previously ordered only by `created_at DESC`. Per the AC
-//   in 03-user-stories.md §E1, the primary sort is `sev DESC` so high-severity
-//   alerts surface above medium/low regardless of creation date. Without it,
-//   an old high-severity alert could be buried below newer low-severity ones.
-//
-// This test asserts the order chain:
-//   1. .order('sev', {ascending: false}) is called first
-//   2. .order('created_at', {ascending: false}) is called second
+// Regression test for E1 (docs/work-breakdown/MATRIX.md §E1):
+//   listAlerts() must surface the highest-severity alert first, regardless
+//   of creation date. The original fix used a DB-level `.order('sev')`, but
+//   live verification (2026-05-16) showed the Postgres `alert_severity` enum
+//   is `high, medium, low` with `critical` APPENDED (migration 021) — so
+//   `ORDER BY sev DESC` yields critical, low, medium, high (WRONG: high
+//   sorts last). The corrected impl orders by `created_at` at the DB layer
+//   then re-sorts in TS by an explicit severity rank
+//   (critical > high > medium > low), recency as the tiebreak.
 
-const orderCalls: Array<{ column: string; ascending: boolean }> = [];
+const ROWS = [
+  {
+    id: 'low-new',
+    sev: 'low',
+    title: 'low',
+    description: '',
+    batch_id: null,
+    action: '',
+    closed: false,
+    created_at: '2026-05-16T10:00:00Z',
+    alert_farms: [],
+  },
+  {
+    id: 'high-old',
+    sev: 'high',
+    title: 'high',
+    description: '',
+    batch_id: null,
+    action: '',
+    closed: false,
+    created_at: '2026-05-15T10:00:00Z',
+    alert_farms: [],
+  },
+  {
+    id: 'medium-mid',
+    sev: 'medium',
+    title: 'medium',
+    description: '',
+    batch_id: null,
+    action: '',
+    closed: false,
+    created_at: '2026-05-15T20:00:00Z',
+    alert_farms: [],
+  },
+  {
+    id: 'critical-oldest',
+    sev: 'critical',
+    title: 'critical',
+    description: '',
+    batch_id: null,
+    action: '',
+    closed: false,
+    created_at: '2026-05-14T10:00:00Z',
+    alert_farms: [],
+  },
+];
 
 vi.mock('@/lib/supabase/client', () => {
-  const finalQuery = {
-    data: [],
-    error: null,
-    then: (cb: (v: { data: never[]; error: null }) => unknown) =>
-      Promise.resolve(cb({ data: [], error: null })),
-  };
-
+  const result = { data: ROWS, error: null };
   function makeChain(): Record<string, unknown> {
     const chain: Record<string, unknown> = {
       eq: () => chain,
-      order: (column: string, opts: { ascending: boolean }) => {
-        orderCalls.push({ column, ascending: opts.ascending });
-        return chain;
-      },
-      then: finalQuery.then,
+      order: () => chain,
+      then: (cb: (v: typeof result) => unknown) =>
+        Promise.resolve(cb(result)),
     };
     return chain;
   }
-
   return {
     createClient: () => ({
-      from: () => ({
-        select: () => makeChain(),
-      }),
+      from: () => ({ select: () => makeChain() }),
     }),
   };
 });
 
-describe('listAlerts — E1.i severity-sort regression', () => {
+describe('listAlerts — E1 severity-rank ordering', () => {
   beforeEach(() => {
-    orderCalls.length = 0;
+    vi.resetModules();
   });
 
-  it('orders by sev DESC before created_at DESC', async () => {
+  it('orders critical > high > medium > low regardless of created_at', async () => {
     const { listAlerts } = await import('@/lib/api/supabase');
-    await listAlerts();
-    expect(orderCalls.length).toBe(2);
-    expect(orderCalls[0]).toEqual({ column: 'sev', ascending: false });
-    expect(orderCalls[1]).toEqual({ column: 'created_at', ascending: false });
+    const alerts = await listAlerts();
+    expect(alerts.map((a) => a.id)).toEqual([
+      'critical-oldest',
+      'high-old',
+      'medium-mid',
+      'low-new',
+    ]);
   });
 });

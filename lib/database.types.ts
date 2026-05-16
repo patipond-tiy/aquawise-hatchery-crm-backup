@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      alert_batches: {
+        Row: {
+          alert_id: string
+          batch_id: string
+        }
+        Insert: {
+          alert_id: string
+          batch_id: string
+        }
+        Update: {
+          alert_id?: string
+          batch_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_batches_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "alerts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alert_batches_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alert_farms: {
         Row: {
           alert_id: string
@@ -44,9 +74,45 @@ export type Database = {
           },
         ]
       }
+      alert_resolutions: {
+        Row: {
+          actions: Json
+          alert_id: string
+          closed_at: string
+          closed_by: string
+          id: string
+          note: string
+        }
+        Insert: {
+          actions?: Json
+          alert_id: string
+          closed_at?: string
+          closed_by: string
+          id?: string
+          note: string
+        }
+        Update: {
+          actions?: Json
+          alert_id?: string
+          closed_at?: string
+          closed_by?: string
+          id?: string
+          note?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_resolutions_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alerts: {
         Row: {
           action: string | null
+          alert_kind: string | null
           batch_id: string | null
           closed: boolean
           closed_at: string | null
@@ -54,6 +120,7 @@ export type Database = {
           closed_reason: string | null
           created_at: string
           description: string | null
+          dip_week: string | null
           id: string
           nursery_id: string
           sev: Database["public"]["Enums"]["alert_severity"]
@@ -61,6 +128,7 @@ export type Database = {
         }
         Insert: {
           action?: string | null
+          alert_kind?: string | null
           batch_id?: string | null
           closed?: boolean
           closed_at?: string | null
@@ -68,6 +136,7 @@ export type Database = {
           closed_reason?: string | null
           created_at?: string
           description?: string | null
+          dip_week?: string | null
           id?: string
           nursery_id: string
           sev: Database["public"]["Enums"]["alert_severity"]
@@ -75,6 +144,7 @@ export type Database = {
         }
         Update: {
           action?: string | null
+          alert_kind?: string | null
           batch_id?: string | null
           closed?: boolean
           closed_at?: string | null
@@ -82,6 +152,7 @@ export type Database = {
           closed_reason?: string | null
           created_at?: string
           description?: string | null
+          dip_week?: string | null
           id?: string
           nursery_id?: string
           sev?: Database["public"]["Enums"]["alert_severity"]
@@ -854,6 +925,112 @@ export type Database = {
           },
         ]
       }
+      prices: {
+        Row: {
+          created_at: string
+          currency: string
+          effective_date: string
+          id: string
+          nursery_id: string
+          size_label: string
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          effective_date?: string
+          id?: string
+          nursery_id: string
+          size_label: string
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          effective_date?: string
+          id?: string
+          nursery_id?: string
+          size_label?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prices_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "nurseries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prices_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "public_scorecard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          created_by: string | null
+          customer_id: string
+          decided_at: string | null
+          id: string
+          items: Json
+          note: string | null
+          nursery_id: string
+          sent_at: string
+          status: string
+          valid_until: string | null
+        }
+        Insert: {
+          created_by?: string | null
+          customer_id: string
+          decided_at?: string | null
+          id?: string
+          items: Json
+          note?: string | null
+          nursery_id: string
+          sent_at?: string
+          status?: string
+          valid_until?: string | null
+        }
+        Update: {
+          created_by?: string | null
+          customer_id?: string
+          decided_at?: string | null
+          id?: string
+          items?: Json
+          note?: string | null
+          nursery_id?: string
+          sent_at?: string
+          status?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "nurseries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "public_scorecard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scorecard_settings: {
         Row: {
           nursery_id: string
@@ -1019,9 +1196,13 @@ export type Database = {
         Returns: string
       }
       current_user_nursery_ids: { Args: never; Returns: string[] }
+      run_d30_dip_alert_scan: {
+        Args: { p_nursery_id: string }
+        Returns: number
+      }
     }
     Enums: {
-      alert_severity: "high" | "medium" | "low"
+      alert_severity: "high" | "medium" | "low" | "critical"
       customer_status:
         | "active"
         | "restock-soon"
@@ -1159,7 +1340,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      alert_severity: ["high", "medium", "low"],
+      alert_severity: ["high", "medium", "low", "critical"],
       customer_status: [
         "active",
         "restock-soon",

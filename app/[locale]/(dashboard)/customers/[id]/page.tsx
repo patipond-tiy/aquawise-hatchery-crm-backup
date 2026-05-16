@@ -1,7 +1,11 @@
 import { notFound } from 'next/navigation';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 import { getQueryClient } from '@/lib/query/server';
-import { getCustomerServer, listCallbacksServer } from '@/lib/api/server-reads';
+import {
+  getCustomerServer,
+  listCallbacksServer,
+  listQuotesServer,
+} from '@/lib/api/server-reads';
 import { CustomerDetailView } from './customer-detail-view';
 
 /**
@@ -26,6 +30,7 @@ export default async function CustomerDetailPage({
     ['callbacks', id],
     await listCallbacksServer(id)
   );
+  queryClient.setQueryData(['quotes', id], await listQuotesServer(id));
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

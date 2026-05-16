@@ -3,7 +3,8 @@
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from '@/i18n/navigation';
-import { getCustomer, listCallbacks } from '@/lib/api';
+import { getCustomer, listCallbacks, listQuotes } from '@/lib/api';
+import type { QuoteStatus } from '@/lib/types';
 import { completeCallbackAction } from '../actions';
 import { useModal } from '@/lib/store/modal';
 import { V3Card } from '@/components/aw/v3-card';
@@ -19,6 +20,16 @@ const CONTACT_ROWS = [
   { icon: 'mail', label: 'LINE ID' },
   { icon: 'home', label: 'ที่อยู่' },
 ] as const;
+
+const QUOTE_STATUS: Record<
+  QuoteStatus,
+  { label: string; tone: 'amber' | 'good' | 'bad' | 'lav' }
+> = {
+  sent: { label: 'รออนุมัติ', tone: 'amber' },
+  accepted: { label: 'ตอบรับแล้ว', tone: 'good' },
+  declined: { label: 'ปฏิเสธ', tone: 'bad' },
+  expired: { label: 'หมดอายุ', tone: 'lav' },
+};
 
 function fmtThaiDateTime(iso: string): string {
   return new Date(iso).toLocaleString('th-TH', {
@@ -42,6 +53,10 @@ export function CustomerDetailView({ id }: { id: string }) {
   const { data: callbacks = [] } = useQuery({
     queryKey: ['callbacks', id],
     queryFn: () => listCallbacks(id),
+  });
+  const { data: quotes = [] } = useQuery({
+    queryKey: ['quotes', id],
+    queryFn: () => listQuotes(id),
   });
 
   const complete = useMutation({
@@ -459,6 +474,78 @@ export function CustomerDetailView({ id }: { id: string }) {
                 </span>
               </div>
             ))
+          )}
+        </V3Card>
+      </V3Section>
+
+      <V3Section title="ใบเสนอราคา" style={{ marginTop: 28 }}>
+        <V3Card
+          pad={0}
+          style={{
+            border: '1px solid var(--color-line)',
+            overflow: 'hidden',
+          }}
+        >
+          {quotes.length === 0 ? (
+            <div
+              style={{
+                padding: 40,
+                textAlign: 'center',
+                color: 'var(--color-ink-4)',
+                fontSize: 13,
+              }}
+            >
+              ยังไม่มีใบเสนอราคา
+            </div>
+          ) : (
+            quotes.map((q, i) => {
+              const st = QUOTE_STATUS[q.status];
+              const summary = q.items
+                .map((it) => `${it.sizeLabel} × ${it.quantity}`)
+                .join(', ');
+              return (
+                <div
+                  key={q.id}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1.6fr auto auto',
+                    gap: 14,
+                    padding: '14px 20px',
+                    alignItems: 'center',
+                    borderBottom:
+                      i < quotes.length - 1
+                        ? '1px solid var(--color-line)'
+                        : 0,
+                    fontSize: 13.5,
+                  }}
+                >
+                  <span style={{ color: 'var(--color-ink-3)' }}>
+                    {new Date(q.sentAt).toLocaleDateString('th-TH', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </span>
+                  <span style={{ fontWeight: 600 }}>{summary}</span>
+                  <span
+                    style={{
+                      fontSize: 11.5,
+                      color: 'var(--color-ink-4)',
+                    }}
+                  >
+                    {q.validUntil
+                      ? `ถึง ${new Date(q.validUntil).toLocaleDateString(
+                          'th-TH',
+                          { day: 'numeric', month: 'short' }
+                        )}`
+                      : '—'}
+                  </span>
+                  <V3Chip tone={st.tone} size="xs">
+                    {st.label}
+                  </V3Chip>
+                </div>
+              );
+            })
           )}
         </V3Card>
       </V3Section>

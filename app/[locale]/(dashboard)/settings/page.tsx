@@ -3,15 +3,23 @@
 import { useState } from 'react';
 import { Profile } from './profile-tab';
 import { Notifications } from './notifications-tab';
+import { RestockThresholds } from './restock-thresholds-tab';
 import { Team } from './team-tab';
 import { DataExport } from './data-export-tab';
 import { Billing } from './billing-tab';
 
-type TabId = 'profile' | 'notifications' | 'team' | 'data' | 'billing';
+type TabId =
+  | 'profile'
+  | 'notifications'
+  | 'restock'
+  | 'team'
+  | 'data'
+  | 'billing';
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'profile', label: 'โปรไฟล์ฟาร์ม' },
   { id: 'notifications', label: 'การแจ้งเตือน' },
+  { id: 'restock', label: 'เกณฑ์เติมสต็อก' },
   { id: 'team', label: 'ทีมงาน' },
   { id: 'data', label: 'ข้อมูลและส่งออก' },
   { id: 'billing', label: 'แพ็กเกจ' },
@@ -82,6 +90,7 @@ export default function SettingsPage() {
 
       {tab === 'profile' && <Profile />}
       {tab === 'notifications' && <Notifications />}
+      {tab === 'restock' && <RestockThresholds />}
       {tab === 'team' && <Team />}
       {tab === 'data' && <DataExport />}
       {tab === 'billing' && <Billing />}

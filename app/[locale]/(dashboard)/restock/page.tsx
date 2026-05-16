@@ -1,6 +1,5 @@
 'use client';
 
-import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from '@/i18n/navigation';
 import { listCustomers, getNursery } from '@/lib/api';
@@ -12,8 +11,10 @@ import { V3Chip } from '@/components/aw/v3-chip';
 import { V3Avatar } from '@/components/aw/v3-avatar';
 import { V3Section } from '@/components/aw/v3-section';
 
+import type { BroadcastFilterId } from '@/lib/store/modal';
+
 type Group = {
-  id: string;
+  id: BroadcastFilterId;
   label: string;
   tone: 'bad' | 'amber' | 'sky' | 'lav';
   icon: string;
@@ -102,17 +103,9 @@ export default function RestockPage() {
             พยากรณ์จากวันลงลูกกุ้ง + ระยะเวลาเลี้ยงเฉลี่ย 110 วัน
           </div>
         </div>
-        <button
-          type="button"
-          className="aw3-btn aw3-btn-hero"
-          onClick={() =>
-            toast.success(
-              `ส่งข้อความถึง ${due.filter((c) => (c.restockIn ?? 0) <= 14).length} ฟาร์มแล้ว`
-            )
-          }
-        >
-          ส่งข้อความหาทุกคน
-        </button>
+        <div />
+        {/* D3: broadcast is per-urgency-group (each section header has its
+            own "ส่งข้อความหาทุกคน" button below). */}
       </div>
 
       <V3Grid cols={4} gap={14} style={{ marginBottom: 28, marginTop: 22 }}>
@@ -165,7 +158,14 @@ export default function RestockPage() {
             <V3Section
               key={g.id}
               title={
-                <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    width: '100%',
+                  }}
+                >
                   <span
                     style={{
                       width: 24,
@@ -202,6 +202,21 @@ export default function RestockPage() {
                   >
                     · {g.items.length}
                   </span>
+                  <button
+                    type="button"
+                    className="aw3-btn aw3-btn-soft aw3-btn-sm"
+                    style={{ marginLeft: 'auto' }}
+                    onClick={() =>
+                      openModal('broadcastConfirm', {
+                        broadcast: {
+                          filterId: g.id,
+                          farmCount: g.items.length,
+                        },
+                      })
+                    }
+                  >
+                    ส่งข้อความหาทุกคน
+                  </button>
                 </span>
               }
             >
