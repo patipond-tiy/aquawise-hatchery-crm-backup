@@ -109,9 +109,63 @@ prototypes/             V3 standalone HTML — design intent. Read-only.
 - **`'use client'` is opt-in.** Server components are the default in App Router; mark client only when state/effects/event handlers are needed.
 - **Server-only files import `'server-only'`** — `lib/stripe/server.ts`, `lib/auth.ts`. Stripe SDK must never bundle into the client.
 - **No `any` in app code.** Narrow `as` casts allowed only in adapters (see `lib/api/supabase.ts` `rowToCustomer` / `rowToBatch`).
-- **Server actions live next to routes** (`app/[locale]/(dashboard)/<page>/actions.ts`). Required for anything that writes `audit_log` or talks to Stripe.
+- **Server actions live next to routes** (`app/[locale]/(dashboard)/<page>/actions.ts`). Required for anything that writes `audit_log` or talks to Stripe. See "Server-component data-fetching" below for the full fetch+mutate convention new pages must follow.
 - **Async-only API surface** — even mock functions return `Promise<T>` so the live swap doesn't change call sites.
 - **Locale matters.** Default is `th`. URLs are `/th/...` first. English is gated to `<ComingSoon />` at `app/[locale]/layout.tsx` — port new features against the Thai surface.
+
+## Server-component data-fetching (the convention new code MUST follow)
+
+Historically all 9 `(dashboard)/*/page.tsx` were `'use client'`, fetched via
+the browser Supabase client through TanStack Query, repeated a fragile
+`.from('nurseries').select('id').limit(1).single()` tenant idiom ~7×, and
+mutated client-side — bypassing the server-action `audit_log`. New pages and
+new BMAD systems **must not** copy that. The locked pattern:
+
+1. **Tenant scope: one helper, never re-inlined.** Resolve the caller's
+   tenant with `currentNurseryScope()` (user + nurseryId + role) or
+   `getCurrentTenantId()` — both in `lib/auth.ts` (`'server-only'`). Do
+   **not** re-write the `nursery_members` / `nurseries .limit(1).single()`
+   lookup inline in an action or RSC.
+2. **Pages are RSCs that prefetch + hydrate.** A `(dashboard)` page that owns
+   server data is an async Server Component (no `'use client'`). It builds a
+   per-request client via `getQueryClient()` (`lib/query/server.ts`),
+   `prefetchQuery`s through the `@/lib/api` facade (still the only data
+   entrypoint — never call Supabase directly), and wraps a thin
+   `'use client'` `*-view.tsx` in `<HydrationBoundary state={dehydrate(qc)}>`.
+   The view keeps the interactive UI and reads the hydrated cache with
+   `useQuery` (same `queryKey`).
+3. **Mutations go through a co-located server action that writes `audit_log`.**
+   `<page>/actions.ts` (`'use server'`): mock mode delegates to `lib/mock/api`
+   (keeps dev click-through working), live mode calls
+   `requireActiveSubscription()` for write actions, scopes via
+   `currentNurseryScope()`, persists, then `await writeAuditLog(action, payload)`
+   (`lib/audit.ts`). The client view's `useMutation.mutationFn` is the server
+   action, not a `@/lib/api` mutation.
+
+**Reference implementations:** `scorecard/` (full: RSC page + view + server
+action + audit_log) and `alerts/` (read-only RSC page + view). Copy these.
+
+**Migration checklist — remaining client pages to convert (P2-1d, deferred,
+keep-green per page):**
+
+- [ ] `(dashboard)/page.tsx` (dashboard hero)
+- [ ] `(dashboard)/customers/page.tsx` + `customers/[id]/page.tsx`
+- [ ] `(dashboard)/batches/page.tsx` + `batches/[id]/page.tsx`
+- [ ] `(dashboard)/restock/page.tsx`
+- [ ] `(dashboard)/settings/page.tsx` tabs (notifications/profile/team/billing)
+- [ ] Route `closeAlert` / `addCustomer` / `addBatch` mutations through
+      co-located server actions writing `audit_log` (currently still via the
+      `@/lib/api` client facade behind modals)
+- [ ] `lib/api/supabase.ts` live impl uses the **browser** Supabase client; a
+      server-side variant is needed before RSC prefetch hits real Supabase
+      (today only mock mode is exercised, so RSC prefetch is safe as-is)
+- [ ] `lib/auth/bootstrap.ts` keeps its own `nursery_members` lookup — it is
+      keyed by an explicitly-passed `userId` during the auth callback (no
+      ambient session yet), distinct from `currentNurseryScope()`; revisit if
+      it can adopt the helper without destabilising first sign-in
+
+Convert one page per commit; `typecheck + lint + test + build` must stay
+green after each. Never half-convert a page.
 
 ## Mock-mode billing
 
