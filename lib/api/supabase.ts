@@ -89,7 +89,6 @@ export async function getNursery(): Promise<Nursery> {
   const supabase = createClient();
   // Cast to any so we can read restock_thresholds (added by migration 010)
   // without waiting for a generated-types regen.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any)
     .from('nurseries')
     .select('name, name_en, location, location_en, restock_thresholds')

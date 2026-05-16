@@ -15,7 +15,13 @@ export function V3Donut({ segs, size = 180, stroke = 22 }: V3DonutProps) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const total = segs.reduce((a, s) => a + s.value, 0);
-  let acc = 0;
+  // Precompute cumulative offsets so the render pass stays pure (no mutation
+  // of a closure variable while mapping — react-hooks/immutability).
+  const offsets = segs.reduce<number[]>((acc, s) => {
+    const prev = acc.length === 0 ? 0 : acc[acc.length - 1];
+    acc.push(prev + (s.value / total) * c);
+    return acc;
+  }, []);
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
@@ -35,8 +41,9 @@ export function V3Donut({ segs, size = 180, stroke = 22 }: V3DonutProps) {
           {segs.map((s, i) => {
             const len = (s.value / total) * c;
             const dasharray = `${len} ${c - len}`;
-            const dashoffset = -acc;
-            acc += len;
+            // offsets[i] is the cumulative length *through* segment i; the dash
+            // offset is the negative cumulative length *before* it.
+            const dashoffset = -(offsets[i] - len);
             return (
               <circle
                 key={i}

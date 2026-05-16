@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
@@ -23,6 +23,36 @@ const TONE_FG: Record<'sky' | 'amber' | 'bad', string> = {
 };
 
 const DISMISS_PREFIX = 'aw3-banner-dismissed:';
+
+// Tiny external store over sessionStorage so the banner can read dismissal
+// state without a setState-in-effect cascade. sessionStorage means a brand-new
+// tab / window / day shows the banner again.
+const dismissListeners = new Set<() => void>();
+
+function subscribeDismiss(onChange: () => void): () => void {
+  dismissListeners.add(onChange);
+  return () => {
+    dismissListeners.delete(onChange);
+  };
+}
+
+function isDismissed(dismissKey: string): boolean {
+  if (typeof window === 'undefined') return true; // SSR/first paint: stay hidden
+  try {
+    return window.sessionStorage.getItem(dismissKey) === '1';
+  } catch {
+    return false; // sessionStorage may be unavailable in some privacy modes
+  }
+}
+
+function markDismissed(dismissKey: string): void {
+  try {
+    window.sessionStorage.setItem(dismissKey, '1');
+  } catch {
+    /* sessionStorage may be unavailable in some privacy modes */
+  }
+  dismissListeners.forEach((l) => l());
+}
 
 export function TrialBanner() {
   const t = useTranslations('billing');
@@ -84,24 +114,19 @@ function Banner({
   cta: string;
 }) {
   // Hide for the rest of this browser session once the user dismisses it.
-  // sessionStorage means a brand-new tab / window / day shows the banner again.
-  const [dismissed, setDismissed] = useState(true); // start hidden to avoid SSR-vs-client flash
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const seen = window.sessionStorage.getItem(dismissKey) === '1';
-    setDismissed(seen);
-  }, [dismissKey]);
+  // useSyncExternalStore keeps SSR (server snapshot = hidden, avoids flash) and
+  // the live sessionStorage value in sync without a setState-in-effect cascade.
+  const getSnapshot = useCallback(() => isDismissed(dismissKey), [dismissKey]);
+  const getServerSnapshot = useCallback(() => true, []);
+  const dismissed = useSyncExternalStore(
+    subscribeDismiss,
+    getSnapshot,
+    getServerSnapshot
+  );
 
   if (dismissed) return null;
 
-  const dismiss = () => {
-    try {
-      window.sessionStorage.setItem(dismissKey, '1');
-    } catch {
-      /* sessionStorage may be unavailable in some privacy modes */
-    }
-    setDismissed(true);
-  };
+  const dismiss = () => markDismissed(dismissKey);
 
   return (
     <div
