@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from '@/i18n/navigation';
-import { listBatches, listCustomers } from '@/lib/api';
+import { listBatches, listCustomers, getContinueWatching } from '@/lib/api';
 import { useModal } from '@/lib/store/modal';
 import { V3Card } from '@/components/aw/v3-card';
 import { V3Section } from '@/components/aw/v3-section';
@@ -29,16 +29,18 @@ export default function DashboardPage() {
     queryKey: ['batches'],
     queryFn: listBatches,
   });
+  const { data: watching = [] } = useQuery({
+    queryKey: ['continue-watching'],
+    queryFn: () => getContinueWatching(3),
+  });
 
-  const continueWatching = customers
-    .filter((c) => c.cycleDay)
-    .slice(0, 3)
-    .map((c, i) => ({
-      ...c,
-      tone: PHOTO_TONES[i],
-      chip: ['ล็อต B-2604-A', 'ล็อต B-2604-B', 'ล็อต B-2603-C'][i],
-      chipTone: CHIP_TONES[i],
-    }));
+  const continueWatching = watching.map((c, i) => ({
+    ...c,
+    tone: PHOTO_TONES[i],
+    // Real latest batch reference for this customer (no hardcoded literal).
+    chip: c.batchRef ? `ล็อต ${c.batchRef}` : 'ยังไม่มีล็อต',
+    chipTone: CHIP_TONES[i],
+  }));
 
   const stats = deriveDashboardStats(customers, batches);
   const restockPLk = Math.round(stats.restockPL / 1000);
@@ -255,10 +257,10 @@ export default function DashboardPage() {
         <V3Grid cols={3} gap={16}>
           {continueWatching.map((c) => (
             <V3Card
-              key={c.id}
+              key={c.customerId}
               pad={14}
               hover
-              onClick={() => router.push(`/customers/${c.id}` as never)}
+              onClick={() => router.push(`/customers/${c.customerId}` as never)}
               style={{ border: '1px solid var(--color-line)' }}
             >
               <div style={{ position: 'relative' }}>
@@ -267,7 +269,8 @@ export default function DashboardPage() {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    openModal('sendLine', { customer: c });
+                    const full = customers.find((x) => x.id === c.customerId);
+                    if (full) openModal('sendLine', { customer: full });
                   }}
                   style={{
                     position: 'absolute',

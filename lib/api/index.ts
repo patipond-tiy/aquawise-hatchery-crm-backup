@@ -21,6 +21,7 @@ export const getNursery = impl.getNursery;
 export const listCustomers = impl.listCustomers;
 export const getCustomer = impl.getCustomer;
 export const listBatches = impl.listBatches;
+export const getContinueWatching = impl.getContinueWatching;
 export const getBatch = impl.getBatch;
 export const listAlerts = impl.listAlerts;
 export const getPrices = impl.getPrices;

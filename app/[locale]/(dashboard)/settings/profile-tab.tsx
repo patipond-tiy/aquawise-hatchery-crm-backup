@@ -1,18 +1,38 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { getNursery } from '@/lib/api';
+import type { Nursery } from '@/lib/types';
 import { V3Card } from '@/components/aw/v3-card';
 import { V3Grid, V3Col } from '@/components/aw/v3-grid';
 import { V3Mark } from '@/components/aw/v3-mark';
 
 export function Profile() {
-  const [name, setName] = useState('ฟ้าใส แฮทเชอรี่');
-  const [nameEn, setNameEn] = useState('Fasai Nursery');
-  const [location, setLocation] = useState('78/12 ม.4 ต.บ้านบ่อ อ.เมือง สมุทรสาคร 74000');
-  const [locationEn, setLocationEn] = useState('');
-  const [displayNameTh, setDisplayNameTh] = useState('ฟ้าใส แฮทเชอรี่');
-  const [displayNameEn, setDisplayNameEn] = useState('Fasai Nursery');
+  // AC#1 — inputs are seeded from the fetched nursery (not hardcoded
+  // defaults). The inner form is keyed by the loaded row so its useState
+  // initializers take the real values without a setState-in-effect.
+  const { data: nursery } = useQuery({
+    queryKey: ['nursery'],
+    queryFn: getNursery,
+  });
+
+  return (
+    <ProfileForm
+      key={nursery ? `${nursery.name}|${nursery.nameEn}` : 'loading'}
+      nursery={nursery ?? null}
+    />
+  );
+}
+
+function ProfileForm({ nursery }: { nursery: Nursery | null }) {
+  const [name, setName] = useState(nursery?.name ?? '');
+  const [nameEn, setNameEn] = useState(nursery?.nameEn ?? '');
+  const [location, setLocation] = useState(nursery?.location ?? '');
+  const [locationEn, setLocationEn] = useState(nursery?.locationEn ?? '');
+  const [displayNameTh, setDisplayNameTh] = useState(nursery?.name ?? '');
+  const [displayNameEn, setDisplayNameEn] = useState(nursery?.nameEn ?? '');
   const [brandColor, setBrandColor] = useState('#1F6FEB');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);

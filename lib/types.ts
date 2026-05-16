@@ -102,6 +102,16 @@ export type TeamMember = {
   tone?: string;
 };
 
+export type ContinueWatchingItem = {
+  customerId: string;
+  name: string;
+  farm: string;
+  zone: string;
+  cycleDay: number | null;
+  /** Real latest batch reference this customer purchased from, or null. */
+  batchRef: string | null;
+};
+
 export type Locale = 'en' | 'th';
 
 // ============================================================

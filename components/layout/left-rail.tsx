@@ -3,8 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { usePathname, Link } from '@/i18n/navigation';
 import { V3Mark } from '@/components/aw/v3-mark';
-import { signOut } from '@/app/actions/auth';
 import { Icon } from '@/components/aw/icon';
+import { LogoutButton } from '@/components/layout/logout-button';
 import { useSidebar } from '@/lib/store/sidebar';
 
 type NavItem = {
@@ -160,26 +160,7 @@ export function LeftRail() {
           {SETTINGS.map((n) => (
             <NavLink key={n.id} item={n} />
           ))}
-          <form action={signOut}>
-            <button
-              type="submit"
-              title={collapsed ? t('nav.logout') : undefined}
-              className="flex items-center rounded-[var(--radius)] min-h-[50px] bg-transparent border-0 cursor-pointer font-semibold text-base"
-              style={{
-                color: 'var(--color-ink)',
-                gap: collapsed ? 0 : 14,
-                padding: collapsed ? '14px 0' : '14px 16px',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                textAlign: 'left',
-                width: '100%',
-              }}
-            >
-              <Icon name="out" size={22} />
-              {!collapsed && (
-                <span className="whitespace-nowrap">{t('nav.logout')}</span>
-              )}
-            </button>
-          </form>
+          <LogoutButton collapsed={collapsed} label={t('nav.logout')} />
         </NavGroup>
       </div>
     </aside>

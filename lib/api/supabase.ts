@@ -13,6 +13,7 @@ import type {
   Alert,
   Batch,
   Customer,
+  ContinueWatchingItem,
   Nursery,
   NotificationSettings,
   Prices,
@@ -154,6 +155,70 @@ export async function getCustomer(id: string): Promise<Customer | null> {
       ? data.customer_cycles[0] ?? null
       : (data.customer_cycles as never) ?? null
   );
+}
+
+export async function getContinueWatching(
+  limit = 3
+): Promise<ContinueWatchingItem[]> {
+  const supabase = createClient();
+  // Customers with an active cycle, nearest restock first. RLS scopes rows.
+  const { data } = await supabase
+    .from('customers')
+    .select(
+      `id, name, farm, zone,
+       customer_cycles(cycle_day, restock_in),
+       batch_buyers(batch_id, created_at)`
+    );
+  if (!data) return [];
+
+  type Row = {
+    id: string;
+    name: string;
+    farm: string;
+    zone: string | null;
+    customer_cycles:
+      | { cycle_day: number | null; restock_in: number | null }
+      | { cycle_day: number | null; restock_in: number | null }[]
+      | null;
+    batch_buyers:
+      | { batch_id: string; created_at: string }[]
+      | { batch_id: string; created_at: string }
+      | null;
+  };
+
+  const rows = data as unknown as Row[];
+
+  return rows
+    .map((r) => {
+      const cycle = Array.isArray(r.customer_cycles)
+        ? r.customer_cycles[0] ?? null
+        : r.customer_cycles;
+      const buyers = Array.isArray(r.batch_buyers)
+        ? r.batch_buyers
+        : r.batch_buyers
+          ? [r.batch_buyers]
+          : [];
+      // Real latest batch the customer purchased from.
+      const latest = buyers
+        .slice()
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+      return {
+        customerId: r.id,
+        name: r.name,
+        farm: r.farm,
+        zone: r.zone ?? '',
+        cycleDay: cycle?.cycle_day ?? null,
+        batchRef: latest?.batch_id ?? null,
+        _restockIn: cycle?.restock_in ?? null,
+      };
+    })
+    .filter((c) => c.cycleDay !== null)
+    .sort((a, b) => (a._restockIn ?? 1e9) - (b._restockIn ?? 1e9))
+    .slice(0, limit)
+    .map(({ _restockIn, ...item }) => {
+      void _restockIn;
+      return item;
+    });
 }
 
 export async function listBatches(): Promise<Batch[]> {

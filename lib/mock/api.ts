@@ -12,6 +12,7 @@ import type {
   Alert,
   Batch,
   Customer,
+  ContinueWatchingItem,
   Nursery,
   NotificationSettings,
   Prices,
@@ -69,6 +70,30 @@ export async function getScorecardSettings(): Promise<ScorecardSettings> {
 
 export async function getNotificationSettings(): Promise<NotificationSettings> {
   return delay(state.notifications);
+}
+
+export async function getContinueWatching(
+  limit = 3
+): Promise<ContinueWatchingItem[]> {
+  // Latest batch by date — the same "most recent batch the customer relates
+  // to" semantics as the live join, derived from real mock data (no
+  // hardcoded literal).
+  const latestBatch = [...state.batches].sort((a, b) =>
+    b.date.localeCompare(a.date)
+  )[0];
+  const items = state.customers
+    .filter((c) => c.cycleDay !== null)
+    .sort((a, b) => (a.restockIn ?? 1e9) - (b.restockIn ?? 1e9))
+    .slice(0, limit)
+    .map((c) => ({
+      customerId: c.id,
+      name: c.name,
+      farm: c.farm,
+      zone: c.zone,
+      cycleDay: c.cycleDay,
+      batchRef: latestBatch?.id ?? null,
+    }));
+  return delay(items);
 }
 
 // Mutations -------------------------------------------------------------------
