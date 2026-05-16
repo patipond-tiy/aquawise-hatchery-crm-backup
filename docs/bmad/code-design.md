@@ -1931,6 +1931,14 @@ Format:
 - Owner: Patipond.
 - Link: this commit.
 
+### 2026-05-16 · S1 — Next.js i18n middleware-bypass CVE: verified already patched
+
+- Decision: GHSA-36qx-fr4f-26g5 (Next.js i18n middleware bypass, vulnerable `>=16.0.0 <16.2.5`) is already remediated — `pnpm-lock.yaml` resolves `next@16.2.6`, `next-intl@4.12.0`, direct `postcss@8.5.14`. No `pnpm up` required. `pnpm audit --audit-level=high` exits 0.
+- Residual: one **moderate** advisory remains — GHSA-qx2v-qp2m-jg93 (PostCSS `<8.5.10` XSS) via `next@16.2.6`'s **bundled** `postcss@8.4.31` (transitive, not our direct dep; our direct postcss is 8.5.14). Not high-severity, so it does not block `--audit-level=high`. Patched upstream when Next bumps its bundled postcss; tracked by S5 Dependabot. No app-code exposure (PostCSS runs build-time only, no untrusted CSS input).
+- Tooling note: the globally-installed `pnpm` (8.15.0) has a broken `audit` (`reference.startsWith is not a function`); run audits via `corepack pnpm` which honours the pinned `pnpm@10.0.0`. CI uses corepack so it is unaffected.
+- Owner: Patipond (story S1).
+- Link: this commit.
+
 <!-- Add new entries above this line, newest first. -->
 
 ---
