@@ -45,7 +45,7 @@ export function ModalRoot() {
         style={{
           background: '#fff',
           borderRadius: 'var(--radius-xl)',
-          boxShadow: '0 20px 60px rgba(13,12,24,0.25)',
+          boxShadow: 'var(--shadow-modal)',
           maxWidth: 560,
           width: '100%',
           maxHeight: '88vh',
