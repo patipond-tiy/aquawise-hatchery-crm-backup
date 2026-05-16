@@ -62,9 +62,16 @@
   --shadow-pop: 0 8px 24px rgba(20, 19, 31, 0.08);
 
   /* Type */
-  --font-sans: 'Noto Sans Thai', 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-display: 'Plus Jakarta Sans', 'Noto Sans Thai', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  /* Wired to the next/font CSS variables set in app/[locale]/layout.tsx.
+     Per ../../../design-system-v1/colors_and_type.css:
+       --font-sans    body / tables / forms / eyebrows  → Inter (Latin), Noto Sans Thai (Thai)
+       --font-display headings + hero only              → Plus Jakarta Sans (sanctioned
+                       exception), Thai falls to Noto Sans Thai (Jakarta has no Thai glyphs)
+       --font-mono    numbers / lot IDs                 → JetBrains Mono
+     Thai-first order on --font-sans because most UI copy is Thai. */
+  --font-sans: var(--font-noto-thai), var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-jakarta), var(--font-noto-thai), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 
   /* Animation */
   --animate-aw3-rise: aw3-rise 0.1s ease-out both;
@@ -122,6 +129,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Headings carry the design-system-v1 display face (Plus Jakarta Sans for
+   Latin; Thai headings fall through to Noto Sans Thai). Page titles / hero
+   text rendered via non-semantic elements should add the `font-display`
+   Tailwind utility (generated from the --font-display @theme token). */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+}
+
 ::selection {
   background: var(--color-hero);
   color: #fff;
@@ -171,7 +188,9 @@ body {
 
 @layer components {
   .eyebrow {
-    font-family: var(--font-display);
+    /* Eyebrows are Latin/UPPERCASE — Inter, not the Jakarta display face,
+       per design-system-v1 (eyebrow uses the Inter-first --font3-en stack). */
+    font-family: var(--font-inter), var(--font-noto-thai), system-ui, sans-serif;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.1em;

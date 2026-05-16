@@ -16,7 +16,7 @@ The locale layout (`layout.tsx`) sets up fonts, the `<NextIntlClientProvider>`, 
 
 | File | Description |
 |------|-------------|
-| `layout.tsx` | Root html/body. Loads Plus Jakarta Sans + Noto Sans Thai + JetBrains Mono via `next/font`. Validates locale, calls `setRequestLocale`. **Renders `<ComingSoon />` for `en` locale**, otherwise `<Providers>` + children |
+| `layout.tsx` | Root html/body. Loads Inter (Latin/body) + Plus Jakarta Sans (display headings — design-system-v1 sanctioned exception) + Noto Sans Thai (Thai) + JetBrains Mono (numerics) via `next/font`. Validates locale, calls `setRequestLocale`. **Renders `<ComingSoon />` for `en` locale**, otherwise `<Providers>` + children |
 | `error.tsx` | Locale-scoped error boundary with retry |
 | `not-found.tsx` | Locale-scoped 404 page |
 
@@ -47,6 +47,6 @@ The locale layout (`layout.tsx`) sets up fonts, the `<NextIntlClientProvider>`, 
 
 ### External
 - `next-intl/server` (`setRequestLocale`, `hasLocale`), `next-intl` (`NextIntlClientProvider`)
-- `next/font/google` for Plus Jakarta Sans, Noto Sans Thai, JetBrains Mono
+- `next/font/google` for Inter (Latin/body), Plus Jakarta Sans (display headings only — design-system-v1 sanctioned exception, not the default), Noto Sans Thai (Thai), JetBrains Mono (numerics). Canonical stack: `../../../design-system-v1/colors_and_type.css`
 
 <!-- MANUAL: -->
