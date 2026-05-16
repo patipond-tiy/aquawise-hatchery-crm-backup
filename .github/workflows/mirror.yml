@@ -54,15 +54,23 @@ jobs:
             "https://x-access-token:${SRC_TOKEN}@github.com/${{ github.repository }}.git" \
             mirror.git
 
-      - name: Push mirror to backup
+      - name: Push branches and tags to backup
         working-directory: mirror.git
         env:
           DST_TOKEN: ${{ secrets.MIRROR_TOKEN }}
           DST_OWNER: patipond-tiy
           DST_REPO: aquawise-nursery-crm-backup
         run: |
-          git push --mirror \
-            "https://x-access-token:${DST_TOKEN}@github.com/${DST_OWNER}/${DST_REPO}.git"
+          # `git push --mirror` also tries to push GitHub's server-managed,
+          # read-only refs/pull/* refs (one per PR), which GitHub always
+          # rejects ("deny updating a hidden ref") — making the whole push
+          # exit non-zero even though branches/tags went through. Push only
+          # heads and tags instead: still a complete, force-synced, pruned
+          # mirror of everything that actually belongs to the repo.
+          git push --prune --force \
+            "https://x-access-token:${DST_TOKEN}@github.com/${DST_OWNER}/${DST_REPO}.git" \
+            "refs/heads/*:refs/heads/*" \
+            "refs/tags/*:refs/tags/*"
 
       - name: Summary
         if: always()

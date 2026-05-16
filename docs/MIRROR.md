@@ -13,7 +13,7 @@ GitHub Actions workflow `.github/workflows/mirror.yml` runs:
 - Daily at 02:00 UTC (cron, as a safety net)
 - On manual dispatch from the Actions tab
 
-It clones the source as a `--mirror` (bare) and pushes that to the backup.
+It clones the source as a `--mirror` (bare) and force-pushes every branch and tag to the backup, pruning refs that no longer exist in the source. (It deliberately does **not** `git push --mirror`, because that also pushes GitHub's read-only `refs/pull/*` refs, which GitHub rejects.)
 
 ## One-time setup
 
@@ -72,5 +72,7 @@ If the workflow ever fails with "remote: invalid credentials", the token has exp
 **"MIRROR_TOKEN secret is not set"** — the workflow's first sanity-check failed. Add the secret per § One-time setup.
 
 **"403 — refusing to allow a Personal Access Token to create or update workflow"** — your PAT doesn't have the `workflows` permission. The mirror workflow does NOT push workflow files (it pushes whatever is on the source), but if the source's `.github/workflows/` ever needs to overwrite the backup's workflow files, you'd hit this. Solution: use a **classic** PAT with `repo` + `workflow` scopes, or grant the fine-grained PAT `Workflows: Read and write` permission.
+
+**"deny updating a hidden ref" / `refs/pull/*` rejected** — only happens if the push step is reverted to `git push --mirror`. GitHub maintains read-only `refs/pull/<n>/head` refs that cannot be pushed. The workflow pushes only `refs/heads/*` + `refs/tags/*` to avoid this; keep it that way.
 
 **Diverged backup** — if someone accidentally pushes to the backup directly, the next mirror run will force-delete those changes. The backup is intentionally not a working copy.
