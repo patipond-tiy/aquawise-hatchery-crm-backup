@@ -41,7 +41,7 @@ pnpm dev                  # http://localhost:3000 — boots in mock mode at /th
 pnpm build                # production build
 pnpm start                # serve production build
 pnpm typecheck            # tsc --noEmit (strict)
-pnpm lint                 # next lint
+pnpm lint                 # eslint . (flat config, eslint-config-next/core-web-vitals)
 pnpm test                 # vitest run
 pnpm test:watch           # vitest watch
 pnpm test:ui              # vitest with UI

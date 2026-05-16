@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { exchangeCodeAction, bootstrapCurrentUserAction } from './actions';
@@ -61,7 +62,7 @@ function AuthCallbackInner() {
         <div style={{ color: 'crimson', textAlign: 'center', padding: 24 }}>
           <h2>Sign-in error</h2>
           <p>{error}</p>
-          <a href="/th/login">Back to login</a>
+          <Link href="/th/login">Back to login</Link>
         </div>
       ) : (
         <div>กำลังเข้าสู่ระบบ...</div>

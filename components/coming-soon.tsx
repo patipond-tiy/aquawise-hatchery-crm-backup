@@ -57,7 +57,7 @@ export function ComingSoon() {
             color: 'var(--color-ink-3)',
           }}
         >
-          We're launching with a Thai-first experience for nursery operators in
+          We&apos;re launching with a Thai-first experience for nursery operators in
           Thailand. The English version is on the way — until then, the full app
           is available in Thai.
         </p>
