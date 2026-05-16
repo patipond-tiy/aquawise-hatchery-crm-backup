@@ -2,75 +2,73 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 import type { Batch } from '@/lib/types';
-import { CUSTOMERS } from '@/lib/mock/data';
+import { getBatch } from '@/lib/api';
+import { sendCertificateAction } from '@/app/[locale]/(dashboard)/batches/actions';
 import { useModal } from '@/lib/store/modal';
 import { ModalShell, Field } from './modal-shell';
 
 export function CertModal({ batch }: { batch?: Batch }) {
   const close = useModal((s) => s.close);
-  const [recipients, setRecipients] = useState<string[]>(
-    CUSTOMERS.slice(0, 4).map((c) => c.id)
-  );
+  const { data: detail } = useQuery({
+    queryKey: ['batch', batch?.id],
+    queryFn: () => getBatch(batch!.id),
+    enabled: Boolean(batch?.id),
+  });
+  const buyers = detail?.buyers ?? [];
+  const [recipients, setRecipients] = useState<string[]>([]);
+  const [pending, setPending] = useState(false);
 
   const toggle = (id: string) =>
     setRecipients((r) =>
       r.includes(id) ? r.filter((x) => x !== id) : [...r, id]
     );
 
-  const send = () => {
-    toast.success(
-      `ส่งใบรับรอง ${batch?.id ?? ''} ให้ ${recipients.length} ฟาร์มแล้ว`
-    );
-    close();
+  const send = async () => {
+    if (!batch || recipients.length === 0) return;
+    setPending(true);
+    try {
+      const { enqueued } = await sendCertificateAction(
+        batch.id,
+        recipients
+      );
+      toast.success(`เพิ่มคิวส่งใบรับรองให้ ${enqueued} ราย แล้ว`);
+      close();
+    } catch (e) {
+      toast.error(
+        e instanceof Error ? e.message : 'ส่งใบรับรองไม่สำเร็จ'
+      );
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
     <ModalShell
-      title="ส่งใบรับรอง"
-      subtitle={`ล็อต ${batch?.id ?? 'B-2604-A'}`}
+      title="ส่งใบรับรอง PCR"
+      subtitle={`ล็อต ${batch?.id ?? ''}`}
       footer={
         <>
-          <button className="aw3-btn aw3-btn-ghost" type="button" onClick={close}>
+          <button
+            className="aw3-btn aw3-btn-ghost"
+            type="button"
+            onClick={close}
+          >
             ยกเลิก
           </button>
           <button
             className="aw3-btn aw3-btn-hero"
             type="button"
             onClick={send}
-            disabled={recipients.length === 0}
+            disabled={recipients.length === 0 || pending}
           >
-            ส่งให้ {recipients.length} ฟาร์ม
+            {pending ? 'กำลังบันทึก…' : `เพิ่มคิวส่ง`}
           </button>
         </>
       }
     >
-      <Field label="วิธีการส่ง">
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            type="button"
-            className="aw3-btn aw3-btn-hero aw3-btn-sm"
-            style={{ flex: 1, justifyContent: 'center' }}
-          >
-            LINE Flex
-          </button>
-          <button
-            type="button"
-            className="aw3-btn aw3-btn-soft aw3-btn-sm"
-            style={{ flex: 1, justifyContent: 'center' }}
-          >
-            PDF แนบ
-          </button>
-          <button
-            type="button"
-            className="aw3-btn aw3-btn-soft aw3-btn-sm"
-            style={{ flex: 1, justifyContent: 'center' }}
-          >
-            SMS ลิงก์
-          </button>
-        </div>
-      </Field>
-      <Field label="ส่งให้ฟาร์ม">
+      <Field label="เลือกผู้รับ">
         <div
           style={{
             display: 'flex',
@@ -82,13 +80,24 @@ export function CertModal({ batch }: { batch?: Batch }) {
             margin: -4,
           }}
         >
-          {CUSTOMERS.slice(0, 8).map((c) => {
-            const on = recipients.includes(c.id);
+          {buyers.length === 0 && (
+            <div
+              style={{
+                fontSize: 13,
+                color: 'var(--color-ink-4)',
+                padding: 12,
+              }}
+            >
+              ยังไม่มีผู้ซื้อล็อตนี้
+            </div>
+          )}
+          {buyers.map((c) => {
+            const on = recipients.includes(c.customerId);
             return (
               <button
                 type="button"
-                key={c.id}
-                onClick={() => toggle(c.id)}
+                key={c.customerId}
+                onClick={() => toggle(c.customerId)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -109,7 +118,9 @@ export function CertModal({ batch }: { batch?: Batch }) {
                     height: 22,
                     borderRadius: 'var(--radius-sm)',
                     background: on ? 'var(--color-hero)' : '#fff',
-                    border: on ? 0 : '1.5px solid var(--color-line-2)',
+                    border: on
+                      ? 0
+                      : '1.5px solid var(--color-line-2)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -121,11 +132,16 @@ export function CertModal({ batch }: { batch?: Batch }) {
                   {on ? '✓' : ''}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13.5, fontWeight: 700 }}>{c.farm}</div>
+                  <div style={{ fontSize: 13.5, fontWeight: 700 }}>
+                    {c.farm}
+                  </div>
                   <div
-                    style={{ fontSize: 11.5, color: 'var(--color-ink-4)' }}
+                    style={{
+                      fontSize: 11.5,
+                      color: 'var(--color-ink-4)',
+                    }}
                   >
-                    {c.name}
+                    {c.zone}
                   </div>
                 </div>
               </button>
@@ -133,6 +149,16 @@ export function CertModal({ batch }: { batch?: Batch }) {
           })}
         </div>
       </Field>
+      <div
+        style={{
+          fontSize: 12.5,
+          color: 'var(--color-ink-4)',
+          marginTop: 10,
+          lineHeight: 1.5,
+        }}
+      >
+        จะส่งเมื่อระบบ LINE พร้อม
+      </div>
     </ModalShell>
   );
 }

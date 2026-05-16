@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { addBatch } from '@/lib/api';
+import { addBatchAction } from '@/app/[locale]/(dashboard)/batches/actions';
 import { useModal } from '@/lib/store/modal';
 import { ModalShell, Field } from './modal-shell';
 
@@ -12,8 +12,12 @@ const SOURCES = [
   'CP-Genetics Line A',
   'CP-Genetics Line B',
   'SyAqua Line 7',
+  'Charoen Line 3',
   'Shrimp Improvement Sys.',
 ];
+const DISEASES = ['WSSV', 'EHP', 'IHHNV', 'TSV'] as const;
+
+type Result = 'negative' | 'positive';
 
 export function AddBatchModal() {
   const close = useModal((s) => s.close);
@@ -23,21 +27,48 @@ export function AddBatchModal() {
     source: SOURCES[0],
     plProduced: 2_000_000,
     date: new Date().toISOString().slice(0, 10),
-    pcr: 'pending' as 'clean' | 'flagged' | 'pending',
   });
+  const [results, setResults] = useState<Record<string, Result>>(
+    Object.fromEntries(DISEASES.map((d) => [d, 'negative']))
+  );
+  const [fileName, setFileName] = useState('');
+  const [error, setError] = useState('');
+
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) =>
     setF((s) => ({ ...s, [k]: v }));
 
   const mutation = useMutation({
-    mutationFn: () => addBatch({ source: f.source, plProduced: f.plProduced, date: f.date, pcr: 'clean' }),
+    mutationFn: () =>
+      addBatchAction({
+        source: f.source,
+        plProduced: f.plProduced,
+        date: f.date,
+        pcrResults: DISEASES.map((d) => ({
+          disease: d,
+          status: results[d],
+        })),
+        pcrLab: 'กรมประมง',
+        pcrFileUrl: fileName || undefined,
+      }),
     onSuccess: (b) => {
       qc.invalidateQueries({ queryKey: ['batches'] });
-      toast.success(`ลงทะเบียนล็อต ${b.source} แล้ว`);
+      toast.success(`เพิ่มล็อต "${b.id}" แล้ว`);
       close();
+    },
+    onError: (e) => {
+      setError(
+        e instanceof Error ? e.message : 'ลงทะเบียนล็อตไม่สำเร็จ'
+      );
     },
   });
 
   const next = () => {
+    setError('');
+    // AC #8: cannot advance past PCR step without a file.
+    if (step === 2 && !fileName) {
+      setError('กรุณาอัปโหลดผล PCR ก่อนดำเนินการต่อ');
+      return;
+    }
     if (step < 3) {
       setStep(step + 1);
     } else {
@@ -55,7 +86,10 @@ export function AddBatchModal() {
             <button
               className="aw3-btn aw3-btn-ghost"
               type="button"
-              onClick={() => setStep(step - 1)}
+              onClick={() => {
+                setError('');
+                setStep(step - 1);
+              }}
             >
               ย้อนกลับ
             </button>
@@ -66,7 +100,11 @@ export function AddBatchModal() {
             onClick={next}
             disabled={mutation.isPending}
           >
-            {step === 3 ? (mutation.isPending ? 'กำลังบันทึก…' : 'ลงทะเบียน') : 'ถัดไป →'}
+            {step === 3
+              ? mutation.isPending
+                ? 'กำลังบันทึก…'
+                : 'ลงทะเบียน'
+              : 'ถัดไป →'}
           </button>
         </>
       }
@@ -80,7 +118,9 @@ export function AddBatchModal() {
               height: 4,
               borderRadius: 'var(--radius-pill)',
               background:
-                i + 1 <= step ? 'var(--color-hero)' : 'var(--color-line-2)',
+                i + 1 <= step
+                  ? 'var(--color-hero)'
+                  : 'var(--color-line-2)',
             }}
           />
         ))}
@@ -116,7 +156,10 @@ export function AddBatchModal() {
               step="0.1"
               value={f.plProduced / 1_000_000}
               onChange={(e) =>
-                set('plProduced', parseFloat(e.target.value) * 1_000_000)
+                set(
+                  'plProduced',
+                  parseFloat(e.target.value) * 1_000_000
+                )
               }
             />
           </Field>
@@ -132,10 +175,11 @@ export function AddBatchModal() {
               marginBottom: 14,
             }}
           >
-            เลือกอัปโหลดไฟล์ PCR หรือกรอกผลด้วยตัวเอง
+            อัปโหลดไฟล์ PCR แล้วระบุผลแต่ละโรค
           </div>
-          <div
+          <label
             style={{
+              display: 'block',
               padding: 24,
               borderRadius: 'var(--radius)',
               background: 'var(--color-soft)',
@@ -145,8 +189,9 @@ export function AddBatchModal() {
               cursor: 'pointer',
             }}
           >
-            <div style={{ fontSize: 28, marginBottom: 8 }}>📄</div>
-            <div style={{ fontSize: 14, fontWeight: 700 }}>อัปโหลดไฟล์ PCR</div>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>
+              {fileName || 'เลือกไฟล์ PCR'}
+            </div>
             <div
               style={{
                 fontSize: 12,
@@ -156,40 +201,66 @@ export function AddBatchModal() {
             >
               PDF, JPG หรือ PNG
             </div>
-          </div>
+            <input
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              style={{ display: 'none' }}
+              onChange={(e) =>
+                setFileName(e.target.files?.[0]?.name ?? '')
+              }
+            />
+          </label>
           <div style={{ display: 'flex', gap: 8 }}>
-            {(['WSSV', 'EHP', 'IHHNV', 'TSV'] as const).map((d) => (
-              <div
-                key={d}
-                style={{
-                  flex: 1,
-                  padding: 12,
-                  background: 'var(--color-good-tint)',
-                  borderRadius: 'var(--radius-sm)',
-                  textAlign: 'center',
-                }}
-              >
-                <div
+            {DISEASES.map((d) => {
+              const positive = results[d] === 'positive';
+              return (
+                <button
+                  type="button"
+                  key={d}
+                  onClick={() =>
+                    setResults((r) => ({
+                      ...r,
+                      [d]: positive ? 'negative' : 'positive',
+                    }))
+                  }
                   style={{
-                    fontSize: 11,
-                    color: 'var(--color-good)',
-                    fontWeight: 700,
+                    flex: 1,
+                    padding: 12,
+                    background: positive
+                      ? 'var(--color-bad-tint)'
+                      : 'var(--color-good-tint)',
+                    borderRadius: 'var(--radius-sm)',
+                    border: 0,
+                    cursor: 'pointer',
+                    textAlign: 'center',
                   }}
                 >
-                  {d}
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 800,
-                    color: 'var(--color-good)',
-                    marginTop: 2,
-                  }}
-                >
-                  ✓ ผ่าน
-                </div>
-              </div>
-            ))}
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: positive
+                        ? 'var(--color-bad)'
+                        : 'var(--color-good)',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {d}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: positive
+                        ? 'var(--color-bad)'
+                        : 'var(--color-good)',
+                      marginTop: 2,
+                    }}
+                  >
+                    {positive ? 'พบเชื้อ' : 'ไม่พบเชื้อ'}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </>
       )}
@@ -208,8 +279,19 @@ export function AddBatchModal() {
               [
                 ['สายพันธุ์', f.source],
                 ['วันที่ลงไข่', f.date],
-                ['ปริมาณ', `${(f.plProduced / 1_000_000).toFixed(1)}M PL`],
-                ['PCR', '✓ ผ่านทุกชนิด'],
+                [
+                  'ปริมาณ',
+                  `${(f.plProduced / 1_000_000).toFixed(1)}M PL`,
+                ],
+                ['ไฟล์ PCR', fileName || '—'],
+                [
+                  'ผล PCR',
+                  DISEASES.every((d) => results[d] === 'negative')
+                    ? 'ไม่พบเชื้อทุกชนิด'
+                    : DISEASES.filter(
+                        (d) => results[d] === 'positive'
+                      ).join(', ') + ' พบเชื้อ',
+                ],
               ] as const
             ).map(([k, v], i) => (
               <div
@@ -218,19 +300,41 @@ export function AddBatchModal() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   padding: '8px 0',
-                  borderTop: i > 0 ? '1px solid var(--color-line)' : 0,
+                  borderTop:
+                    i > 0 ? '1px solid var(--color-line)' : 0,
                 }}
               >
-                <span style={{ color: 'var(--color-ink-3)', fontSize: 13 }}>
+                <span
+                  style={{
+                    color: 'var(--color-ink-3)',
+                    fontSize: 13,
+                  }}
+                >
                   {k}
                 </span>
-                <span style={{ fontWeight: 700, fontSize: 13 }}>{v}</span>
+                <span style={{ fontWeight: 700, fontSize: 13 }}>
+                  {v}
+                </span>
               </div>
             ))}
           </div>
-          <div style={{ fontSize: 12.5, color: 'var(--color-ink-4)' }}>
-            กดลงทะเบียนเพื่อสร้างใบรับรองและเปิดให้ขายในระบบ
+          <div
+            style={{ fontSize: 12.5, color: 'var(--color-ink-4)' }}
+          >
+            กดลงทะเบียนเพื่อบันทึกล็อตและผลตรวจ PCR
           </div>
+        </div>
+      )}
+
+      {error && (
+        <div
+          style={{
+            color: 'var(--color-bad)',
+            fontSize: 13,
+            marginTop: 14,
+          }}
+        >
+          {error}
         </div>
       )}
     </ModalShell>

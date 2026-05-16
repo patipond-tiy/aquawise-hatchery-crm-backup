@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { addCustomer } from '@/lib/api';
+import { addCustomerAction } from '@/app/[locale]/(dashboard)/customers/actions';
 import { useModal } from '@/lib/store/modal';
 import { ModalShell, Field } from './modal-shell';
 
@@ -30,16 +30,27 @@ export function AddCustomerModal() {
     setF((s) => ({ ...s, [k]: v }));
 
   const mutation = useMutation({
-    mutationFn: () => addCustomer({ farm: f.farm, name: f.name, zone: f.zone, phone: f.phone, plan: f.plan }),
+    mutationFn: () =>
+      addCustomerAction({
+        farm: f.farm,
+        name: f.name,
+        zone: f.zone,
+        phone: f.phone,
+        plan: f.plan,
+      }),
     onSuccess: (c) => {
       qc.invalidateQueries({ queryKey: ['customers'] });
       toast.success(`เพิ่มลูกค้า "${c.farm}" แล้ว`);
       close();
     },
+    onError: (e) => {
+      toast.error(e instanceof Error ? e.message : 'เพิ่มลูกค้าไม่สำเร็จ');
+    },
   });
 
+  // AC #2: farm, owner, zone required — submission blocked if any missing.
   const submit = () => {
-    if (!f.farm || !f.name) return;
+    if (!f.farm || !f.name || !f.zone) return;
     mutation.mutate();
   };
 

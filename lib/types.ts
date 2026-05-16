@@ -36,6 +36,76 @@ export type Batch = {
   pcr: PcrStatus;
 };
 
+// B3 — customer detail: time-series cycle row backing the D30 sparkline.
+export type CustomerCycleHistoryRow = {
+  id: string;
+  batchId: string | null;
+  startedAt: string;
+  d30: number | null;
+  d60: number | null;
+  harvest: string | null;
+};
+
+// B3 — customer detail: one PL distribution to this customer (batch_buyers
+// joined with batches).
+export type CustomerBatchHistoryRow = {
+  batchId: string;
+  date: string;
+  plPurchased: number;
+  d30: number | null;
+  pcr: PcrStatus;
+};
+
+export type CustomerDetail = Customer & {
+  phone: string | null;
+  lineId: string | null;
+  address: string | null;
+  cycleHistory: CustomerCycleHistoryRow[];
+  batchHistory: CustomerBatchHistoryRow[];
+};
+
+// B4 — a scheduled rep reminder.
+export type CustomerCallback = {
+  id: string;
+  customerId: string;
+  scheduledFor: string;
+  channel: 'call' | 'line';
+  note: string | null;
+  completedAt: string | null;
+  createdBy: string;
+};
+
+// C3 — batch detail: one buyer row (batch_buyers joined with customers).
+export type BatchBuyer = {
+  customerId: string;
+  farm: string;
+  zone: string;
+  plPurchased: number;
+  d30: number | null;
+};
+
+// C3/C4 — one per-disease PCR result row.
+export type PcrResult = {
+  id: string;
+  disease: string;
+  status: string;
+  lab: string | null;
+  testedOn: string | null;
+};
+
+export type BatchDetail = Batch & {
+  buyers: BatchBuyer[];
+  pcrResults: PcrResult[];
+};
+
+// C4 — nursery brand used on the PCR certificate PDF.
+export type NurseryBrand = {
+  displayNameTh: string;
+  displayNameEn: string;
+  logoUrl: string | null;
+  brandColor: string;
+};
+
 export type AlertSeverity = 'high' | 'medium' | 'low';
 
 export type Alert = {

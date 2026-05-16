@@ -12,6 +12,7 @@ const EXPECTED: Record<string, Record<Role, boolean>> = {
   'customer:write':  { owner: true,  counter_staff: true,  lab_tech: false, auditor: false },
   'batch:read':      { owner: true,  counter_staff: true,  lab_tech: true,  auditor: true  },
   'batch:write':     { owner: true,  counter_staff: true,  lab_tech: true,  auditor: false },
+  'pcr:write':       { owner: true,  counter_staff: false, lab_tech: true,  auditor: false },
   'alert:close':     { owner: true,  counter_staff: true,  lab_tech: false, auditor: false },
   'team:invite':     { owner: true,  counter_staff: false, lab_tech: false, auditor: false },
   'settings:write':  { owner: true,  counter_staff: false, lab_tech: false, auditor: false },

@@ -23,11 +23,11 @@ export default function DashboardPage() {
 
   const { data: customers = [] } = useQuery({
     queryKey: ['customers'],
-    queryFn: listCustomers,
+    queryFn: () => listCustomers(),
   });
   const { data: batches = [] } = useQuery({
     queryKey: ['batches'],
-    queryFn: listBatches,
+    queryFn: () => listBatches(),
   });
   const { data: watching = [] } = useQuery({
     queryKey: ['continue-watching'],

@@ -12,7 +12,10 @@ import type { Database } from '@/lib/database.types';
 import type {
   Alert,
   Batch,
+  BatchDetail,
   Customer,
+  CustomerDetail,
+  CustomerCallback,
   ContinueWatchingItem,
   Nursery,
   NotificationSettings,
@@ -138,23 +141,100 @@ export async function listCustomers(): Promise<Customer[]> {
   );
 }
 
-export async function getCustomer(id: string): Promise<Customer | null> {
+export async function getCustomer(id: string): Promise<CustomerDetail | null> {
   const supabase = createClient();
+  // RLS scopes this to the caller's nursery — a cross-tenant id yields null.
   const { data } = await supabase
     .from('customers')
     .select(
       `id, name, farm, farm_en, zone, status, ltv, last_buy,
+       phone, line_id, address,
        customer_cycles(cycle_day, expected_harvest, d30, d60, restock_in)`
     )
     .eq('id', id)
     .maybeSingle();
   if (!data) return null;
-  return rowToCustomer(
+
+  const base = rowToCustomer(
     data,
     Array.isArray(data.customer_cycles)
       ? data.customer_cycles[0] ?? null
       : (data.customer_cycles as never) ?? null
   );
+
+  // D30 sparkline series — newest 6 from the time-series history table
+  // (NOT the 1-row customer_cycles snapshot).
+  const { data: history } = await supabase
+    .from('customer_cycle_history')
+    .select('id, batch_id, started_at, d30, d60, harvest')
+    .eq('customer_id', id)
+    .order('started_at', { ascending: false })
+    .limit(6);
+
+  // Batch history — distributions to this customer joined with batches.
+  const { data: dist } = await supabase
+    .from('batch_buyers')
+    .select('batch_id, pl_purchased, d30, batches(id, date, pcr)')
+    .eq('customer_id', id);
+
+  type DistRow = {
+    batch_id: string;
+    pl_purchased: number;
+    d30: number | null;
+    batches:
+      | { id: string; date: string; pcr: string }
+      | { id: string; date: string; pcr: string }[]
+      | null;
+  };
+
+  const batchHistory = ((dist ?? []) as unknown as DistRow[]).map((r) => {
+    const b = Array.isArray(r.batches) ? r.batches[0] : r.batches;
+    return {
+      batchId: r.batch_id,
+      date: b?.date ?? '',
+      plPurchased: r.pl_purchased,
+      d30: r.d30,
+      pcr: (b?.pcr ?? 'pending') as PcrStatus,
+    };
+  });
+
+  return {
+    ...base,
+    phone: (data as { phone: string | null }).phone ?? null,
+    lineId: (data as { line_id: string | null }).line_id ?? null,
+    address: (data as { address: string | null }).address ?? null,
+    cycleHistory: (history ?? []).map((h) => ({
+      id: h.id,
+      batchId: h.batch_id,
+      startedAt: h.started_at,
+      d30: h.d30,
+      d60: h.d60,
+      harvest: h.harvest,
+    })),
+    batchHistory,
+  };
+}
+
+export async function listCallbacks(
+  customerId: string
+): Promise<CustomerCallback[]> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('customer_callbacks')
+    .select('id, customer_id, scheduled_for, channel, note, completed_at, created_by')
+    .eq('customer_id', customerId)
+    .is('completed_at', null)
+    .gte('scheduled_for', new Date().toISOString())
+    .order('scheduled_for', { ascending: true });
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    customerId: r.customer_id,
+    scheduledFor: r.scheduled_for,
+    channel: r.channel as 'call' | 'line',
+    note: r.note,
+    completedAt: r.completed_at,
+    createdBy: r.created_by,
+  }));
 }
 
 export async function getContinueWatching(
@@ -221,16 +301,31 @@ export async function getContinueWatching(
     });
 }
 
-export async function listBatches(): Promise<Batch[]> {
+export type BatchListFilters = {
+  pcr?: PcrStatus;
+  strain?: string;
+  year?: number;
+};
+
+export async function listBatches(
+  filters?: BatchListFilters
+): Promise<Batch[]> {
   const supabase = createClient();
-  const { data } = await supabase
+  let q = supabase
     .from('batches')
-    .select('id, source, pl_produced, pl_sold, date, pcr, mean_d30, dist')
-    .order('date', { ascending: false });
+    .select('id, source, pl_produced, pl_sold, date, pcr, mean_d30, dist');
+  if (filters?.pcr) q = q.eq('pcr', filters.pcr);
+  if (filters?.strain) q = q.eq('source', filters.strain);
+  if (filters?.year) {
+    q = q
+      .gte('date', `${filters.year}-01-01`)
+      .lte('date', `${filters.year}-12-31`);
+  }
+  const { data } = await q.order('date', { ascending: false });
   return (data ?? []).map(rowToBatch);
 }
 
-export async function getBatch(id: string): Promise<Batch | null> {
+export async function getBatch(id: string): Promise<BatchDetail | null> {
   const supabase = createClient();
   const { data } = await supabase
     .from('batches')
@@ -238,7 +333,63 @@ export async function getBatch(id: string): Promise<Batch | null> {
     .eq('id', id)
     .maybeSingle();
   if (!data) return null;
-  return rowToBatch(data);
+  const base = rowToBatch(data);
+
+  // Real buyers from batch_buyers joined with customers.
+  const { data: buyersRaw } = await supabase
+    .from('batch_buyers')
+    .select('customer_id, pl_purchased, d30, customers(farm, zone)')
+    .eq('batch_id', id);
+
+  type BuyerRow = {
+    customer_id: string;
+    pl_purchased: number;
+    d30: number | null;
+    customers:
+      | { farm: string; zone: string | null }
+      | { farm: string; zone: string | null }[]
+      | null;
+  };
+  const buyers = ((buyersRaw ?? []) as unknown as BuyerRow[]).map((r) => {
+    const c = Array.isArray(r.customers) ? r.customers[0] : r.customers;
+    return {
+      customerId: r.customer_id,
+      farm: c?.farm ?? '',
+      zone: c?.zone ?? '',
+      plPurchased: r.pl_purchased,
+      d30: r.d30,
+    };
+  });
+
+  // Real per-disease PCR rows.
+  const { data: pcrRaw } = await supabase
+    .from('pcr_results')
+    .select('id, disease, status, lab, tested_on')
+    .eq('batch_id', id)
+    .order('disease', { ascending: true });
+  const pcrResults = (pcrRaw ?? []).map((p) => ({
+    id: p.id,
+    disease: p.disease,
+    status: p.status,
+    lab: p.lab,
+    testedOn: p.tested_on,
+  }));
+
+  const d30s = buyers
+    .map((b) => b.d30)
+    .filter((v): v is number => v != null);
+  const meanD30 =
+    d30s.length > 0
+      ? Math.round(d30s.reduce((a, b) => a + b, 0) / d30s.length)
+      : base.meanD30;
+
+  return {
+    ...base,
+    farms: buyers.length,
+    meanD30,
+    buyers,
+    pcrResults,
+  };
 }
 
 export async function listAlerts(): Promise<Alert[]> {
@@ -400,7 +551,22 @@ export async function addBatch(input: AddBatchInput): Promise<Batch> {
     .single();
   if (!nursery) throw new Error('No nursery scope for current user');
 
-  const id = `B-${input.date.slice(2, 4)}${input.date.slice(5, 7)}-${Math.random().toString(36).slice(2, 4).toUpperCase()}`;
+  const id = `B-${input.date.slice(2, 4)}${input.date.slice(5, 7)}-${Math.random()
+    .toString(36)
+    .slice(2, 4)
+    .toUpperCase()}`;
+
+  // PCR status is DERIVED from the real per-disease results, never hardcoded:
+  // any positive → flagged; all negative → clean; otherwise pending.
+  const diseases = input.pcrResults ?? [];
+  const pcr: PcrStatus =
+    diseases.length === 0
+      ? 'pending'
+      : diseases.some((d) => d.status === 'positive')
+        ? 'flagged'
+        : diseases.every((d) => d.status === 'negative')
+          ? 'clean'
+          : 'pending';
 
   const { data, error } = await supabase
     .from('batches')
@@ -410,11 +576,31 @@ export async function addBatch(input: AddBatchInput): Promise<Batch> {
       source: input.source,
       pl_produced: input.plProduced,
       date: input.date,
-      pcr: input.pcr ?? 'pending',
+      pcr,
     })
     .select('id, source, pl_produced, pl_sold, date, pcr, mean_d30, dist')
     .single();
   if (error) throw error;
+
+  // Atomic intent: if the PCR rows fail to insert, roll the batch back so we
+  // never leave an orphan batch without its quality data (C1 AC #5).
+  if (diseases.length > 0) {
+    const { error: pcrError } = await supabase.from('pcr_results').insert(
+      diseases.map((d) => ({
+        batch_id: id,
+        disease: d.disease,
+        status: d.status,
+        lab: input.pcrLab ?? null,
+        tested_on: input.date,
+        file_url: input.pcrFileUrl ?? null,
+      }))
+    );
+    if (pcrError) {
+      await supabase.from('batches').delete().eq('id', id);
+      throw pcrError;
+    }
+  }
+
   return rowToBatch(data);
 }
 

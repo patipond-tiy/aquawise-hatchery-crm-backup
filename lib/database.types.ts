@@ -7,6 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -52,8 +54,8 @@ export type Database = {
           closed_reason: string | null
           created_at: string
           description: string | null
-          nursery_id: string
           id: string
+          nursery_id: string
           sev: Database["public"]["Enums"]["alert_severity"]
           title: string
         }
@@ -66,8 +68,8 @@ export type Database = {
           closed_reason?: string | null
           created_at?: string
           description?: string | null
-          nursery_id: string
           id?: string
+          nursery_id: string
           sev: Database["public"]["Enums"]["alert_severity"]
           title: string
         }
@@ -80,8 +82,8 @@ export type Database = {
           closed_reason?: string | null
           created_at?: string
           description?: string | null
-          nursery_id?: string
           id?: string
+          nursery_id?: string
           sev?: Database["public"]["Enums"]["alert_severity"]
           title?: string
         }
@@ -113,24 +115,24 @@ export type Database = {
         Row: {
           action: string
           created_at: string
-          nursery_id: string
           id: number
+          nursery_id: string
           payload: Json | null
           user_id: string | null
         }
         Insert: {
           action: string
           created_at?: string
-          nursery_id: string
           id?: number
+          nursery_id: string
           payload?: Json | null
           user_id?: string | null
         }
         Update: {
           action?: string
           created_at?: string
-          nursery_id?: string
           id?: number
+          nursery_id?: string
           payload?: Json | null
           user_id?: string | null
         }
@@ -190,14 +192,46 @@ export type Database = {
           },
         ]
       }
+      batch_certs: {
+        Row: {
+          batch_id: string
+          generated_at: string
+          generated_by: string | null
+          id: string
+          pdf_url: string
+        }
+        Insert: {
+          batch_id: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          pdf_url: string
+        }
+        Update: {
+          batch_id?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          pdf_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batch_certs_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       batches: {
         Row: {
           created_at: string
           date: string
           dist: Json
-          nursery_id: string
           id: string
           mean_d30: number | null
+          nursery_id: string
           pcr: Database["public"]["Enums"]["pcr_status"]
           pl_produced: number
           pl_sold: number
@@ -207,9 +241,9 @@ export type Database = {
           created_at?: string
           date: string
           dist?: Json
-          nursery_id: string
           id: string
           mean_d30?: number | null
+          nursery_id: string
           pcr?: Database["public"]["Enums"]["pcr_status"]
           pl_produced?: number
           pl_sold?: number
@@ -219,9 +253,9 @@ export type Database = {
           created_at?: string
           date?: string
           dist?: Json
-          nursery_id?: string
           id?: string
           mean_d30?: number | null
+          nursery_id?: string
           pcr?: Database["public"]["Enums"]["pcr_status"]
           pl_produced?: number
           pl_sold?: number
@@ -299,6 +333,129 @@ export type Database = {
           },
         ]
       }
+      customer_callbacks: {
+        Row: {
+          channel: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          customer_id: string
+          id: string
+          note: string | null
+          nursery_id: string
+          scheduled_for: string
+        }
+        Insert: {
+          channel: string
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          customer_id: string
+          id?: string
+          note?: string | null
+          nursery_id: string
+          scheduled_for: string
+        }
+        Update: {
+          channel?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          customer_id?: string
+          id?: string
+          note?: string | null
+          nursery_id?: string
+          scheduled_for?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_callbacks_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_callbacks_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "nurseries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_callbacks_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "public_scorecard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_cycle_history: {
+        Row: {
+          batch_id: string | null
+          created_at: string
+          customer_id: string
+          d30: number | null
+          d60: number | null
+          harvest: string | null
+          id: string
+          nursery_id: string
+          started_at: string
+        }
+        Insert: {
+          batch_id?: string | null
+          created_at?: string
+          customer_id: string
+          d30?: number | null
+          d60?: number | null
+          harvest?: string | null
+          id?: string
+          nursery_id: string
+          started_at: string
+        }
+        Update: {
+          batch_id?: string | null
+          created_at?: string
+          customer_id?: string
+          d30?: number | null
+          d60?: number | null
+          harvest?: string | null
+          id?: string
+          nursery_id?: string
+          started_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_cycle_history_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_cycle_history_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_cycle_history_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "nurseries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_cycle_history_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "public_scorecard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_cycles: {
         Row: {
           customer_id: string
@@ -343,12 +500,12 @@ export type Database = {
           created_at: string
           farm: string
           farm_en: string | null
-          nursery_id: string
           id: string
           last_buy: string | null
           line_id: string | null
           ltv: number
           name: string
+          nursery_id: string
           package_interest: string | null
           phone: string | null
           status: Database["public"]["Enums"]["customer_status"]
@@ -359,12 +516,12 @@ export type Database = {
           created_at?: string
           farm: string
           farm_en?: string | null
-          nursery_id: string
           id?: string
           last_buy?: string | null
           line_id?: string | null
           ltv?: number
           name: string
+          nursery_id: string
           package_interest?: string | null
           phone?: string | null
           status?: Database["public"]["Enums"]["customer_status"]
@@ -375,12 +532,12 @@ export type Database = {
           created_at?: string
           farm?: string
           farm_en?: string | null
-          nursery_id?: string
           id?: string
           last_buy?: string | null
           line_id?: string | null
           ltv?: number
           name?: string
+          nursery_id?: string
           package_interest?: string | null
           phone?: string | null
           status?: Database["public"]["Enums"]["customer_status"]
@@ -398,6 +555,127 @@ export type Database = {
             foreignKeyName: "customers_nursery_id_fkey"
             columns: ["nursery_id"]
             isOneToOne: false
+            referencedRelation: "public_scorecard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      line_outbound_events: {
+        Row: {
+          attempts: number
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          id: string
+          kind: Database["public"]["Enums"]["line_event_kind"]
+          last_error: string | null
+          line_user_id: string
+          nursery_id: string
+          payload: Json
+          scheduled_for: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["line_event_status"]
+          template: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          id?: string
+          kind?: Database["public"]["Enums"]["line_event_kind"]
+          last_error?: string | null
+          line_user_id: string
+          nursery_id: string
+          payload: Json
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["line_event_status"]
+          template: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["line_event_kind"]
+          last_error?: string | null
+          line_user_id?: string
+          nursery_id?: string
+          payload?: Json
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["line_event_status"]
+          template?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "line_outbound_events_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "line_outbound_events_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "nurseries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "line_outbound_events_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "public_scorecard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_settings: {
+        Row: {
+          disease: boolean
+          line_reply: boolean
+          low_d30: boolean
+          nursery_id: string
+          price_move: boolean
+          restock: boolean
+          updated_at: string
+          weekly: boolean
+        }
+        Insert: {
+          disease?: boolean
+          line_reply?: boolean
+          low_d30?: boolean
+          nursery_id: string
+          price_move?: boolean
+          restock?: boolean
+          updated_at?: string
+          weekly?: boolean
+        }
+        Update: {
+          disease?: boolean
+          line_reply?: boolean
+          low_d30?: boolean
+          nursery_id?: string
+          price_move?: boolean
+          restock?: boolean
+          updated_at?: string
+          weekly?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: true
+            referencedRelation: "nurseries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_settings_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: true
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
           },
@@ -462,24 +740,24 @@ export type Database = {
           brand_color: string
           display_name_en: string
           display_name_th: string
-          nursery_id: string
           logo_url: string | null
+          nursery_id: string
           updated_at: string
         }
         Insert: {
           brand_color?: string
           display_name_en: string
           display_name_th: string
-          nursery_id: string
           logo_url?: string | null
+          nursery_id: string
           updated_at?: string
         }
         Update: {
           brand_color?: string
           display_name_en?: string
           display_name_th?: string
-          nursery_id?: string
           logo_url?: string | null
+          nursery_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -530,127 +808,6 @@ export type Database = {
             foreignKeyName: "nursery_members_nursery_id_fkey"
             columns: ["nursery_id"]
             isOneToOne: false
-            referencedRelation: "public_scorecard"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      line_outbound_events: {
-        Row: {
-          attempts: number
-          created_at: string
-          created_by: string | null
-          customer_id: string
-          nursery_id: string
-          id: string
-          kind: Database["public"]["Enums"]["line_event_kind"]
-          last_error: string | null
-          line_user_id: string
-          payload: Json
-          scheduled_for: string
-          sent_at: string | null
-          status: Database["public"]["Enums"]["line_event_status"]
-          template: string
-        }
-        Insert: {
-          attempts?: number
-          created_at?: string
-          created_by?: string | null
-          customer_id: string
-          nursery_id: string
-          id?: string
-          kind?: Database["public"]["Enums"]["line_event_kind"]
-          last_error?: string | null
-          line_user_id: string
-          payload: Json
-          scheduled_for?: string
-          sent_at?: string | null
-          status?: Database["public"]["Enums"]["line_event_status"]
-          template: string
-        }
-        Update: {
-          attempts?: number
-          created_at?: string
-          created_by?: string | null
-          customer_id?: string
-          nursery_id?: string
-          id?: string
-          kind?: Database["public"]["Enums"]["line_event_kind"]
-          last_error?: string | null
-          line_user_id?: string
-          payload?: Json
-          scheduled_for?: string
-          sent_at?: string | null
-          status?: Database["public"]["Enums"]["line_event_status"]
-          template?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "line_outbound_events_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "line_outbound_events_nursery_id_fkey"
-            columns: ["nursery_id"]
-            isOneToOne: false
-            referencedRelation: "nurseries"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "line_outbound_events_nursery_id_fkey"
-            columns: ["nursery_id"]
-            isOneToOne: false
-            referencedRelation: "public_scorecard"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notification_settings: {
-        Row: {
-          disease: boolean
-          nursery_id: string
-          line_reply: boolean
-          low_d30: boolean
-          price_move: boolean
-          restock: boolean
-          updated_at: string
-          weekly: boolean
-        }
-        Insert: {
-          disease?: boolean
-          nursery_id: string
-          line_reply?: boolean
-          low_d30?: boolean
-          price_move?: boolean
-          restock?: boolean
-          updated_at?: string
-          weekly?: boolean
-        }
-        Update: {
-          disease?: boolean
-          nursery_id?: string
-          line_reply?: boolean
-          low_d30?: boolean
-          price_move?: boolean
-          restock?: boolean
-          updated_at?: string
-          weekly?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notification_settings_nursery_id_fkey"
-            columns: ["nursery_id"]
-            isOneToOne: true
-            referencedRelation: "nurseries"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notification_settings_nursery_id_fkey"
-            columns: ["nursery_id"]
-            isOneToOne: true
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
           },
@@ -748,24 +905,24 @@ export type Database = {
       subscription_events: {
         Row: {
           created_at: string
-          nursery_id: string | null
           id: number
+          nursery_id: string | null
           payload: Json | null
           stripe_event_id: string
           type: string
         }
         Insert: {
           created_at?: string
-          nursery_id?: string | null
           id?: number
+          nursery_id?: string | null
           payload?: Json | null
           stripe_event_id: string
           type: string
         }
         Update: {
           created_at?: string
-          nursery_id?: string | null
           id?: number
+          nursery_id?: string | null
           payload?: Json | null
           stripe_event_id?: string
           type?: string
@@ -794,8 +951,8 @@ export type Database = {
           created_by: string
           email: string
           expires_at: string
-          nursery_id: string
           id: string
+          nursery_id: string
           role: Database["public"]["Enums"]["nursery_role"]
           token: string
         }
@@ -805,8 +962,8 @@ export type Database = {
           created_by: string
           email: string
           expires_at?: string
-          nursery_id: string
           id?: string
+          nursery_id: string
           role: Database["public"]["Enums"]["nursery_role"]
           token: string
         }
@@ -816,8 +973,8 @@ export type Database = {
           created_by?: string
           email?: string
           expires_at?: string
-          nursery_id?: string
           id?: string
+          nursery_id?: string
           role?: Database["public"]["Enums"]["nursery_role"]
           token?: string
         }
@@ -871,9 +1028,9 @@ export type Database = {
         | "restock-now"
         | "concern"
         | "quiet"
-      nursery_role: "owner" | "counter_staff" | "lab_tech" | "auditor"
       line_event_kind: "template_push" | "chat_nudge"
       line_event_status: "pending" | "sending" | "sent" | "failed" | "dead"
+      nursery_role: "owner" | "counter_staff" | "lab_tech" | "auditor"
       pcr_status: "clean" | "flagged" | "pending"
     }
     CompositeTypes: {
@@ -1010,9 +1167,9 @@ export const Constants = {
         "concern",
         "quiet",
       ],
-      nursery_role: ["owner", "counter_staff", "lab_tech", "auditor"],
       line_event_kind: ["template_push", "chat_nudge"],
       line_event_status: ["pending", "sending", "sent", "failed", "dead"],
+      nursery_role: ["owner", "counter_staff", "lab_tech", "auditor"],
       pcr_status: ["clean", "flagged", "pending"],
     },
   },
