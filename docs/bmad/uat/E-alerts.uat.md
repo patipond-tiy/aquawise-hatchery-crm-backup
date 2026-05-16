@@ -6,7 +6,7 @@
 
 - `pnpm install` completed; `pnpm dev` boots without error
 - Mock mode: `USE_MOCK=true` / `NEXT_PUBLIC_USE_MOCK=true` in `.env.local` (default)
-- Live mode (specific scenarios only): all three `*_SUPABASE_*` env vars set; two distinct hatchery tenants seeded with separate owner accounts
+- Live mode (specific scenarios only): all three `*_SUPABASE_*` env vars set; two distinct nursery tenants seeded with separate owner accounts
 - Role under test is noted per scenario; default is `owner`
 
 ---
@@ -15,7 +15,7 @@
 
 ### Scenario 1: E1-sort — High-severity alert surfaces above newer low-severity alert
 
-**Given:** The database (or mock) contains two open alerts for the same hatchery:
+**Given:** The database (or mock) contains two open alerts for the same nursery:
 - Alert A: `sev='low'`, `created_at = now() - interval '1 hour'` (newer)
 - Alert B: `sev='high'`, `created_at = now() - interval '25 hours'` (older)
 
@@ -33,23 +33,23 @@ Or: Manual (mock mode). Insert two seed alerts with the above properties in `lib
 
 ---
 
-### Scenario 2: E1-rls — Cross-tenant isolation: hatchery B user cannot see hatchery A alerts
+### Scenario 2: E1-rls — Cross-tenant isolation: nursery B user cannot see nursery A alerts
 
-**Given:** Two separate hatchery accounts exist in a live Supabase project — hatchery A (with at least one `closed=false` alert) and hatchery B (with no alerts). A user authenticated as a member of hatchery B is logged in.
+**Given:** Two separate nursery accounts exist in a live Supabase project — nursery A (with at least one `closed=false` alert) and nursery B (with no alerts). A user authenticated as a member of nursery B is logged in.
 
-**When:** The hatchery B user navigates to `/th/alerts`
+**When:** The nursery B user navigates to `/th/alerts`
 
-**Then:** The alert list is empty (or shows only hatchery B's own alerts); no alerts belonging to hatchery A are visible
+**Then:** The alert list is empty (or shows only nursery B's own alerts); no alerts belonging to nursery A are visible
 
 **Verification:**
 Manual — `USE_MOCK=false`.
-1. Seed hatchery A with one open alert row directly in Supabase dashboard.
-2. Sign in as a hatchery B owner (separate auth session).
+1. Seed nursery A with one open alert row directly in Supabase dashboard.
+2. Sign in as a nursery B owner (separate auth session).
 3. Navigate to `/th/alerts`.
-4. Confirm the hatchery A alert does not appear.
-5. As a secondary check, run a raw Supabase query authenticated as hatchery B's anon token and confirm the `alerts` RLS returns 0 rows for hatchery A's `hatchery_id`.
+4. Confirm the nursery A alert does not appear.
+5. As a secondary check, run a raw Supabase query authenticated as nursery B's anon token and confirm the `alerts` RLS returns 0 rows for nursery A's `nursery_id`.
 
-**Pass/Fail:** PASS if hatchery B session sees zero hatchery A alerts. FAIL if any hatchery A alert row is returned or rendered.
+**Pass/Fail:** PASS if nursery B session sees zero nursery A alerts. FAIL if any nursery A alert row is returned or rendered.
 
 ---
 

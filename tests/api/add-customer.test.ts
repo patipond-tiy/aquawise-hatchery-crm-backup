@@ -11,7 +11,7 @@ vi.mock('@/lib/supabase/client', () => {
   return {
     createClient: () => ({
       from: (table: string) => {
-        if (table === 'hatcheries') {
+        if (table === 'nurseries') {
           return {
             select: () => ({
               limit: () => ({

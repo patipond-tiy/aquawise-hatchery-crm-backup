@@ -14,7 +14,7 @@ export class PaywallError extends Error {
 }
 
 /**
- * Throws PaywallError when the calling user's hatchery subscription requires
+ * Throws PaywallError when the calling user's nursery subscription requires
  * the paywall (trial_expired or canceled). Call at the top of every mutation
  * server action. Read-only actions must NOT call this.
  */
@@ -37,7 +37,7 @@ export async function requireActiveSubscription(): Promise<void> {
 
   const supabase = await createClient();
   const { data } = await supabase
-    .from('hatcheries')
+    .from('nurseries')
     .select('subscription_status, trial_ends_at')
     .limit(1)
     .single();

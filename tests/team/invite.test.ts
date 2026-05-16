@@ -6,7 +6,7 @@ vi.mock('@/lib/utils/mock-mode', () => ({ isMockMode: () => false }));
 // ---- Supabase mock ----
 // We track inserts so we can assert on them.
 type InsertedInvite = {
-  hatchery_id: string;
+  nursery_id: string;
   email: string;
   role: string;
   token: string;
@@ -29,9 +29,9 @@ vi.mock('@/lib/supabase/server', () => {
             eq: (_col2: string, _val2: string) => ({
               limit: () => ({
                 single: async () => {
-                  if (table === 'hatchery_members') {
+                  if (table === 'nursery_members') {
                     if (membershipRole !== 'owner') return { data: null, error: { message: 'not found' } };
-                    return { data: { hatchery_id: 'hatchery-1' }, error: null };
+                    return { data: { nursery_id: 'nursery-1' }, error: null };
                   }
                   return { data: null, error: null };
                 },
@@ -46,9 +46,9 @@ vi.mock('@/lib/supabase/server', () => {
               },
             }),
             single: async () => {
-              if (table === 'hatchery_members') {
+              if (table === 'nursery_members') {
                 if (membershipRole !== 'owner') return { data: null, error: { message: 'not found' } };
-                return { data: { hatchery_id: 'hatchery-1' }, error: null };
+                return { data: { nursery_id: 'nursery-1' }, error: null };
               }
               return { data: null, error: null };
             },
@@ -116,7 +116,7 @@ describe('inviteTeamMember', () => {
     );
     await inviteTeamMember('test@example.com', 'counter_staff');
     expect(capturedInsert).not.toBeNull();
-    expect(capturedInsert!.hatchery_id).toBe('hatchery-1');
+    expect(capturedInsert!.nursery_id).toBe('nursery-1');
     expect(capturedInsert!.email).toBe('test@example.com');
     expect(capturedInsert!.role).toBe('counter_staff');
     expect(typeof capturedInsert!.token).toBe('string');

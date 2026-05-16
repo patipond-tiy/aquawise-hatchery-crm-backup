@@ -30,9 +30,9 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'AquaWise Hatchery',
+  title: 'AquaWise Nursery',
   description:
-    'Hatchery management for Southeast Asian shrimp & fish farms — track customers, batches, and disease alerts.',
+    'Nursery management for Southeast Asian shrimp & fish farms — track customers, batches, and disease alerts.',
 };
 
 export function generateStaticParams() {

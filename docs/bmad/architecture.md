@@ -1,4 +1,4 @@
-# AquaWise Hatchery CRM — Architecture Reference
+# AquaWise Nursery CRM — Architecture Reference
 
 > PURPOSE: Authoritative reference for AI dev agents executing stories. Rules here are enforced — deviations are bugs.
 > SOURCE OF TRUTH: `CLAUDE.md` (this file is a structured derivative).
@@ -60,8 +60,8 @@ const impl = useMock ? mock : live;
 
 | Method | Purpose |
 |---|---|
-| `getHatchery` | Fetch the calling user's hatchery row |
-| `listCustomers` | List all customers for the hatchery |
+| `getNursery` | Fetch the calling user's nursery row (FLAG: method name — pending rename decision) |
+| `listCustomers` | List all customers for the nursery |
 | `getCustomer` | Fetch a single customer by ID |
 | `listBatches` | List all PL batches |
 | `getBatch` | Fetch a single batch by ID |
@@ -93,7 +93,7 @@ const impl = useMock ? mock : live;
 
 **File:** `lib/rbac.ts`
 
-**Role enum** (DB type: `Database['public']['Enums']['hatchery_role']`):
+**Role enum** (DB type: `Database['public']['Enums']['nursery_role']` — FLAG: enum type name — pending rename decision):
 
 ```typescript
 type Role = 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
@@ -140,39 +140,39 @@ if (member.role === 'owner') { ... }
 
 ## 5. RLS Tables
 
-All rows carry `hatchery_id` directly or via FK chain. RLS is enforced at the Postgres level.
+All rows carry `nursery_id` (FLAG: code identifier — pending rename decision) directly or via FK chain. RLS is enforced at the Postgres level; `nursery_id` scopes to the nursery tenant.
 
 | Table | In migrations | RLS read scope | Insert | Update | Delete | Notes |
 |---|---|---|---|---|---|---|
-| `hatcheries` | Y (001) | Own row only | Server-side at signup | `owner` only | — | |
-| `hatchery_members` | Y (001) | Own hatchery's members | `owner` (via invite acceptance) | `owner` only | `owner` only | |
+| `nurseries` | Y (001) | Own row only | Server-side at signup | `owner` only | — | FLAG: table name — nursery tenant row |
+| `nursery_members` | Y (001) | Own nursery's members | `owner` (via invite acceptance) | `owner` only | `owner` only | FLAG: table name |
 | `team_invites` | Y (008) | `owner` only | `owner` only | `owner` only (revoke) | `owner` only | |
-| `customers` | Y (001) | All roles, own hatchery | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only | |
+| `customers` | Y (001) | All roles, own nursery | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only | |
 | `customer_bind_tokens` | Y (006) | Service role only | `owner` + `counter_staff` | Service role | Service role | LIFF bind flow |
-| `batches` | Y (001) | All roles, own hatchery | `owner` + `counter_staff` | `owner` + `counter_staff` (basic); `lab_tech` (PCR fields) | `owner` only | |
-| `pcr_results` | Y (001) | All roles, own hatchery | `lab_tech` + `owner` | `lab_tech` + `owner` | `owner` only | Spec formerly called `batch_pcr_tests` |
-| `alerts` | Y (001) | All roles, own hatchery | `owner` + `counter_staff` + system trigger | `owner` + `counter_staff` (close/note) | `owner` only | |
-| `notification_settings` | Y (001) | All roles, own hatchery | `owner` | `owner` | `owner` | |
-| `scorecard_settings` | Y (001) | All roles, own hatchery | `owner` | `owner` | `owner` | |
-| `line_outbound_events` | Y (006) | All roles, own hatchery | Server actions only | Service role (worker) | — | |
+| `batches` | Y (001) | All roles, own nursery | `owner` + `counter_staff` | `owner` + `counter_staff` (basic); `lab_tech` (PCR fields) | `owner` only | |
+| `pcr_results` | Y (001) | All roles, own nursery | `lab_tech` + `owner` | `lab_tech` + `owner` | `owner` only | Spec formerly called `batch_pcr_tests` |
+| `alerts` | Y (001) | All roles, own nursery | `owner` + `counter_staff` + system trigger | `owner` + `counter_staff` (close/note) | `owner` only | |
+| `notification_settings` | Y (001) | All roles, own nursery | `owner` | `owner` | `owner` | |
+| `scorecard_settings` | Y (001) | All roles, own nursery | `owner` | `owner` | `owner` | |
+| `line_outbound_events` | Y (006) | All roles, own nursery | Server actions only | Service role (worker) | — | |
 | `subscription_events` | Y (004) | `owner` only | Service role (Stripe webhook) | Service role | — | Spec formerly called `subscriptions`; idempotent |
-| `hatchery_brand` | Y (001) | Own hatchery + public for `/h/{slug}` | `owner` | `owner` | — | Public when `scorecard_settings.public = true` |
-| `batch_buyers` | Y (001) | All roles, own hatchery | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only | Spec formerly called `batch_distributions` |
-| `quotes` | *(planned)* | All roles, own hatchery | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only | Not yet in migrations |
-| `prices` | *(planned)* | All roles, own hatchery | `owner` only | `owner` only | `owner` only | Not yet in migrations |
-| `customer_callbacks` | *(planned)* | All roles, own hatchery | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only | Not yet in migrations |
-| `line_message_logs` | *(planned)* | All roles, own hatchery | Service role only | — | — | Not yet in migrations |
-| `data_exports` | *(planned)* | All roles, own hatchery | Server actions only | — | `owner` only | Not yet in migrations |
+| `nursery_brand` | Y (001) | Own nursery + public for `/h/{slug}` | `owner` | `owner` | — | FLAG: table name — Public when `scorecard_settings.public = true` |
+| `batch_buyers` | Y (001) | All roles, own nursery | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only | Spec formerly called `batch_distributions` |
+| `quotes` | *(planned)* | All roles, own nursery | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only | Not yet in migrations |
+| `prices` | *(planned)* | All roles, own nursery | `owner` only | `owner` only | `owner` only | Not yet in migrations |
+| `customer_callbacks` | *(planned)* | All roles, own nursery | `owner` + `counter_staff` | `owner` + `counter_staff` | `owner` only | Not yet in migrations |
+| `line_message_logs` | *(planned)* | All roles, own nursery | Service role only | — | — | Not yet in migrations |
+| `data_exports` | *(planned)* | All roles, own nursery | Server actions only | — | `owner` only | Not yet in migrations |
 
-**`restock_thresholds`** is a JSONB column on `hatcheries` (added migration 010), not a separate table. Managed via `getHatchery` / `updateHatchery`.
+**`restock_thresholds`** is a JSONB column on `nurseries` (FLAG: table name — nursery tenant table; added migration 010), not a separate table. Managed via `getNursery` / `updateNursery`.
 
 **Cross-tenant read block** is P0. Run on every deploy:
 
 ```sql
--- as user A (hatchery_a member)
-SELECT count(*) FROM customers WHERE hatchery_id = '{hatchery_b}'; -- expected: 0
-SELECT count(*) FROM batches WHERE hatchery_id = '{hatchery_b}';   -- expected: 0
--- repeat for every table with hatchery_id
+-- as user A (hatchery_a member)  -- FLAG: hatchery_a/hatchery_b are SQL variable placeholders for nursery tenant UUIDs
+SELECT count(*) FROM customers WHERE nursery_id = '{hatchery_b}'; -- expected: 0
+SELECT count(*) FROM batches WHERE nursery_id = '{hatchery_b}';   -- expected: 0
+-- repeat for every table with nursery_id  -- FLAG: nursery_id is the nursery tenant FK — code identifier
 ```
 
 ---
@@ -269,7 +269,7 @@ background: var(--color-aw3-canvas);
 color: var(--color-aw3-ink);
 ```
 
-**Prototypes:** `prototypes/AquaWise Hatchery v3 - Standalone.html` is read-only design intent. Open in browser to see token usage in context.
+**Prototypes:** `prototypes/AquaWise Hatchery v3 - Standalone.html` is read-only design intent (filename is FLAG — repo artifact). Open in browser to see token usage in context.
 
 **Brand constraints (non-negotiable):**
 - No emoji on professional surfaces.
@@ -350,7 +350,7 @@ Batch            // id, date, source, plProduced, plSold, farms, meanD30, pcr, .
 Alert            // id, sev, title, desc, batch, date, farms, action, closed
 PriceRow         // size, price, delta, avg3y
 Prices           // date, source, rows: PriceRow[]
-Hatchery         // name, nameEn, location, locationEn, restockThresholds
+Hatchery         // name, nameEn, location, locationEn, restockThresholds  (FLAG: type name — represents the nursery tenant; rename is a separate engineering decision)
 TeamMember       // name, role, perm: 'owner'|'counter_staff'|'lab_tech'|'auditor'
 ScorecardSettings
 NotificationSettings

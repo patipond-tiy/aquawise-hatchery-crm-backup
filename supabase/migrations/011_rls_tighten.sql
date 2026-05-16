@@ -7,45 +7,45 @@
 -- so subsequent code can rely on the spec's permission model.
 --
 -- Spec references (08-roles-and-rls.md):
---   hatcheries.update     — `owner` only        (per-table policies row 1)
---   hatchery_members.*    — `owner` only        (per-table policies row 2)
+--   nurseries.update     — `owner` only        (per-table policies row 1)
+--   nursery_members.*    — `owner` only        (per-table policies row 2)
 --   subscriptions.select  — `owner` only        (per-table policies, line 80)
 --
--- hatchery_brand stays at hatchery-membership scope because counter_staff
+-- nursery_brand stays at nursery-membership scope because counter_staff
 -- legitimately need to update brand assets day-to-day (per persona docs).
 -- Tighten that separately if a future story requires it.
 
 -- ============================================================
--- hatcheries: owner only for UPDATE
+-- nurseries: owner only for UPDATE
 -- ============================================================
 
-drop policy if exists hatcheries_update on public.hatcheries;
-create policy hatcheries_update on public.hatcheries
+drop policy if exists nurseries_update on public.nurseries;
+create policy nurseries_update on public.nurseries
   for update using (
     id in (
-      select hatchery_id from public.hatchery_members
+      select nursery_id from public.nursery_members
       where user_id = auth.uid() and role = 'owner'
     )
   );
 
 -- ============================================================
--- hatchery_members: owner only for INSERT and DELETE
+-- nursery_members: owner only for INSERT and DELETE
 -- ============================================================
 
-drop policy if exists members_insert on public.hatchery_members;
-create policy members_insert on public.hatchery_members
+drop policy if exists members_insert on public.nursery_members;
+create policy members_insert on public.nursery_members
   for insert with check (
-    hatchery_id in (
-      select hatchery_id from public.hatchery_members
+    nursery_id in (
+      select nursery_id from public.nursery_members
       where user_id = auth.uid() and role = 'owner'
     )
   );
 
-drop policy if exists members_delete on public.hatchery_members;
-create policy members_delete on public.hatchery_members
+drop policy if exists members_delete on public.nursery_members;
+create policy members_delete on public.nursery_members
   for delete using (
-    hatchery_id in (
-      select hatchery_id from public.hatchery_members
+    nursery_id in (
+      select nursery_id from public.nursery_members
       where user_id = auth.uid() and role = 'owner'
     )
   );
@@ -57,8 +57,8 @@ create policy members_delete on public.hatchery_members
 drop policy if exists subscription_events_select on public.subscription_events;
 create policy subscription_events_select on public.subscription_events
   for select using (
-    hatchery_id in (
-      select hatchery_id from public.hatchery_members
+    nursery_id in (
+      select nursery_id from public.nursery_members
       where user_id = auth.uid() and role = 'owner'
     )
   );

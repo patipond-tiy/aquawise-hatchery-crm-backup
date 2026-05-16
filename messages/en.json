@@ -1,7 +1,7 @@
 {
   "app": {
-    "title": "AquaWise Hatchery",
-    "tagline": "Hatchery management for SEA shrimp & fish farms"
+    "title": "AquaWise Nursery",
+    "tagline": "Nursery management for SEA shrimp & fish farms"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -46,7 +46,7 @@
     "per_month": "month",
     "trial_days_left": "Free trial — {days} days left",
     "trial_expired_title": "Your 30-day free trial has ended",
-    "trial_expired_body": "Subscribe to Pro to keep using AquaWise Hatchery — every record you've added is preserved and reappears the moment you subscribe.",
+    "trial_expired_body": "Subscribe to Pro to keep using AquaWise Nursery — every record you've added is preserved and reappears the moment you subscribe.",
     "subscribe_cta": "Subscribe — 5,000 ฿ / month",
     "preparing_checkout": "Preparing checkout…",
     "manage_cta": "Manage subscription",

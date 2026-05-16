@@ -25,7 +25,7 @@ Server-only Stripe SDK access + plan config constants.
 - **Trial length is 30 days.** Two places must agree: `TRIAL_DAYS` in `config.ts` AND the column default in `supabase/migrations/004_billing.sql` (`now() + interval '30 days'`). Change both together.
 - **Pro price is THB 5,000/mo** = 500_000 satang in Stripe. The display value (`PRO_AMOUNT_THB`) and Stripe's stored value differ by 100×. Don't conflate them.
 - **`STRIPE_PRO_PRICE_ID` must come from env**, not hardcoded. The price is provisioned once in the Stripe Dashboard (see `docs/STRIPE.md`) and the id pasted into `.env.local`.
-- **`appInfo`** sets `name: 'AquaWise Hatchery CRM'` — Stripe shows this in their dashboard activity log. Keep it as-is for support traceability.
+- **`appInfo`** sets `name: 'AquaWise Nursery CRM'` — Stripe shows this in their dashboard activity log. Keep it as-is for support traceability.
 
 ## Dependencies
 

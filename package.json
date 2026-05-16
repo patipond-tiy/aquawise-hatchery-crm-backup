@@ -1,8 +1,8 @@
 {
-  "name": "hatchery-crm",
+  "name": "nursery-crm",
   "version": "0.1.0",
   "private": true,
-  "description": "AquaWise Hatchery CRM — Thai/English SaaS for shrimp & fish hatchery operators in SEA",
+  "description": "AquaWise Nursery CRM — Thai/English SaaS for shrimp & fish nursery operators in SEA",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

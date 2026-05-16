@@ -17,7 +17,7 @@
 
 > ⚠ DO NOT RUN — 2027+ hypothesis not validated
 
-**Given:** An owner account for a hatchery with `scorecard_settings.public = false` (the default); the F2 public scorecard route (`/th/h/{slug}`) exists and is deployed (hypothesis — does not exist today)
+**Given:** An owner account for a nursery with `scorecard_settings.public = false` (the default); the F2 public scorecard route (`/th/h/{slug}`) exists and is deployed (hypothesis — does not exist today)
 
 **When:** The owner navigates to Settings → Scorecard and flips the `public` toggle to `on`; the change is persisted to `scorecard_settings`
 
@@ -38,7 +38,7 @@ Or: Manual — `USE_MOCK=false`. Navigate to Settings → Scorecard; enable publ
 
 > ⚠ DO NOT RUN — 2027+ hypothesis not validated
 
-**Given:** An authenticated `counter_staff` user with a valid session for the hatchery
+**Given:** An authenticated `counter_staff` user with a valid session for the nursery
 
 **When:** The `counter_staff` user attempts to toggle any of the six scorecard visibility settings (public, showD30, showPCR, showRetention, showVolume, showReviews)
 
@@ -82,13 +82,13 @@ Or: Manual. Open `/th/scorecard` (internal settings view) in any browser. Right-
 
 > ⚠ DO NOT RUN — 2027+ hypothesis not validated
 
-**Given:** A hatchery has `scorecard_settings.public = true`; the public route `app/[locale]/h/[slug]/page.tsx` is deployed (hypothesis — does not exist today); the hatchery slug is `p-pong`
+**Given:** A nursery has `scorecard_settings.public = true`; the public route `app/[locale]/h/[slug]/page.tsx` is deployed (hypothesis — does not exist today); the nursery slug is `p-pong`
 
 **When:** An unauthenticated visitor opens `/th/h/p-pong` in an incognito browser window
 
 **Then:**
 - The page returns HTTP 200
-- The hatchery brand (logo, display name in Thai) is rendered
+- The nursery brand (logo, display name in Thai) is rendered
 - "Verified by AquaWise" stamp and last-refresh timestamp are visible
 - Only the stat sections that the owner has toggled on in F1 are shown
 - No auth prompt or redirect to login occurs
@@ -104,13 +104,13 @@ Or: Manual — `USE_MOCK=false`. Open `/th/h/p-pong` in incognito; confirm HTTP 
 
 ---
 
-### Scenario 2: F2-private — Private hatchery returns 404
+### Scenario 2: F2-private — Private nursery returns 404
 
 > ⚠ DO NOT RUN — 2027+ hypothesis not validated
 
-**Given:** A hatchery has `scorecard_settings.public = false`; the public route exists
+**Given:** A nursery has `scorecard_settings.public = false`; the public route exists
 
-**When:** An unauthenticated visitor opens `/th/h/{slug}` for that hatchery
+**When:** An unauthenticated visitor opens `/th/h/{slug}` for that nursery
 
 **Then:** The page returns HTTP 404
 
@@ -119,9 +119,9 @@ Or: Manual — `USE_MOCK=false`. Open `/th/h/p-pong` in incognito; confirm HTTP 
 # ⚠ DO NOT RUN
 pnpm vitest run tests/scorecard/public.test.ts -t "private slug returns 404"
 ```
-Or: Manual — `USE_MOCK=false`. Set `public=false` for a hatchery; open its slug URL in incognito; confirm 404 response.
+Or: Manual — `USE_MOCK=false`. Set `public=false` for a nursery; open its slug URL in incognito; confirm 404 response.
 
-**Pass/Fail:** PASS if HTTP 404 is returned for a private hatchery slug. FAIL if HTTP 200 is returned or the page is visible to unauthenticated visitors.
+**Pass/Fail:** PASS if HTTP 404 is returned for a private nursery slug. FAIL if HTTP 200 is returned or the page is visible to unauthenticated visitors.
 
 ---
 

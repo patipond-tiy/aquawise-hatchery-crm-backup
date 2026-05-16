@@ -9,8 +9,8 @@
 - A `batches_auditor_v` SECURITY INVOKER view exists (migration `013_auditor_batch_view.sql`)
 - At least one batch exists with real `pcr_results` rows (at least 4 diseases) and at least 3 `batch_buyers` rows with linked `customer_cycles.d30` values
 - At least one batch exists with zero `batch_buyers` rows
-- A `lab_tech` member and a `counter_staff` member exist for Hatchery A
-- An `auditor` member exists for Hatchery A
+- A `lab_tech` member and a `counter_staff` member exist for Nursery A
+- An `auditor` member exists for Nursery A
 - Font files `Plus Jakarta Sans` and `Noto Sans Thai` exist in `public/fonts/`
 
 ---

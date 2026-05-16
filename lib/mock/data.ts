@@ -2,16 +2,16 @@ import type {
   Alert,
   Batch,
   Customer,
-  Hatchery,
+  Nursery,
   NotificationSettings,
   Prices,
   ScorecardSettings,
   TeamMember,
 } from '@/lib/types';
 
-export const HATCHERY: Hatchery = {
+export const NURSERY: Nursery = {
   name: 'ฟ้าใส แฮทเชอรี่',
-  nameEn: 'Fasai Hatchery',
+  nameEn: 'Fasai Nursery',
   location: 'สมุทรสาคร',
   locationEn: 'Samut Sakhon',
   restockThresholds: { now: 0, week: 14, month: 45 },

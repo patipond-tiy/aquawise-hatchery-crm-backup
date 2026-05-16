@@ -1,4 +1,4 @@
-# Welcome to Hatchery CRM
+# Welcome to Nursery CRM
 
 ## How We Use Claude
 
@@ -24,7 +24,7 @@ Top MCP Servers:
 ## Your Setup Checklist
 
 ### Codebases
-- [ ] hatchery-crm — https://github.com/aquawise-tech/aquawise-hatchery-crm
+- [ ] nursery-crm — https://github.com/aquawise-tech/aquawise-nursery-crm
 
 ### MCP Servers to Activate
 - [ ] oh-my-claudecode — Bundled MCP tools from the OMC plugin (project memory, notepad, state, LSP, AST grep, wiki). Install via `/oh-my-claudecode:omc-setup` or run `omc update` if you already have it.

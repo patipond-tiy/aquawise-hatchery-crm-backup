@@ -2,10 +2,10 @@ import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const BUCKET = 'hatchery-logos';
+const BUCKET = 'nursery-logos';
 
-export async function uploadHatcheryLogo(
-  hatcheryId: string,
+export async function uploadNurseryLogo(
+  nurseryId: string,
   file: File
 ): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
   if (!ALLOWED_TYPES.includes(file.type)) {
@@ -14,7 +14,7 @@ export async function uploadHatcheryLogo(
 
   const supabase = await createClient();
   const ext = file.name.split('.').pop() ?? 'jpg';
-  const path = `${hatcheryId}/logo.${ext}`;
+  const path = `${nurseryId}/logo.${ext}`;
 
   const { error } = await supabase.storage
     .from(BUCKET)

@@ -7,8 +7,8 @@
 - Migration `010_restock_thresholds.sql` applied; `hatcheries.restock_thresholds` column exists with default `{"now":0,"week":14,"month":45}`
 - Migration `006_line_integration.sql` applied; `line_outbound_events` table and its partial unique index on `(customer_id, template, cycle_id)` exist
 - Migration `013_quotes.sql` applied; `quotes` and `prices` tables exist
-- At least 5 customers in Hatchery A have `restockIn` values distributed across urgency groups: at least one with `restockIn <= 0`, at least two with `1 <= restockIn <= 14`, and at least one with `restockIn > 45`
-- An `owner` and a `counter_staff` member exist for Hatchery A
+- At least 5 customers in Nursery A have `restockIn` values distributed across urgency groups: at least one with `restockIn <= 0`, at least two with `1 <= restockIn <= 14`, and at least one with `restockIn > 45`
+- An `owner` and a `counter_staff` member exist for Nursery A
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### Scenario 1: D1-buckets — Customers in "now" group all have restockIn ≤ 0
 
-**Given:** Hatchery A has customers with a mix of `restockIn` values; the default thresholds (`now=0`, `week=14`, `month=45`) are active
+**Given:** Nursery A has customers with a mix of `restockIn` values; the default thresholds (`now=0`, `week=14`, `month=45`) are active
 **When:** The owner navigates to `/th/restock`
 **Then:** Every customer card rendered in the "now" urgency group has `restockIn <= 0`; no card with `restockIn > 0` appears in the "now" group
 
@@ -54,7 +54,7 @@ Manual — `USE_MOCK=false`:
 1. Note which customer has `restockIn = 10`; confirm it appears in the "week" group on `/th/restock`.
 2. Navigate to Settings → Restock Thresholds; change the "สัปดาห์นี้" input from 14 to 7; click "บันทึก".
 3. Confirm success toast "บันทึกแล้ว".
-4. In Supabase → `hatcheries`: confirm `restock_thresholds` JSON has `"week": 7`.
+4. In Supabase → `nurseries`: confirm `restock_thresholds` JSON has `"week": 7`.
 5. Navigate to `/th/restock`; confirm the customer with `restockIn = 10` now appears in the "month" group, not the "week" group.
 
 **Pass/Fail:** PASS if the customer re-buckets to "month" after the threshold change and the DB reflects `"week": 7`. FAIL if the customer remains in the "week" group, or if the DB is not updated.
@@ -65,7 +65,7 @@ Manual — `USE_MOCK=false`:
 
 ### Scenario 1: D2-idempotent — Sending same quote twice does not duplicate line_outbound_events
 
-**Given:** A `quotes` row and one `line_outbound_events` row with `template = 'quote'` already exist for `(hatchery_id, customer_id, items)` with `status = 'sent'`
+**Given:** A `quotes` row and one `line_outbound_events` row with `template = 'quote'` already exist for `(nursery_id, customer_id, items)` with `status = 'sent'`
 **When:** The user opens the quote modal for the same customer, enters identical line items, and submits a second time
 **Then:** No duplicate `line_outbound_events` row is created; the server action returns the existing `quoteId`; the idempotency toast "ใบเสนอราคานี้ส่งไปแล้ว" appears
 

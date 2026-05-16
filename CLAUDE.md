@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**AquaWise Hatchery CRM** — Thai/English (default `th`) SaaS for the upstream end of the AquaWise system: shrimp & fish hatchery operators in Southeast Asia. The customer is the operator who owns broodstock and produces nauplii, then sells post-larvae (PL) to nursery (`โรงอนุบาล`) and farm customers. The app tracks customers (farms), PL batches with PCR results, disease alerts, a public scorecard, restock cadence, team RBAC, and Stripe billing (30-day no-card trial → THB 5,000/mo Pro plan).
+**AquaWise Nursery CRM** — Thai/English (default `th`) SaaS for shrimp & fish **nursery** operators (`โรงอนุบาล`) in Southeast Asia. The customer is the operator who **buys nauplii from a hatchery, grows them ~20 days, and sells post-larvae (PL) to farm customers** — the mid-chain player in `hatchery → nursery → farm`. Archetype: **P'Pong** (per `../aquawise-docs/04-aquawise-nursery-customer-doc.md`). The app tracks customers (farms), PL batches with PCR results, disease alerts, a public scorecard, restock cadence, team RBAC, and Stripe billing (30-day no-card trial → THB 5,000/mo Pro plan).
 
 This is one of two product submodules in the `aquawise-ecosystem` umbrella (the other is `line-bot/`). It is **single-package**, not a monorepo — `packageManager: pnpm@10.0.0`.
 
@@ -13,20 +13,22 @@ This is one of two product submodules in the `aquawise-ecosystem` umbrella (the 
 Per `../aquawise-docs/02-aquawise-what-we-build-first.md` (Chain, CEO):
 
 1. Farmer (now, 2026) — via the LINE bot `น้องน้ำ` in the sibling `line-bot/`
-2. Nursery (now, 2026) — distribution channel for the farmer side
+2. **Nursery (`โรงอนุบาล`) — now, 2026. ← This repo's customer.** Distribution channel for the farmer side (QR-at-counter onboards farmers).
 3. Broker / `ล้ง` (parallel, opportunistic) — price-feed revenue
-4. **Hatchery (`โรงเพาะฟัก`) — 2027.** ← This repo's customer.
+4. Hatchery (`โรงเพาะฟัก`) — 2027. The **real upstream broodstock** stakeholder (archetype P'Bunjong); a **separate future product**, not this repo.
 5. Feed company (2027), Bank/BAAC (2028+).
 
-The hatchery doc is `../aquawise-docs/06-aquawise-hatchery-customer-doc.md` and is **explicitly v0.5 with ⚠ markers**. ⚠ items are hypotheses awaiting validation with P'Bunjong (Thai Aquaculture Federation). Do not treat any specific hatchery feature, scene, or pricing claim as customer reality. The architecture exists so we have something to push back on, not because we have a confirmed spec.
+> **History:** this repo was initially mis-scoped as a "hatchery" CRM. The actual customer is the **nursery** (P'Pong, `โรงอนุบาล`), served **now (2026)**. The genuine hatchery (broodstock/nauplii/lineages, P'Bunjong) is the distinct 2027+ upstream stakeholder in step 4 — do not conflate the two.
 
-The repo today is functionally a **nursery-style CRM scaffolded against the hatchery vocabulary** (broodstock, nauplii, PCR, lineages) — the schema and UX will be revisited heavily in 2027 once we have real conversations.
+The nursery customer doc is `../aquawise-docs/04-aquawise-nursery-customer-doc.md` (archetype **P'Pong**, President of the Thai Shrimp Larvae Hatchery Association — the association name is older terminology; he operationally runs a nursery). The separate `06-aquawise-hatchery-customer-doc.md` covers the **future** hatchery stakeholder (P'Bunjong) and is **explicitly v0.5 with ⚠ markers** — 2027+ hypotheses, not this repo's customer reality.
+
+The repo today is a **nursery CRM**: PL batches, PCR results, farm customers, restock cadence, disease alerts. Broodstock / nauplii / genetic-lineage vocabulary belongs to the upstream *hatchery* (step 4, 2027) — not the nursery surfaces built here.
 
 ## Read these before product work
 
-- `../aquawise-docs/00-aquawise-brand-foundation.md` — tone/voice gates ALL user-facing copy. Voice archetype: `ลูกหลานที่เรียนมา` ("educated younger relative who came back to help"). For hatchery surfaces the register is even more deferential and scientific. **Never** use: "AI-powered", "platform", "revolutionary", excitement, urgency, awe-at-tech. **No emoji on professional surfaces. No dark mode. No customization.**
-- `../aquawise-docs/02-aquawise-what-we-build-first.md` — sequencing is non-negotiable. The hatchery is 2027+; resist over-investing now.
-- `../aquawise-docs/06-aquawise-hatchery-customer-doc.md` — read before scoping any hatchery feature.
+- `../aquawise-docs/00-aquawise-brand-foundation.md` — tone/voice gates ALL user-facing copy. Voice archetype: `ลูกหลานที่เรียนมา` ("educated younger relative who came back to help"). For nursery surfaces the register is even more deferential and scientific. **Never** use: "AI-powered", "platform", "revolutionary", excitement, urgency, awe-at-tech. **No emoji on professional surfaces. No dark mode. No customization.**
+- `../aquawise-docs/02-aquawise-what-we-build-first.md` — sequencing is non-negotiable. The nursery is **now (2026)** as the farmer-side distribution channel; the real hatchery is 2027+ (don't build ahead of the farmer side).
+- `../aquawise-docs/04-aquawise-nursery-customer-doc.md` — read before scoping any nursery feature (this repo's customer). `06-aquawise-hatchery-customer-doc.md` is the *future* 2027+ hatchery stakeholder — not this repo.
 
 When the docs and the code disagree on *what to build*, the docs win. When they disagree on *how to build it*, this repo wins.
 
@@ -58,9 +60,9 @@ Run a single test by name: `pnpm vitest run -t "test name substring"`.
 - **`proxy.ts` (root middleware)** runs `next-intl` middleware AND injects an `x-pathname` header on every response so server components like `BillingGate` can branch on the URL (layouts don't get the request URL directly). The matcher excludes `/auth/*` because Supabase OAuth/PKCE callbacks land there without a locale prefix.
 - **i18n**: `next-intl` 4.5, default `th`. Strings live in `messages/{en,th}.json`. **Every key must exist in both files.** Missing keys render `⚠️ {key}` in dev. `app/[locale]/layout.tsx` currently renders `<ComingSoon />` for `locale === 'en'` — the English experience is intentionally gated; port features against the Thai surface.
 - **API facade (`lib/api/index.ts`)**: pages and components import only from `@/lib/api`. The facade dispatches to `lib/mock/api.ts` (mock) or `lib/api/supabase.ts` (live) based on `USE_MOCK` / `NEXT_PUBLIC_USE_MOCK` env (also auto-falls back to mock if `NEXT_PUBLIC_SUPABASE_URL` is unset). Mock and live share async signatures so flipping the flag is a one-line swap. **Never call Supabase directly from a page.**
-- **Auth + multi-tenant scope**: Supabase Auth (magic link + PKCE/implicit). Every domain row carries `hatchery_id`; RLS scopes reads/writes to `hatchery_members.hatchery_id` of the calling user. `app/auth/callback/` handles both PKCE and implicit-flow callbacks.
-- **RBAC** (`lib/rbac.ts`): role enum is `owner | counter_staff | lab_tech | auditor`. The DB enum lives at `Database['public']['Enums']['hatchery_role']`. Action-based: `customer:read|write`, `batch:read|write`, `alert:close`, `team:invite`, `settings:write`, `data:export`, `billing:manage`. Use `can(role, action)` — do not branch on role strings directly.
-- **Billing**: trial state lives on `hatcheries` (`subscription_status`, `trial_ends_at`). `BillingGate` (server component in dashboard layout) redirects expired/canceled tenants everywhere except `/settings`, `/billing/trial-expired`, `/login`, `/auth`. **Stripe webhook at `app/api/webhooks/stripe/route.ts` is the source of truth** — uses service-role client + `subscription_events` for idempotency. Plan: THB 5,000/mo Pro; 30-day no-card trial.
+- **Auth + multi-tenant scope**: Supabase Auth (magic link + PKCE/implicit). Every domain row carries `nursery_id`; RLS scopes reads/writes to `nursery_members.nursery_id` of the calling user. `app/auth/callback/` handles both PKCE and implicit-flow callbacks.
+- **RBAC** (`lib/rbac.ts`): role enum is `owner | counter_staff | lab_tech | auditor`. The DB enum lives at `Database['public']['Enums']['nursery_role']`. Action-based: `customer:read|write`, `batch:read|write`, `alert:close`, `team:invite`, `settings:write`, `data:export`, `billing:manage`. Use `can(role, action)` — do not branch on role strings directly.
+- **Billing**: trial state lives on `nurseries` (`subscription_status`, `trial_ends_at`). `BillingGate` (server component in dashboard layout) redirects expired/canceled tenants everywhere except `/settings`, `/billing/trial-expired`, `/login`, `/auth`. **Stripe webhook at `app/api/webhooks/stripe/route.ts` is the source of truth** — uses service-role client + `subscription_events` for idempotency. Plan: THB 5,000/mo Pro; 30-day no-card trial.
 - **State**: TanStack Query 5 for server cache; Zustand for ephemeral UI (modal stack at `lib/store/modal.ts`, sidebar collapsed flag at `lib/store/sidebar.ts`). `<ModalRoot />` (mounted in `<Providers>`) switches on a `kind` union — adding a modal means: extend the union, add a branch in `ModalRoot`, drop the component in `components/modals/`.
 - **Design tokens**: Tailwind 4 with **CSS-first** tokens in `app/globals.css` under `@theme inline`. Custom `aw3-*` tokens (canvas/app/card/ink/hero, plus pastel pairs `lav`/`peach`/`mint`/`sky`/`rose`/`amber` and `good`/`bad`/`warn`). Custom primitives in `components/aw/` use `var(--color-…)` directly. **No `tailwind.config.ts`** — Tailwind 4 doesn't need one for tokens.
 
@@ -144,8 +146,8 @@ Reload — Settings → Billing tab and `BillingGate` redirects react accordingl
 
 ## Working with the umbrella
 
-This directory is a git submodule of `aquawise-ecosystem`. Inside `hatchery-crm/` it behaves as a full clone of its own repo (`aquawise-tech/aquawise-hatchery-crm`). Branch and push from this folder; pushes go to the component's GitHub repo, not the umbrella. The umbrella auto-bumps its submodule pin within ~10 seconds of a push to the tracked branch (`main`).
+This directory is a git submodule of `aquawise-ecosystem`. Inside `hatchery-crm/` it behaves as a full clone of its own repo (`aquawise-tech/aquawise-nursery-crm`). Branch and push from this folder; pushes go to the component's GitHub repo, not the umbrella. The umbrella auto-bumps its submodule pin within ~10 seconds of a push to the tracked branch (`main`).
 
 ## Status
 
-Current status and execution live in `docs/bmad/` (start at `docs/README.md` → `docs/bmad/README.md`). Per the archived `docs/archive/PLAN.md` (historical): Phases 1–4 done; Phase 5 (polish + deploy) in progress; Phase 6 (Stripe Pro plan + 30-day trial) code-complete, awaiting Stripe Dashboard provisioning. The reference design is `prototypes/AquaWise Hatchery v3 - Standalone.html` — open in a browser to see the design intent.
+Current status and execution live in `docs/bmad/` (start at `docs/README.md` → `docs/bmad/README.md`). Per the archived `docs/archive/PLAN.md` (historical): Phases 1–4 done; Phase 5 (polish + deploy) in progress; Phase 6 (Stripe Pro plan + 30-day trial) code-complete, awaiting Stripe Dashboard provisioning. The reference design is `prototypes/AquaWise Hatchery v3 - Standalone.html` — open in a browser to see the design intent (filename frozen, do not rename).

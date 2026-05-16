@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   const now = new Date().toISOString();
   const { data: invite, error } = await supabase
     .from('team_invites')
-    .select('id, hatchery_id, role, expires_at, accepted_at, email')
+    .select('id, nursery_id, role, expires_at, accepted_at, email')
     .eq('token', token)
     .single();
 
@@ -41,10 +41,10 @@ export async function GET(request: NextRequest) {
 
   // Insert member row — upsert in case they're already a member with a different role
   const { error: memberError } = await supabase
-    .from('hatchery_members')
+    .from('nursery_members')
     .upsert(
-      { hatchery_id: invite.hatchery_id, user_id: user.id, role: invite.role },
-      { onConflict: 'hatchery_id,user_id' }
+      { nursery_id: invite.nursery_id, user_id: user.id, role: invite.role },
+      { onConflict: 'nursery_id,user_id' }
     );
 
   if (memberError) {

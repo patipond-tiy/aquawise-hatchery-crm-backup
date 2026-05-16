@@ -18,7 +18,7 @@ export function getStripe(): Stripe {
   _stripe = new Stripe(key, {
     typescript: true,
     appInfo: {
-      name: 'AquaWise Hatchery CRM',
+      name: 'AquaWise Nursery CRM',
       version: '0.1.0',
     },
   });

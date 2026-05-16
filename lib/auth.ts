@@ -2,16 +2,16 @@ import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 import type { Database } from '@/lib/database.types';
 
-type Role = Database['public']['Enums']['hatchery_role'];
+type Role = Database['public']['Enums']['nursery_role'];
 
 /**
- * Resolve the calling user's hatchery scope from the cookie session.
+ * Resolve the calling user's nursery scope from the cookie session.
  * Returns null in mock mode (no Supabase configured) — callers should
  * gracefully short-circuit.
  */
-export async function currentHatcheryScope(): Promise<{
+export async function currentNurseryScope(): Promise<{
   userId: string;
-  hatcheryId: string;
+  nurseryId: string;
   role: Role;
 } | null> {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
@@ -23,8 +23,8 @@ export async function currentHatcheryScope(): Promise<{
   if (!user) return null;
 
   const { data: membership } = await supabase
-    .from('hatchery_members')
-    .select('hatchery_id, role')
+    .from('nursery_members')
+    .select('nursery_id, role')
     .eq('user_id', user.id)
     .limit(1)
     .single();
@@ -32,7 +32,7 @@ export async function currentHatcheryScope(): Promise<{
 
   return {
     userId: user.id,
-    hatcheryId: membership.hatchery_id,
+    nurseryId: membership.nursery_id,
     role: membership.role,
   };
 }

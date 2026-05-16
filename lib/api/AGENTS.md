@@ -22,8 +22,8 @@ Switching providers is a one-line change to `.env.local` — no page edits.
 
 | File | Description |
 |------|-------------|
-| `index.ts` | The facade. 18 exports cover hatchery, customers, batches, alerts, prices, team, scorecard/notification settings, billing, and 4 mutations (`addCustomer`, `addBatch`, `closeAlert`, `updateScorecardSettings`, `updateNotificationSettings`) |
-| `supabase.ts` | Live implementation against the browser Supabase client. Uses RLS to scope rows by hatchery. Includes `rowToCustomer` / `rowToBatch` adapters that bridge snake_case rows to camelCase domain types |
+| `index.ts` | The facade. 18 exports cover nursery, customers, batches, alerts, prices, team, scorecard/notification settings, billing, and 4 mutations (`addCustomer`, `addBatch`, `closeAlert`, `updateScorecardSettings`, `updateNotificationSettings`) |
+| `supabase.ts` | Live implementation against the browser Supabase client. Uses RLS to scope rows by nursery. Includes `rowToCustomer` / `rowToBatch` adapters that bridge snake_case rows to camelCase domain types |
 
 ## For AI Agents
 
@@ -37,6 +37,7 @@ Switching providers is a one-line change to `.env.local` — no page edits.
 - **Mock-mode auto-fallback**: even with `USE_MOCK=false`, the facade falls back to mock when `NEXT_PUBLIC_SUPABASE_URL` is unset. This is intentional — devs without Supabase access still get a working UI.
 - **The Supabase impl uses the BROWSER client** (`@/lib/supabase/client`) so it can run from server or client components alike (Next 16 RSC + 'use client' both call into it). Mutations that need to write `audit_log` should NOT live here; use a server action instead.
 - **`getInvoiceHistory` returns `[]` from `supabase.ts`** — real invoices require the Stripe secret key, which only the Settings page's server action `fetchInvoiceHistory()` has access to. The contract just keeps the facade satisfied.
+- **`getNursery`** — queries the `nurseries` table; falls back to `NURSERY` mock default.
 
 ### Common Patterns
 - All functions are `async` and return `Promise<T>`.
@@ -49,7 +50,7 @@ Switching providers is a one-line change to `.env.local` — no page edits.
 - `@/lib/mock/api` (mock impl)
 - `@/lib/supabase/client` (browser Supabase client)
 - `@/lib/types`, `@/lib/database.types`
-- `@/lib/mock/data` (still used for `PRICES`/`TEAM`/`HATCHERY` defaults — these aren't in the schema yet)
+- `@/lib/mock/data` (still used for `PRICES`/`TEAM`/`NURSERY` defaults — these aren't in the schema yet)
 
 ### External
 - `@supabase/ssr` (via `lib/supabase/client`)

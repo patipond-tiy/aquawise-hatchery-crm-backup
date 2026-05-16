@@ -1,4 +1,4 @@
-# AquaWise Hatchery CRM — Product Requirements Document
+# AquaWise Nursery CRM — Product Requirements Document
 
 **Version:** 1.0 (2026-05-03)
 **Status:** Active scaffold — hatchery-specific features are 2027+ hypotheses
@@ -9,7 +9,7 @@
 
 ## 1. Product Vision
 
-AquaWise Hatchery CRM is a Thai/English SaaS cockpit for shrimp and fish hatchery operators in Southeast Asia. It closes the loop between a hatchery's post-larvae batches and downstream farm outcomes, giving the operator verifiable evidence to defend their reputation, manage a small high-stakes customer base, and make their careful craft visible to nursery buyers they have not yet met. The current repo is a nursery-style CRM scaffolded against hatchery vocabulary; serious hatchery product investment begins in 2027 once nursery and farmer cycle data exists at scale.
+AquaWise Nursery CRM is a Thai/English SaaS cockpit for shrimp and fish nursery operators in Southeast Asia. It closes the loop between a nursery's post-larvae batches and downstream farm outcomes, giving the operator verifiable evidence to defend their reputation, manage a small high-stakes customer base, and make their careful craft visible to farm buyers they have not yet met. The current repo is a nursery-style CRM scaffolded against hatchery vocabulary; serious hatchery product investment begins in 2027 once nursery and farmer cycle data exists at scale.
 
 **Boundary:** Do not add hatchery-specific features beyond the current scaffold before the 2027 P'Bunjong validation conversations. The scaffolded app ships Phase H1 production-readiness first.
 
@@ -36,12 +36,12 @@ AquaWise Hatchery CRM is a Thai/English SaaS cockpit for shrimp and fish hatcher
 
 > ⚠ Hatchery personas are 2027+ hypotheses pending validation with P'Bunjong and other hatchery operators. Do not treat any specific job, scene, or behavior as confirmed customer reality. Source: `docs/product-spec/01-personas.md` + `docs/aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md` v0.5.
 
-### Operational personas (inside the hatchery)
+### Operational personas (inside the nursery)
 
 | ID | Name | Role | Thai title | Key pain | RBAC role |
 |---|---|---|---|---|---|
-| P1 | Owner / Hatchery boss | Buyer and primary user; dashboard, restock, alerts | คุณสุเทพ | Unfair blame when downstream farms fail; no verifiable D30 data to defend batches | `owner` |
-| P2 | Hatchery manager | Day-to-day operations; batch registration, PCR upload, delivery scheduling | คุณนิภา | PCR PDFs scattered in email; no single place for batch lineage | `counter_staff` (often co-`owner`) |
+| P1 | Owner / Nursery boss | Buyer and primary user; dashboard, restock, alerts | คุณสุเทพ | Unfair blame when downstream farms fail; no verifiable D30 data to defend batches | `owner` |
+| P2 | Nursery manager | Day-to-day operations; batch registration, PCR upload, delivery scheduling | คุณนิภา | PCR PDFs scattered in email; no single place for batch lineage | `counter_staff` (often co-`owner`) |
 | P3 | Customer rep | Outbound contact; restock calls, LINE quotes, delivery follow-up | คุณรัตนา | Forgets callbacks; quotes sent from personal LINE look unprofessional | `counter_staff` |
 | P4 | PCR / Lab officer | Narrow: upload PCR results, flag positive batches | คุณพรชัย | PCR workflow is paper-first; no structured digital upload | `lab_tech` |
 | P5 | Read-only auditor | Compliance reads; batch lineage and PCR records, no commercial data | คุณมานพ | Cannot export clean compliance data without seeing customer LTV | `auditor` *(planned Phase H3)* |
@@ -50,7 +50,7 @@ AquaWise Hatchery CRM is a Thai/English SaaS cockpit for shrimp and fish hatcher
 
 | ID | Name | Role | Thai title | Key context | RBAC role |
 |---|---|---|---|---|---|
-| P6 | Shrimp farmer | Farm-app user; receives hatchery LINE Flex, logs cycle data | พี่ชาติ | Never logs into the CRM; identified by `line_user_id` on the farm-side LINE bot | None in CRM |
+| P6 | Shrimp farmer | Farm-app user; receives nursery LINE Flex, logs cycle data | พี่ชาติ | Never logs into the CRM; identified by `line_user_id` on the farm-side LINE bot | None in CRM |
 | P7 | Association president | Influence persona; P'Pong is first nursery pilot, P'Bunjong is 2027 hatchery target | พี่ปอง / พี่บุญจง | Brand trust propagates through associations, not ads; his endorsement gates peer adoption | `owner` of his own operation |
 
 **Boundary:** P5 (auditor) role is reserved in the enum from day one but the auditor surface ships Phase H3. P6 never touches the CRM dashboard.
@@ -59,7 +59,7 @@ AquaWise Hatchery CRM is a Thai/English SaaS cockpit for shrimp and fish hatcher
 
 ## 4. Jobs To Be Done
 
-> ⚠ Jobs J1–J5 below reflect the current CRM scaffold (nursery-style vocabulary adapted to hatchery context). The hatchery customer doc (v0.5) defines five distinct hatchery-specific jobs (H-J1 through H-J5) that differ materially and are explicitly hypotheses pending P'Bunjong validation in 2027. Do not treat either set as confirmed hatchery requirements. They will need reconciliation before any 2027 hatchery sprint.
+> ⚠ Jobs J1–J5 below reflect the current CRM scaffold (nursery-style vocabulary adapted to nursery context). The hatchery customer doc (v0.5) defines five distinct hatchery-specific jobs (H-J1 through H-J5) that differ materially and are explicitly hypotheses pending P'Bunjong validation in 2027. Do not treat either set as confirmed hatchery requirements. They will need reconciliation before any 2027 hatchery sprint.
 
 ### Scaffold jobs (current CRM, nursery-style vocabulary)
 
@@ -67,8 +67,8 @@ AquaWise Hatchery CRM is a Thai/English SaaS cockpit for shrimp and fish hatcher
 |---|---|---|---|---|
 | J1 | A customer hasn't reordered in a while | Know if their cycle's ending soon and reach out before a competitor does | I keep the customer | "ลูกค้าไม่กลับมา" |
 | J2 | A farmer says "your PL was bad" | Show evidence about that specific lot — PCR results, what other buyers saw, D30 across all farms that bought it | I'm not blamed unfairly | "เกษตรกรว่า PL ไม่ดี" |
-| J3 | A prospect or association peer asks how good I really am | Hand them a verifiable scorecard with externally-checkable numbers | I close on facts, not promises | "พิสูจน์ว่าโรงเพาะเราดี" |
-| J4 | I want to be a serious, modern operator | Run on a system instead of LINE groups + paper notebooks | I look as professional as I actually am | "อยากเป็นโรงเพาะที่จริงจัง" |
+| J3 | A prospect or association peer asks how good I really am | Hand them a verifiable scorecard with externally-checkable numbers | I close on facts, not promises | "พิสูจน์ว่าโรงอนุบาลเราดี" |
+| J4 | I want to be a serious, modern operator | Run on a system instead of LINE groups + paper notebooks | I look as professional as I actually am | "อยากเป็นโรงอนุบาลที่จริงจัง" |
 | J5 | I want to grow beyond my existing customers | Have a public proof artifact a stranger can find or scan | New farmers reach out without a cold sales call | "อยากได้ลูกค้าใหม่" |
 
 ### ⚠ Hatchery-specific jobs (2027+ hypotheses — not yet confirmed)
@@ -135,13 +135,13 @@ AquaWise Hatchery CRM is a Thai/English SaaS cockpit for shrimp and fish hatcher
 
 | Epic | Title | Representative stories | Phase |
 |---|---|---|---|
-| A | Onboarding & workspace bootstrap | First sign-in creates hatchery row; profile + logo saved to `hatcheries` + `hatchery_brand`; BillingGate trial wired end-to-end | H1 |
+| A | Onboarding & workspace bootstrap | First sign-in creates nursery row; profile + logo saved to `nurseries` + `nursery_brand`; BillingGate trial wired end-to-end | H1 |
 | B | Customer management | Customer detail reads from DB (phone, LINE ID, address); batch history filtered from `batches`; D30 trend from real cycle data; Cmd-K search | H1–H2 |
 | C | Batch register & PCR | PCR step in Add Batch persists disease rows; batch detail buyers table from `batch_buyers`; PCR cert PDF generated and delivered via LINE queue | H1 |
-| D | Restock pipeline | Cron 09:00 ICT fan-out; restock thresholds configurable per hatchery; broadcast wired to LINE queue; quote modal submits | H1–H2 |
+| D | Restock pipeline | Cron 09:00 ICT fan-out; restock thresholds configurable per nursery; broadcast wired to LINE queue; quote modal submits | H1–H2 |
 | E | Alerts & disease tracking | Auto-trigger from farm-side D30 breach; alert message fan-out wired; `closeAlert` audit log | H1–H2 |
 | F | Public scorecard | Public route `/{locale}/h/{slug}` with ISR; real QR encoding slug URL; scorecard PDF; SEO-indexable | H2 — ⚠ full scorecard is a 2027+ hypothesis |
-| G | LINE integration | LINE bind flow; `line_outbound_events` queue; worker sends Flex branded with hatchery logo; `line_message_logs` audit; dead-letter UI | H1 (send-only); H3 (two-way LIFF) |
+| G | LINE integration | LINE bind flow; `line_outbound_events` queue; worker sends Flex branded with nursery logo; `line_message_logs` audit; dead-letter UI | H1 (send-only); H3 (two-way LIFF) |
 | H | Settings, team, billing | Profile save; logo upload; team list from DB; invite token email; data exports (CSV/ZIP/backup) with `data_exports` audit log; quiet hours schema | H1–H2 |
 | X | Ops & infrastructure | RLS audit (every tenant table); Stripe webhook idempotency hardening; cron Cloud Run; multi-tenant cross-contamination test | H1 |
 
@@ -159,7 +159,7 @@ AquaWise Hatchery CRM is a Thai/English SaaS cockpit for shrimp and fish hatcher
 | i18n | Thai-first, English secondary · All UI strings in `messages/{th,en}.json` (no hardcoded literals) · Per-locale number + date formatting · CI fails if either file has keys the other lacks | English is gated to `<ComingSoon />` for now; port features against Thai surface |
 | Scalability | Multi-tenant via RLS · Supabase connection pooling · Cron fan-out via Cloud Run · LINE worker scaled horizontally · Signed URLs for all Storage access | |
 | Observability | Every LINE push logged in `line_message_logs` · Dead-letter UI for `status='dead'` (P2) · Cron error logs streamed to Cloud Logging | |
-| Brand health | ⚠ EOY-2027 KPIs: 1 paying hatchery (P'Bunjong) by Q1 2027 · 200+ cross-nursery cycles flowing to hatchery dashboard · 1+ documented exoneration case | KPIs are hypotheses; gate on 2027 validation |
+| Brand health | ⚠ EOY-2027 KPIs: 1 paying hatchery (P'Bunjong) by Q1 2027 · 200+ cross-nursery cycles flowing to nursery dashboard · 1+ documented exoneration case | KPIs are hypotheses; gate on 2027 validation |
 
 **Boundary:** Every NFR in this table is a gate for production-readiness (Phase H1 done = all NFRs met). KPIs in Brand health are 2027+ targets, not H1 acceptance criteria.
 
@@ -207,8 +207,8 @@ These are hard constraints. Violations are treated as bugs, not style issues.
 - No dark mode — not now, not planned
 - No customization themes
 - Thai is the source-of-truth language; default route is `/th`; English is `<ComingSoon />` until explicitly gated off
-- Voice archetype: `ลูกหลานที่เรียนมา` — the educated younger relative who came back to help. Hatchery register is even more deferential and scientific than the nursery side.
+- Voice archetype: `ลูกหลานที่เรียนมา` — the educated younger relative who came back to help. Nursery register is deferential and scientific.
 - The dashboard is informational, never editorial. No nudges, no "insights", no AI suggestions. Data with sources, sample sizes, time windows, and confidence indicators only.
-- Scientific terminology is welcome on hatchery-facing surfaces (PCR, lineage, broodstock, EHP, WSSV, AHPND). Do not over-translate.
+- Scientific terminology is welcome on nursery-facing surfaces (PCR, lineage, broodstock, EHP, WSSV, AHPND). Do not over-translate.
 
 **Boundary:** Any string, copy, or UI element that violates these gates is a P0 issue. The association president (P7 / P'Pong) must not be embarrassed by anything AquaWise ships. If a feature would embarrass him in front of his peers, it is a P0 stop.

@@ -1,6 +1,6 @@
-# AquaWise Hatchery CRM
+# AquaWise Nursery CRM
 
-Thai/English SaaS for shrimp & fish hatchery operators in Southeast Asia. Built on the same stack as `aquawise-platform` (Next.js 16 + React 19 + Tailwind 4 + Supabase) so the two apps can share packages later.
+Thai/English SaaS for shrimp & fish nursery operators in Southeast Asia. Built on the same stack as `aquawise-platform` (Next.js 16 + React 19 + Tailwind 4 + Supabase) so the two apps can share packages later.
 
 ## Quick start
 
@@ -39,7 +39,7 @@ The app boots with **mock data** by default (`USE_MOCK=true`) so you don't need 
 ## Project layout
 
 ```
-hatchery-crm/
+nursery-crm/
 ├ app/[locale]/              # Locale-prefixed App Router pages
 │ ├ (dashboard)/             # 9 main pages, wrapped in 3-column Shell
 │ │ ├ page.tsx               # Dashboard (hero + stat chips + continue cards)
@@ -137,4 +137,4 @@ See `docs/PLAN.md` for the 5-phase delivery plan and `docs/CHECKLIST.md` for the
 
 ## Reference
 
-Original prototype: `prototypes/AquaWise Hatchery v3 - Standalone.html` (open in browser to see the design intent). Archived JSX sources in `prototypes/_archive/` are the porting reference.
+Original prototype: `prototypes/AquaWise Hatchery v3 - Standalone.html` (open in browser to see the design intent — filename frozen, do not rename). Archived JSX sources in `prototypes/_archive/` are the porting reference.

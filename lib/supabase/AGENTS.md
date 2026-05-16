@@ -28,7 +28,7 @@ Supabase client factories. Three flavors for three runtime contexts:
   - other server-side admin paths that absolutely must write across tenants
   Never expose service-role results to a client.
 - **The "setAll inside Server Components is a no-op" comment** in `server.ts` is intentional — RSC can't write cookies, only middleware can. The try/catch lets the same factory work in RSC, server actions, and route handlers without branching.
-- **Don't write a generic "current hatchery" helper here.** That lives at `@/lib/auth.ts` (`currentHatcheryScope()`) so it can be marked `server-only`.
+- **Don't write a generic "current nursery" helper here.** That lives at `@/lib/auth.ts` (`currentNurseryScope()`) so it can be marked `server-only`.
 
 ### Common Patterns
 - `Database` type from `@/lib/database.types` is generic-parameterized into every client so queries are typed.

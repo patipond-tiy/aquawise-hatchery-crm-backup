@@ -1,6 +1,6 @@
 # docs/bmad — BMAD Execution Layer
 
-This folder is the **BMAD-METHOD execution layer** for the AquaWise Hatchery CRM. It lets an AI dev agent pick up a single story file and implement it end-to-end without a human translating context from the product spec, architecture docs, or business guides.
+This folder is the **BMAD-METHOD execution layer** for the AquaWise Nursery CRM. It lets an AI dev agent pick up a single story file and implement it end-to-end without a human translating context from the product spec, architecture docs, or business guides.
 
 Each story file is self-contained: it embeds the exact acceptance criteria, file paths to touch, API facade methods, RBAC actions, RLS tables, and i18n keys needed to implement and verify the feature autonomously.
 
@@ -95,7 +95,7 @@ All three must pass before the story is considered done.
 
 `stories/_hypotheses/` contains stories for Epic F (public scorecard) and G3 (LIFF inbox). These items are marked ⚠ in `docs/aquawise-updated-docs/06-aquawise-hatchery-customer-doc.md` — they are hypotheses awaiting validation with P'Bunjong (Thai Aquaculture Federation) and the CEO.
 
-**Do not implement hypothesis stories** until they are promoted to confirmed AC after stakeholder validation. The hatchery product is sequenced for 2027 per `docs/aquawise-updated-docs/02-aquawise-what-we-build-first.md`.
+**Do not implement hypothesis stories** until they are promoted to confirmed AC after stakeholder validation. The hatchery stakeholder is sequenced for 2027 per `docs/aquawise-updated-docs/02-aquawise-what-we-build-first.md`.
 
 ---
 
@@ -145,14 +145,14 @@ Story IDs must never change. `A1` in this folder = row `A1` in `docs/work-breakd
 
 Two stories were run through a dev-agent dry run to validate that the BMAD story format is autonomously executable. Results below.
 
-### A1 — Sign Up and Create a Hatchery Workspace (done story, verification pass)
+### A1 — Sign Up and Create a Nursery Workspace (done story, verification pass)
 
 **Objective:** Prove a "done" story gives the agent enough context to verify the implementation without human guidance.
 
 | Check | Result | Notes |
 |---|---|---|
-| Task 1 — Bootstrap idempotency guard | PASS | `lib/auth/bootstrap.ts` checks `hatchery_members` before calling `create_hatchery` RPC. `app/auth/callback/actions.ts` calls `bootstrap()` after PKCE exchange. Mock-mode short-circuit confirmed in `lib/utils/mock-mode.ts`. |
-| Task 2 — `create_hatchery` RPC location | PASS | RPC is in `supabase/migrations/004_billing.sql` (not `001_init.sql`). `trial_ends_at = now() + interval '30 days'` confirmed. Story file was corrected during this run (previously said `001_init.sql`). |
+| Task 1 — Bootstrap idempotency guard | PASS | `lib/auth/bootstrap.ts` checks `nursery_members` before calling `create_nursery` RPC. `app/auth/callback/actions.ts` calls `bootstrap()` after PKCE exchange. Mock-mode short-circuit confirmed in `lib/utils/mock-mode.ts`. |
+| Task 2 — `create_nursery` RPC location | PASS | RPC is in `supabase/migrations/004_billing.sql` (not `001_init.sql`). `trial_ends_at = now() + interval '30 days'` confirmed. Story file was corrected during this run (previously said `001_init.sql`). |
 | Task 3 — Test coverage | PASS | `tests/auth/bootstrap.test.ts` exists with 2 cases: new-user creates workspace; idempotent re-run skips creation. Tests pass (`vitest run` exit code 0). |
 | Task 4 — Live verification | SKIPPED | Requires Supabase credentials; deferred to manual QA. |
 

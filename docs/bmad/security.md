@@ -1,4 +1,4 @@
-# AquaWise Hatchery CRM — Security Reference
+# AquaWise Nursery CRM — Security Reference
 
 > PURPOSE: Threat catalog with concrete, actionable mitigations for THIS stack.
 > AUDIENCE: developers writing features, reviewers gating PRs, anyone preparing for first paying tenant.
@@ -15,7 +15,7 @@ Last reviewed: 2026-05-15. Mitigations verified against actual codebase patterns
 |---|---|---|---|
 | **🔴 P0** | `pnpm up next@latest` (target ≥16.2.5) | GHSA-36qx-fr4f-26g5: middleware/proxy bypass in i18n apps. We are on 16.0.0; we use `next-intl`. **Directly exploitable.** | §1 |
 | **🔴 P0** | Disable Supabase implicit-grant flow; PKCE only | Implicit-flow tokens are visible in the URL fragment; email-link trackers (Outlook SafeLinks, Barracuda) prefetch and consume them. | §3 |
-| **🔴 P0** | Disable Storage bucket directory listing (`hatchery-logos`) | A public bucket leaks the list of all tenant UUIDs via the listing API. | §15 |
+| **🔴 P0** | Disable Storage bucket directory listing (`nursery-logos` — FLAG: bucket name) | A public bucket leaks the list of all nursery tenant UUIDs via the listing API. | §15 |
 | **🟠 P1** | Validate file upload magic bytes (not just `Content-Type`) | Current check is client-asserted; attacker can upload HTML disguised as PNG. | §1 |
 | **🟠 P1** | Add `.github/dependabot.yml` + CI `pnpm audit --audit-level=high` | 16 advisories open today, 7 high. No automated tracking. | §10 |
 | **🟠 P1** | Mark Stripe/Supabase service keys as "Sensitive" in Vercel | Lateral movement on a compromised Vercel team account otherwise. | §11 |
@@ -80,7 +80,7 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
   3. Enforce size in app code before upload starts: `if (file.size > 2_097_152) return …`.
   4. Serve logos through `next/image` with `remotePatterns` restricted to your Supabase storage domain — the proxy strips dangerous content types and re-encodes.
   5. Set `Content-Disposition: attachment` on the bucket if logos are ever rendered as untrusted HTML (irrelevant if served only via `next/image`).
-- **How to verify:** `curl -X PUT '<storage>/hatchery-logos/UUID/logo.html' -H 'Content-Type: image/png' --data '<script>alert(1)</script>'` — must be rejected before reaching storage.
+- **How to verify:** `curl -X PUT '<storage>/nursery-logos/UUID/logo.html' -H 'Content-Type: image/png' --data '<script>alert(1)</script>'` — must be rejected before reaching storage.
 - **Source:** [OWASP Unrestricted File Upload](https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload)
 
 ---
@@ -90,7 +90,7 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
 ## 2. Public scorecard route abuse
 
 - **What it is:** Enumeration, scraping, or bandwidth theft against the unauthenticated `/[locale]/h/{slug}` route.
-- **How it bites THIS app:** The public scorecard is in `_hypotheses/` today (Phase H2/2027). When it ships, the slug maps to a `hatchery_brand` row. Sequential or dictionary-based slug guessing would reveal which hatcheries exist. Logos are in a public Storage bucket and trivially hot-linkable.
+- **How it bites THIS app:** The public scorecard is in `_hypotheses/` today (Phase H2/2027). When it ships, the slug maps to a `nursery_brand` row (FLAG: table name). Sequential or dictionary-based slug guessing would reveal which nurseries exist. Logos are in a public Storage bucket and trivially hot-linkable.
 - **How to prevent:**
   1. Use UUIDs or random 8-char tokens (not sequential IDs, not business names) for the public path.
   2. Add `Cache-Control: public, max-age=3600` + Vercel Edge caching to absorb scraping spikes.
@@ -194,9 +194,9 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
      }
      ```
      (Already a recommended rule in `eslint-plugin-react`; promote to `error`.)
-  3. If markdown rendering is ever needed for hatchery profiles, use `react-markdown` with `rehype-sanitize` and a strict allowlist schema (no `script`, `iframe`, `style`, `on*` attributes).
+  3. If markdown rendering is ever needed for nursery profiles, use `react-markdown` with `rehype-sanitize` and a strict allowlist schema (no `script`, `iframe`, `style`, `on*` attributes).
   4. SVG uploads (not currently allowed) are an XSS vector — keep them banned in `ALLOWED_TYPES`.
-- **How to verify:** Save `<img src=x onerror=alert(1)>` as a hatchery `display_name_th`. Render the page. Confirm it appears as literal text, not as an executing script.
+- **How to verify:** Save `<img src=x onerror=alert(1)>` as a nursery `display_name_th`. Render the page. Confirm it appears as literal text, not as an executing script.
 - **Source:** [OWASP XSS](https://owasp.org/www-community/attacks/xss/), [react-markdown + rehype-sanitize](https://github.com/remarkjs/react-markdown#security)
 
 ---
@@ -206,13 +206,13 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
 ## 8. Server-action parameter tampering
 
 - **What it is:** Manipulating server-action arguments (FormData fields, bound args) to access another tenant's data or escalate privileges.
-- **How it bites THIS app:** `settings/actions.ts:updateProfile` correctly derives `hatchery_id` from the authenticated session, not from the client. `settings/team/actions.ts:inviteTeamMember` accepts `role` from the client but validates against a `VALID_ROLES` allowlist. The risk is **future drift**: a new action that accepts `hatcheryId` as a parameter would let any tenant write to any other tenant's data.
+- **How it bites THIS app:** `settings/actions.ts:updateProfile` correctly derives `nursery_id` (FLAG: code identifier) from the authenticated session, not from the client. `settings/team/actions.ts:inviteTeamMember` accepts `role` from the client but validates against a `VALID_ROLES` allowlist. The risk is **future drift**: a new action that accepts a nursery ID as a parameter would let any tenant write to any other tenant's data.
 - **How to prevent:**
-  1. Hard rule: **NEVER** accept `hatchery_id`, `user_id`, or `role` as a server-action argument. Derive from `supabase.auth.getUser()` + `hatchery_members` lookup. Pattern in `code-design.md` §5 enforces this.
-  2. For Next.js 16 bound arguments via `.bind(null, hatcheryId)`: even though they're AES-encrypted with a per-build key, **do not bind sensitive IDs**. Bind only display hints; re-derive authority server-side.
+  1. Hard rule: **NEVER** accept `nursery_id`, `user_id`, or `role` as a server-action argument (these are FLAG identifiers; the principle applies regardless of rename). Derive from `supabase.auth.getUser()` + `nursery_members` lookup. Pattern in `code-design.md` §5 enforces this.
+  2. For Next.js 16 bound arguments via `.bind(null, nurseryId)`: even though they're AES-encrypted with a per-build key, **do not bind sensitive IDs**. Bind only display hints; re-derive authority server-side.
   3. Validate all enum inputs with a hard zod schema (`z.enum(['owner','counter_staff','lab_tech','auditor'])`).
   4. The `(input: unknown)` type on action signatures is intentional. If TypeScript ever lets you skip the `safeParse`, you've defeated the trust boundary.
-- **How to verify:** Intercept a server action request via DevTools, modify `hatchery_id` in the FormData, replay. The action must ignore the field and derive from session.
+- **How to verify:** Intercept a server action request via DevTools, modify `nursery_id` in the FormData, replay. The action must ignore the field and derive from session.
 - **Source:** [Next.js — Data Security](https://nextjs.org/docs/app/guides/data-security)
 
 ---
@@ -222,7 +222,7 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
 ## 9. Supabase Auth JWT pitfalls
 
 - **What it is:** Trusting client-supplied JWTs without server-side verification.
-- **How it bites THIS app:** `lib/auth.ts:currentHatcheryScope` and `lib/supabase/middleware.ts` both correctly call `getUser()` (which makes a server round-trip to Supabase Auth and validates the JWT). The risk is regression — a developer hot-path that uses `getSession()` for "performance" decodes the JWT locally and can be spoofed by cookie tampering.
+- **How it bites THIS app:** `lib/auth.ts:currentNurseryScope` (FLAG: function name) and `lib/supabase/middleware.ts` both correctly call `getUser()` (which makes a server round-trip to Supabase Auth and validates the JWT). The risk is regression — a developer hot-path that uses `getSession()` for "performance" decodes the JWT locally and can be spoofed by cookie tampering.
 - **How to prevent:**
   1. Rule: **NEVER** use `getSession()` for authorization decisions in server contexts. Always `getUser()`. ESLint rule (custom): forbid `getSession` outside `lib/supabase/middleware.ts` (where it's used only for cookie refresh).
   2. In RLS policies, `auth.uid()` is safe — Supabase validates the JWT at the PostgREST boundary. Don't trust `auth.jwt() ->> 'aud'` for authorization — use `auth.uid()` + membership lookups.
@@ -295,20 +295,20 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
 - **What it is:** Thailand's data-protection law, effective since June 2022. Conceptually similar to GDPR. The Office of the Personal Data Protection Committee (PDPC) is the regulator.
 - **How it bites THIS app:** We collect:
   - Email (sign-up)
-  - Hatchery business address (`hatcheries.location`)
+  - Nursery business address (`hatcheries.location` — FLAG: table name)
   - Customer name (`customers.name` — `พี่ชาติ` etc.)
   - Customer phone (`customers.phone`)
   - LINE user ID (`customer_line_ids.line_user_id`)
   - Potentially Thai national ID for PCR certificates and invoices (TBD; not modeled today)
   - Production data per cycle (`customer_cycles` — potentially a trade secret)
   
-  All of the above except hatchery business name are **personal data** under PDPA Section 26. The Revenue Department of Thailand requires 7-year retention of financial records, which conflicts with the PDPA right-to-erasure for billing/invoice data.
+  All of the above except nursery business name are **personal data** under PDPA Section 26. The Revenue Department of Thailand requires 7-year retention of financial records, which conflicts with the PDPA right-to-erasure for billing/invoice data.
 - **How to prevent (compliance steps):**
   1. **Consent banner** at sign-up — explicit, not implied. Logged with timestamp and consent text version.
   2. **Privacy notice** linked from the sign-up page and `/settings` — what we collect, why, retention period, DPO contact.
   3. **Data Subject Request (DSR) tooling** — an authenticated endpoint that:
      - Exports a user's personal data (JSON download).
-     - Deletes / anonymizes their personal data across `customers`, `hatchery_members`, `team_invites`, `customer_line_ids`, `audit_log` actor columns.
+     - Deletes / anonymizes their personal data across `customers`, `nursery_members`, `team_invites`, `customer_line_ids`, `audit_log` actor columns.
      - Preserves billing/invoice rows but anonymizes the linked customer name to `redacted_<id>`.
   4. **Retention policy** — document and enforce. Default: personal data deleted on DSR. Financial records: 7 years. Audit log: 2 years for non-financial entries.
   5. **DPO (Data Protection Officer)** — name a person or external service. Required by PDPA for organizations processing large-scale personal data.
@@ -361,18 +361,18 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
 ## 15. Storage bucket misconfiguration
 
 - **What it is:** Public buckets leaking files across tenants or exposing directory listings.
-- **How it bites THIS app:** Migration `012_storage_logos` creates a public-read `hatchery-logos` bucket. Tenant-scoped write policies are correct (each hatchery writes to `{hatchery_id}/logo.*`). **The public SELECT policy has no tenant filter** — intentional (the logo IS public on the scorecard). But the bucket also exposes the LIST endpoint by default, revealing **every** `hatchery_id` UUID. That's a tenant inventory leak.
+- **How it bites THIS app:** Migration `012_storage_logos` creates a public-read `nursery-logos` bucket (FLAG: bucket name). Tenant-scoped write policies are correct (each nursery writes to `{nursery_id}/logo.*` — FLAG: path uses code identifier). **The public SELECT policy has no tenant filter** — intentional (the logo IS public on the scorecard). But the bucket also exposes the LIST endpoint by default, revealing **every** nursery tenant UUID. That's a tenant inventory leak.
 - **How to prevent:**
-  1. Disable directory listing: Supabase Dashboard → Storage → `hatchery-logos` → Settings → uncheck "Allow listing objects." Public **GET by exact URL** continues to work; LIST is denied.
+  1. Disable directory listing: Supabase Dashboard → Storage → `nursery-logos` → Settings → uncheck "Allow listing objects." Public **GET by exact URL** continues to work; LIST is denied.
   2. Serve logos exclusively via `next/image` with the **known** public URL pattern. Never expose the raw `storage/v1/object/list/` endpoint to the client.
   3. If signed URLs are ever needed for private assets (PCR certificates), set TTL to **60 seconds maximum**, regenerate on demand.
   4. Add an RLS policy on `storage.objects` to make double-sure (Supabase Storage uses RLS internally):
      ```sql
      create policy hatchery_logos_select on storage.objects
-       for select using (bucket_id = 'hatchery-logos');
+       for select using (bucket_id = 'nursery-logos');
      -- (no listing policy = no listing)
      ```
-- **How to verify:** `curl 'https://<project>.supabase.co/storage/v1/object/list/hatchery-logos'` — must return 403, not a list of folders.
+- **How to verify:** `curl 'https://<project>.supabase.co/storage/v1/object/list/nursery-logos'` — must return 403, not a list of folders.
 - **Source:** [Supabase Storage — Access Control](https://supabase.com/docs/guides/storage/security/access-control)
 
 ---
@@ -382,7 +382,7 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
 ## 16. SQL injection via Supabase client
 
 - **What it is:** SQL injection through Supabase's query builder when using `.rpc()`, `.or()`, or `.filter()` with user-controlled strings.
-- **How it bites THIS app:** Risk is LOW today. `lib/auth/bootstrap.ts` calls `.rpc('create_hatchery', { p_name: 'My Hatchery' })` with hardcoded value — safe. All `.eq()`, `.select()`, `.filter()` calls in `lib/api/supabase.ts` use parameterized values from typed variables. No `.or()` with string interpolation exists. The risk is regression — a feature that does free-text search with `.or()` could introduce injection.
+- **How it bites THIS app:** Risk is LOW today. `lib/auth/bootstrap.ts` calls `.rpc('create_nursery', { p_name: 'My Nursery' })` (FLAG: `create_nursery` is the RPC name — nursery tenant bootstrap) with hardcoded value — safe. All `.eq()`, `.select()`, `.filter()` calls in `lib/api/supabase.ts` use parameterized values from typed variables. No `.or()` with string interpolation exists. The risk is regression — a feature that does free-text search with `.or()` could introduce injection.
 - **How to prevent:**
   1. Rule: **NEVER** build `.or()` or `.filter()` strings from user input.
      ```typescript
@@ -504,7 +504,7 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
   - Mutating server actions: 30/min
   - Exports: 1/min
   - Public scorecard: 60/min per IP
-  - LINE outbound enqueue: 10/min per hatchery
+  - LINE outbound enqueue: 10/min per nursery
 - **How to verify:** Script 50 rapid action invocations; confirm 429 starts being returned.
 - **Source:** [Vercel WAF Rate Limiting](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting), [Vercel SDK](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting-sdk), [Upstash Ratelimit](https://upstash.com/docs/redis/sdks/ratelimit-ts/overview)
 
@@ -546,7 +546,7 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
   ```sql
   create table public.audit_log (
     id            bigserial primary key,
-    hatchery_id   uuid        not null,
+    nursery_id   uuid        not null,
     actor_user_id uuid        not null references auth.users,
     actor_role    text        not null,
     action        text        not null,                      -- 'quote.create', 'alert.close', …
@@ -568,13 +568,13 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
 
   -- Indexes: BRIN for time (tiny, append-only) + BTREE for tenant lookups
   create index audit_log_created_at_brin on public.audit_log using brin (created_at);
-  create index audit_log_hatchery_time on public.audit_log (hatchery_id, created_at desc);
+  create index audit_log_hatchery_time on public.audit_log (nursery_id, created_at desc);
   create index audit_log_actor on public.audit_log (actor_user_id);
 
   -- RLS
   alter table public.audit_log enable row level security;
   create policy audit_log_select on public.audit_log
-    for select using (hatchery_id in (select public.current_user_hatchery_ids()));
+    for select using (nursery_id in (select public.current_user_nursery_ids()));
   -- No INSERT/UPDATE/DELETE policies for authenticated; writes go via SECURITY DEFINER function only.
   ```
   
@@ -588,7 +588,7 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
   export async function logAudit(entry: {
     actorUserId: string;
     actorRole: string;
-    hatcheryId: string;
+    nurseryId: string;   // FLAG: parameter name — nursery tenant ID; rename pending engineering decision
     action: string;       // 'quote.create'
     targetType: string;
     targetId?: string;
@@ -599,7 +599,7 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
     const ip = (await headers()).get('x-forwarded-for')?.split(',')[0]?.trim();
     const ua = (await headers()).get('user-agent');
     await supabase.rpc('write_audit_log', {
-      p_hatchery_id: entry.hatcheryId,
+      p_nursery_id: entry.nurseryId,
       p_actor: entry.actorUserId,
       p_role: entry.actorRole,
       p_action: entry.action,
@@ -624,23 +624,23 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
 ## 21. RLS multi-tenant correctness
 
 - **What it is:** Row-Level Security policies that prevent any tenant from reading or writing another tenant's rows.
-- **How it bites THIS app:** Already implemented and is the foundation of multi-tenancy. The codebase uses `hatchery_id in (select public.current_user_hatchery_ids())` consistently. The risks are:
+- **How it bites THIS app:** Already implemented and is the foundation of multi-tenancy. The codebase uses `nursery_id in (select public.current_user_nursery_ids())` (FLAG: `nursery_id` and function name are code identifiers) consistently to scope every row to its nursery tenant. The risks are:
   - **Forgetting RLS on a new table** (catastrophic — cross-tenant data leak).
   - **Performance**: omitting the `(select …)` wrap causes per-row function calls.
-  - **Helper function callable from PostgREST** — `public.current_user_hatchery_ids()` is reachable as an RPC. Not exploitable by itself, but a defense-in-depth concern.
+  - **Helper function callable from PostgREST** — `public.current_user_nursery_ids()` (FLAG: function name) is reachable as an RPC. Not exploitable by itself, but a defense-in-depth concern.
 - **How to prevent:**
   1. Every new tenant-scoped migration includes `alter table … enable row level security` AND policies in the same file. PR template requires it.
   2. Use the `(select …)` wrap (already enforced; see `code-design.md` §8).
   3. Move helper functions to a `private` schema:
      ```sql
      create schema if not exists private;
-     create or replace function private.current_user_hatchery_ids()
+     create or replace function private.current_user_nursery_ids()
        returns setof uuid language sql security definer stable as $$
-       select hatchery_id from public.hatchery_members where user_id = auth.uid();
+       select nursery_id from public.nursery_members where user_id = auth.uid();
      $$;
      -- revoke from public roles
      revoke all on schema private from public, anon, authenticated;
-     -- migrate policies to call private.current_user_hatchery_ids()
+     -- migrate policies to call private.current_user_nursery_ids()
      ```
      Tracked in `code-design.md` §19.
   4. Run the cross-tenant test (§22) on every deploy.
@@ -671,7 +671,7 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
   - `console.log` in server actions and route handlers goes to Vercel Function logs (retained 1–7 days per plan, accessible to any project member).
   - Sentry (when added) captures stack traces, breadcrumbs, request data — PII leaks through breadcrumbs by default.
 - **How to prevent:**
-  1. **Allow-list, not block-list, the log shape:** every log line includes only `{ action, hatcheryId, targetId, durationMs, errorMessage }`. Anything else is stripped.
+  1. **Allow-list, not block-list, the log shape:** every log line includes only `{ action, nurseryId, targetId, durationMs, errorMessage }` (FLAG: `nurseryId` is the code identifier for the nursery tenant ID). Anything else is stripped.
   2. **Never log:**
      - `customer.phone`, `customer.name`, `customer.address`
      - `line_user_id` (it's a stable user identifier)

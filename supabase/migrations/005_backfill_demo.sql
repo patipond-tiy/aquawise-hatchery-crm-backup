@@ -1,5 +1,5 @@
--- Demo hatchery never expires — pin to active subscription state for local dev/demo.
-update public.hatcheries
+-- Demo nursery never expires — pin to active subscription state for local dev/demo.
+update public.nurseries
    set subscription_status = 'active',
        trial_ends_at = null,
        subscription_current_period_end = now() + interval '30 days'

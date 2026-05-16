@@ -1,16 +1,16 @@
 name: Mirror to personal backup
 
 # Pushes a complete mirror (all branches, all tags, force-sync) of this repo to
-# https://github.com/patipond-tiy/aquawise-hatchery-crm-backup on every push,
+# https://github.com/patipond-tiy/aquawise-nursery-crm-backup on every push,
 # every day at 02:00 UTC, and manually via the Actions tab.
 #
 # One-time setup:
 #   1. On the patipond-tiy account, create a fine-grained Personal Access Token
 #      with these settings:
-#        - Repository access: only `aquawise-hatchery-crm-backup`
+#        - Repository access: only `aquawise-nursery-crm-backup`
 #        - Permissions:       Contents: Read & write
 #                              Metadata: Read-only (auto)
-#   2. In this repo (aquawise-tech/aquawise-hatchery-crm) go to
+#   2. In this repo (aquawise-tech/aquawise-nursery-crm) go to
 #      Settings → Secrets and variables → Actions → New repository secret
 #      Name:  MIRROR_TOKEN
 #      Value: the PAT from step 1
@@ -55,7 +55,7 @@ jobs:
         env:
           DST_TOKEN: ${{ secrets.MIRROR_TOKEN }}
           DST_OWNER: patipond-tiy
-          DST_REPO: aquawise-hatchery-crm-backup
+          DST_REPO: aquawise-nursery-crm-backup
         run: |
           git push --mirror \
             "https://x-access-token:${DST_TOKEN}@github.com/${DST_OWNER}/${DST_REPO}.git"
@@ -66,6 +66,6 @@ jobs:
           {
             echo "## Mirror result"
             echo "- Source: \`${{ github.repository }}\`@\`${{ github.sha }}\`"
-            echo "- Destination: \`patipond-tiy/aquawise-hatchery-crm-backup\`"
+            echo "- Destination: \`patipond-tiy/aquawise-nursery-crm-backup\`"
             echo "- Status: ${{ job.status }}"
           } >> "$GITHUB_STEP_SUMMARY"

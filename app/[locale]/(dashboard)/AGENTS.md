@@ -4,7 +4,7 @@
 # (dashboard)
 
 ## Purpose
-Authenticated app surface — the **9 main pages** of the Hatchery CRM. The parenthesized `(dashboard)` is a route group, so the layout applies but the segment doesn't appear in the URL: `/th/customers`, not `/th/dashboard/customers`.
+Authenticated app surface — the **9 main pages** of the Nursery CRM. The parenthesized `(dashboard)` is a route group, so the layout applies but the segment doesn't appear in the URL: `/th/customers`, not `/th/dashboard/customers`.
 
 The layout (`layout.tsx`) wraps everything in `<BillingGate>` (server-side paywall) → `<TrialBanner>` (header) → `<Shell>` (3-column).
 
@@ -13,7 +13,7 @@ The layout (`layout.tsx`) wraps everything in `<BillingGate>` (server-side paywa
 | File | Description |
 |------|-------------|
 | `layout.tsx` | Wraps children in `<BillingGate locale={locale}>` then `<TrialBanner />` then `<Shell>`. Reads locale from params |
-| `page.tsx` | Dashboard home — hero with hatchery name, stat chips, "Continue where you left off" cards, recent batches table |
+| `page.tsx` | Dashboard home — hero with nursery name, stat chips, "Continue where you left off" cards, recent batches table |
 | `billing-gate.tsx` | Server component — calls `getSubscription()`, derives `effectiveStatus`, redirects to `/{locale}/billing/trial-expired` for expired/canceled users (except on `/settings`, `/billing/trial-expired`, `/login`, `/auth`). Reads `x-pathname` header set by `proxy.ts` |
 
 ## Subdirectories

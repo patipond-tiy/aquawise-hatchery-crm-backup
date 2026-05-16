@@ -1,15 +1,15 @@
--- AquaWise Hatchery CRM — initial schema
--- Multi-tenant: every domain table carries `hatchery_id` for RLS scoping.
+-- AquaWise Nursery CRM — initial schema
+-- Multi-tenant: every domain table carries `nursery_id` for RLS scoping.
 -- Stable ULIDs would be nicer than gen_random_uuid() but the latter ships in pgcrypto by default.
 
 create extension if not exists "pgcrypto";
 create extension if not exists "citext";
 
 -- ============================================================
--- Hatcheries (tenants) and members
+-- Nurseries (tenants) and members
 -- ============================================================
 
-create table public.hatcheries (
+create table public.nurseries (
   id              uuid primary key default gen_random_uuid(),
   name            text not null,
   name_en         text,
@@ -20,22 +20,22 @@ create table public.hatcheries (
   created_at      timestamptz not null default now()
 );
 
-create type public.hatchery_role as enum ('owner', 'admin', 'editor', 'viewer', 'technician');
+create type public.nursery_role as enum ('owner', 'admin', 'editor', 'viewer', 'technician');
 
-create table public.hatchery_members (
-  hatchery_id  uuid not null references public.hatcheries(id) on delete cascade,
+create table public.nursery_members (
+  nursery_id  uuid not null references public.nurseries(id) on delete cascade,
   user_id      uuid not null references auth.users(id) on delete cascade,
-  role         public.hatchery_role not null default 'editor',
+  role         public.nursery_role not null default 'editor',
   created_at   timestamptz not null default now(),
-  primary key (hatchery_id, user_id)
+  primary key (nursery_id, user_id)
 );
 
-create index hatchery_members_user_idx on public.hatchery_members(user_id);
+create index nursery_members_user_idx on public.nursery_members(user_id);
 
--- Helper: hatcheries the calling user can see.
-create or replace function public.current_user_hatchery_ids()
+-- Helper: nurseries the calling user can see.
+create or replace function public.current_user_nursery_ids()
 returns setof uuid language sql security definer stable as $$
-  select hatchery_id from public.hatchery_members where user_id = auth.uid();
+  select nursery_id from public.nursery_members where user_id = auth.uid();
 $$;
 
 -- ============================================================
@@ -46,7 +46,7 @@ create type public.customer_status as enum ('active', 'restock-soon', 'restock-n
 
 create table public.customers (
   id           uuid primary key default gen_random_uuid(),
-  hatchery_id  uuid not null references public.hatcheries(id) on delete cascade,
+  nursery_id  uuid not null references public.nurseries(id) on delete cascade,
   name         text not null,
   farm         text not null,
   farm_en      text,
@@ -60,7 +60,7 @@ create table public.customers (
   created_at   timestamptz not null default now()
 );
 
-create index customers_hatchery_idx on public.customers(hatchery_id);
+create index customers_nursery_idx on public.customers(nursery_id);
 
 -- Current cycle snapshot per customer (denormalised for read speed; updated by triggers / jobs).
 create table public.customer_cycles (
@@ -81,7 +81,7 @@ create type public.pcr_status as enum ('clean', 'flagged', 'pending');
 
 create table public.batches (
   id           text primary key,            -- human-readable id like B-2604-A
-  hatchery_id  uuid not null references public.hatcheries(id) on delete cascade,
+  nursery_id  uuid not null references public.nurseries(id) on delete cascade,
   source       text not null,
   pl_produced  bigint not null default 0,
   pl_sold      bigint not null default 0,
@@ -92,7 +92,7 @@ create table public.batches (
   created_at   timestamptz not null default now()
 );
 
-create index batches_hatchery_idx on public.batches(hatchery_id);
+create index batches_nursery_idx on public.batches(nursery_id);
 
 create table public.batch_buyers (
   batch_id     text not null references public.batches(id) on delete cascade,
@@ -122,7 +122,7 @@ create type public.alert_severity as enum ('high', 'medium', 'low');
 
 create table public.alerts (
   id              uuid primary key default gen_random_uuid(),
-  hatchery_id     uuid not null references public.hatcheries(id) on delete cascade,
+  nursery_id     uuid not null references public.nurseries(id) on delete cascade,
   sev             public.alert_severity not null,
   title           text not null,
   description     text,
@@ -135,8 +135,8 @@ create table public.alerts (
   created_at      timestamptz not null default now()
 );
 
-create index alerts_hatchery_idx on public.alerts(hatchery_id);
-create index alerts_open_idx on public.alerts(hatchery_id, closed) where not closed;
+create index alerts_nursery_idx on public.alerts(nursery_id);
+create index alerts_open_idx on public.alerts(nursery_id, closed) where not closed;
 
 create table public.alert_farms (
   alert_id     uuid not null references public.alerts(id) on delete cascade,
@@ -145,11 +145,11 @@ create table public.alert_farms (
 );
 
 -- ============================================================
--- Settings (per hatchery)
+-- Settings (per nursery)
 -- ============================================================
 
 create table public.scorecard_settings (
-  hatchery_id    uuid primary key references public.hatcheries(id) on delete cascade,
+  nursery_id    uuid primary key references public.nurseries(id) on delete cascade,
   public         boolean not null default true,
   show_d30       boolean not null default true,
   show_pcr       boolean not null default true,
@@ -160,7 +160,7 @@ create table public.scorecard_settings (
 );
 
 create table public.notification_settings (
-  hatchery_id  uuid primary key references public.hatcheries(id) on delete cascade,
+  nursery_id  uuid primary key references public.nurseries(id) on delete cascade,
   restock      boolean not null default true,
   low_d30      boolean not null default true,
   disease      boolean not null default true,
@@ -176,11 +176,11 @@ create table public.notification_settings (
 
 create table public.audit_log (
   id           bigserial primary key,
-  hatchery_id  uuid not null references public.hatcheries(id) on delete cascade,
+  nursery_id  uuid not null references public.nurseries(id) on delete cascade,
   user_id      uuid references auth.users(id) on delete set null,
   action       text not null,
   payload      jsonb,
   created_at   timestamptz not null default now()
 );
 
-create index audit_log_hatchery_idx on public.audit_log(hatchery_id, created_at desc);
+create index audit_log_nursery_idx on public.audit_log(nursery_id, created_at desc);

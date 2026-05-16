@@ -11,9 +11,9 @@
 - K1.i (migration `013_batch_code_and_claims.sql`) marked done before any K2/K3/K4 scenario
 - JWT keypairs provisioned: `CRM_JWT_PUBLIC_KEY` (verifies LINE-bot→CRM read/claim), `CRM_WEBHOOK_JWT_PRIVATE_KEY` (signs CRM→LINE-bot warnings). ES256.
 - `LINE_BOT_BASE_URL` and `CRON_SECRET` set for K4
-- A published batch fixture: a `batches` row with `published_at` set, `valid_until > now()`, `hatchery_contact_snapshot` populated, and at least one `pcr_results` row
+- A published batch fixture: a `batches` row with `published_at` set, `valid_until > now()`, `nursery_contact_snapshot` populated, and at least one `pcr_results` row
 
-> **Identity boundary check (applies to every scenario):** farmers are NOT `customers`. A claim creates a `batch_claims` row keyed by `line_user_id` only — assert no `customers` row, no `hatchery_members` row, and no PII beyond `line_profile {display_name, picture_url}` is ever written.
+> **Identity boundary check (applies to every scenario):** farmers are NOT `customers`. A claim creates a `batch_claims` row keyed by `line_user_id` only — assert no `customers` row, no `nursery_members` row, and no PII beyond `line_profile {display_name, picture_url}` is ever written.
 
 ---
 
@@ -57,9 +57,9 @@ SELECT count(*) - count(DISTINCT batch_code) FROM batches;  -- expect 0
 
 ### Scenario 4: K1-contact-snapshot-freeze — contact frozen at first publish
 
-**Given:** A batch published with `hatchery_contact_snapshot = {line_oa_id:'@old', ...}`
+**Given:** A batch published with `nursery_contact_snapshot = {line_oa_id:'@old', ...}`
 
-**When:** The operator later edits the hatchery profile (`line_oa_id` → `@new`) via A3
+**When:** The operator later edits the nursery profile (`line_oa_id` → `@new`) via A3
 
 **Then:** A K2 read of that batch still returns `@old` (snapshot is frozen at first publish, not live-joined)
 
@@ -133,7 +133,7 @@ SELECT count(*) - count(DISTINCT batch_code) FROM batches;  -- expect 0
 
 **When:** `GET /api/v1/batches/:code` with a valid LINE-bot JWT
 
-**Then:** 200 with the exact field set in K2 AC#4 (`batch_code`, `hatchery_id`, `hatchery_name`, `hatchery_contact`, `pl_stage`, `source_strain`, `spawn_date`, `pcr_results{wssv,ehp,ihhnv,tsv}`, `pcr_certificate_url`, `valid_until`, `claimed_by_other`). `pcr_certificate_url` is a signed URL or `null`; `hatchery_contact` comes from the frozen snapshot.
+**Then:** 200 with the exact field set in K2 AC#4 (`batch_code`, `nursery_id`, `nursery_name`, `nursery_contact`, `pl_stage`, `source_strain`, `spawn_date`, `pcr_results{wssv,ehp,ihhnv,tsv}`, `pcr_certificate_url`, `valid_until`, `claimed_by_other`). `pcr_certificate_url` is a signed URL or `null`; `nursery_contact` comes from the frozen snapshot.
 
 **Verification:** Joint run with the LINE-bot team — the bot's K.1 consumer must parse this body without a schema error.
 **Pass/Fail:** PASS if the body matches ADR-018 exactly and the bot consumes it. FAIL on any missing/renamed field.
@@ -164,7 +164,7 @@ SELECT count(*) - count(DISTINCT batch_code) FROM batches;  -- expect 0
 
 **When:** Valid claim POST against the published fixture
 
-**Then:** 200 `{ ok:true, batch_code, claimed_at }`; one `batch_claims` row with `(batch_id, line_user_id, pond_id, line_profile, correlation_id, hatchery_id, claimed_at)`; `batches.first_claimed_at` set to `now()` (was NULL); one `audit_log` row `event='batch_claim'`. **Assert no `customers` row created.**
+**Then:** 200 `{ ok:true, batch_code, claimed_at }`; one `batch_claims` row with `(batch_id, line_user_id, pond_id, line_profile, correlation_id, nursery_id, claimed_at)`; `batches.first_claimed_at` set to `now()` (was NULL); one `audit_log` row `event='batch_claim'`. **Assert no `customers` row created.**
 
 **Verification:**
 ```sql
@@ -232,7 +232,7 @@ SELECT count(*) FROM customers WHERE created_at > :t0;          -- 0  (identity 
 
 **When:** Publish with `severity='critical'`
 
-**Then:** `deliverBatchWarning()` runs inline (caller awaits ≤3s); outbound JWT has `iss=hatchery-crm`, `aud=line-bot-webhook` (NOT the read-side `aud`); on 2xx, `delivered_at` is set; LINE-bot staging records receipt with the same `correlation_id`
+**Then:** `deliverBatchWarning()` runs inline (caller awaits ≤3s); outbound JWT has `iss=nursery-crm`, `aud=line-bot-webhook` (NOT the read-side `aud`); on 2xx, `delivered_at` is set; LINE-bot staging records receipt with the same `correlation_id`
 
 **Pass/Fail:** PASS if delivered_at set within timeout AND the bot side correlates. FAIL if it falls to retry path on a healthy endpoint, or if the JWT `aud` equals the read-side audience (confused-deputy).
 
@@ -271,7 +271,7 @@ All of the following before K1–K4 are marked done:
 
 - [ ] Every scenario above PASS in the stated mode
 - [ ] **[CROSS-PRODUCT]** scenarios (K2-S5, K3 happy path consumed by bot, K4-S3) verified in a joint run with the LINE-bot team against `aquawise-line-bot/docs/bmad/uat/K-batch-cohort.uat.md`
-- [ ] Identity boundary holds in every claim path: zero `customers` / `hatchery_members` writes from a farmer claim; no farmer PII beyond `line_profile{display_name,picture_url}`
+- [ ] Identity boundary holds in every claim path: zero `customers` / `nursery_members` writes from a farmer claim; no farmer PII beyond `line_profile{display_name,picture_url}`
 - [ ] Confused-deputy check: read-side JWT `aud` (`hatchery-crm`) and webhook-side JWT `aud` (`line-bot-webhook`) are distinct and not interchangeable
 - [ ] `pnpm typecheck && pnpm lint && pnpm test` green
-- [ ] P0 cross-tenant SQL test (see `code-design.md` §11) extended to cover `batch_claims` and `crm_event_log` (both carry `hatchery_id`)
+- [ ] P0 cross-tenant SQL test (see `code-design.md` §11) extended to cover `batch_claims` and `crm_event_log` (both carry `nursery_id`)

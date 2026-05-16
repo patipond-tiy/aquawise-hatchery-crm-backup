@@ -113,11 +113,11 @@ export default function SettingsPage() {
 
 function Profile() {
   const [name, setName] = useState('ฟ้าใส แฮทเชอรี่');
-  const [nameEn, setNameEn] = useState('Fasai Hatchery');
+  const [nameEn, setNameEn] = useState('Fasai Nursery');
   const [location, setLocation] = useState('78/12 ม.4 ต.บ้านบ่อ อ.เมือง สมุทรสาคร 74000');
   const [locationEn, setLocationEn] = useState('');
   const [displayNameTh, setDisplayNameTh] = useState('ฟ้าใส แฮทเชอรี่');
-  const [displayNameEn, setDisplayNameEn] = useState('Fasai Hatchery');
+  const [displayNameEn, setDisplayNameEn] = useState('Fasai Nursery');
   const [brandColor, setBrandColor] = useState('#1F6FEB');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);

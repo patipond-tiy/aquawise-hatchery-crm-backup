@@ -15,7 +15,7 @@ async function getSubscriptionForServer(): Promise<Subscription> {
   const { createClient } = await import('@/lib/supabase/server');
   const supabase = await createClient();
   const { data } = await supabase
-    .from('hatcheries')
+    .from('nurseries')
     .select(
       `subscription_status, trial_ends_at, stripe_customer_id, stripe_subscription_id,
        subscription_current_period_end, subscription_cancel_at_period_end`

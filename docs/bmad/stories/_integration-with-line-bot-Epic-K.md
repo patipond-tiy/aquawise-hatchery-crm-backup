@@ -10,16 +10,16 @@ This brief summarises the cross-product surface introduced by the LINE bot v1.1 
 
 ## Why this matters for the CRM
 
-The LINE bot v1.1 promotes individual shrimp farmers (พี่ปลา) to first-class entities and lets them **claim a hatchery's batch** via a 6-char Batch Code printed on the delivery receipt. Once claimed, the farmer's pond receives:
+The LINE bot v1.1 promotes individual shrimp farmers (พี่ปลา) to first-class entities and lets them **claim a nursery's batch** via a 6-char Batch Code printed on the delivery receipt. Once claimed, the farmer's pond receives:
 
-- The hatchery's PCR certificate (K.7)
+- The nursery's PCR certificate (K.7)
 - Cohort benchmarking against other farms feeding the same batch (K.10–K.11)
-- Late-warning broadcasts the hatchery publishes about the batch (K.12)
+- Late-warning broadcasts the nursery publishes about the batch (K.12)
 - A re-purchase prompt at pond closure when results are good (K.13)
 
-The CRM is the **source of truth** for batch metadata. The LINE bot reads + claims against the CRM via a signed-JWT REST contract (ADR-018, line-bot side). The CRM also **publishes** outbound events to the LINE bot when a hatchery flags a batch warning.
+The CRM is the **source of truth** for batch metadata. The LINE bot reads + claims against the CRM via a signed-JWT REST contract (ADR-018, line-bot side). The CRM also **publishes** outbound events to the LINE bot when a nursery flags a batch warning.
 
-> **Identity boundary — critical.** "Customers" in the CRM are *nursery operators* (`โรงอนุบาล`) — B2B accounts the hatchery sells PL to. The LINE bot adds a *second* downstream identity: individual *farmers* (พี่ปลา) who receive PL from a nursery (or, future, direct from hatchery) and run a single pond at a time. Farmers are NOT in `customers`. The CRM records them only as `batch_claims` rows keyed by `line_user_id` — no other PII, no commercial relationship.
+> **Identity boundary — critical.** "Customers" in the CRM are *farms* (`เกษตรกร`) — B2B accounts the nursery sells PL to. The LINE bot adds a *second* downstream identity: individual *farmers* (พี่ปลา) who receive PL from a nursery (or, future, direct from hatchery — upstream stakeholder, 2027+) and run a single pond at a time. Farmers are NOT in `customers`. The CRM records them only as `batch_claims` rows keyed by `line_user_id` — no other PII, no commercial relationship.
 
 ---
 
@@ -32,7 +32,7 @@ The CRM is the **source of truth** for batch metadata. The LINE bot reads + clai
 | `POST /api/v1/batches/:code/claim` | LINE bot → CRM | **K3** | K.1 |
 | `POST /api/v1/auth/token` (token refresh) | LINE bot → CRM | **K2** (auth section) | K.1 |
 | `POST {LINE_BOT_BASE_URL}/api/crm-events/batch-warning` | CRM → LINE bot | **K4** | K.12 |
-| Hatchery contact (LINE OA id or phone) returned in batch payload | CRM → LINE bot | modifies **A3** | K.13 |
+| Nursery contact (LINE OA id or phone) returned in batch payload | CRM → LINE bot | modifies **A3** | K.13 |
 | PCR certificate URL signed for farmer access | CRM → LINE bot | modifies **C4** | K.7 |
 | Farm-claims panel on Batch Detail page (CRM operator view) | CRM-internal | modifies **C3** | — |
 | Identity-boundary clarification (nursery LINE bind ≠ farmer claim) | CRM-internal | modifies **G1** | K.1 |
@@ -67,13 +67,13 @@ The CRM is the **source of truth** for batch metadata. The LINE bot reads + clai
 9. **K4** webhook publisher
 10. **E4** mod (auto-publish batch warning when disease alert is critical)
 
-> Defer cohort-metrics inbound mirror (a hypothetical CRM-side cache of `cohort_metrics_view`) until the LINE bot side has shipped K.10 and a real demand to view aggregate per-batch farm-level outcomes is voiced by a hatchery operator. This is a 2027 question, not 2026.
+> Defer cohort-metrics inbound mirror (a hypothetical CRM-side cache of `cohort_metrics_view`) until the LINE bot side has shipped K.10 and a real demand to view aggregate per-batch farm-level outcomes is voiced by a nursery operator. This is a 2027 question, not 2026.
 
 ---
 
 ## Out of scope
 
-- Two-way chat between hatchery operator and an individual farmer (this would be Epic G3, already deferred to Phase H3)
-- Hatchery dashboard view of all claimed-farm data (`H-LINEAGE` — 2027+ hypothesis)
+- Two-way chat between nursery operator and an individual farmer (this would be Epic G3, already deferred to Phase H3)
+- Nursery dashboard view of all claimed-farm data (`H-LINEAGE` — 2027+ hypothesis)
 - Direct farmer billing or invoicing through the CRM
 - Storing farmer PII (name, phone) beyond what the LINE bot voluntarily shares in `line_profile` JSON at claim time (LINE display name + avatar URL only)

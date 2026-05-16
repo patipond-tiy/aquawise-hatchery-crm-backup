@@ -71,14 +71,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true, duplicate: true });
   }
 
-  let hatcheryId: string | null = null;
+  let nurseryId: string | null = null;
 
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
-        hatcheryId = session.client_reference_id ?? null;
-        if (!hatcheryId) break;
+        nurseryId = session.client_reference_id ?? null;
+        if (!nurseryId) break;
 
         const subId =
           typeof session.subscription === 'string'
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
         const periodEndUnix = item?.current_period_end;
 
         await supabase
-          .from('hatcheries')
+          .from('nurseries')
           .update({
             stripe_customer_id: customerId,
             stripe_subscription_id: subId,
@@ -106,27 +106,27 @@ export async function POST(req: NextRequest) {
               : null,
             subscription_cancel_at_period_end: sub?.cancel_at_period_end ?? false,
           })
-          .eq('id', hatcheryId);
+          .eq('id', nurseryId);
         break;
       }
 
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const sub = event.data.object as Stripe.Subscription;
-        hatcheryId =
-          (sub.metadata?.hatchery_id as string | undefined) ?? null;
-        if (!hatcheryId) {
+        nurseryId =
+          (sub.metadata?.nursery_id as string | undefined) ?? null;
+        if (!nurseryId) {
           // Fallback — look up by stripe_customer_id
           const customerId =
             typeof sub.customer === 'string' ? sub.customer : sub.customer.id;
           const { data: row } = await supabase
-            .from('hatcheries')
+            .from('nurseries')
             .select('id')
             .eq('stripe_customer_id', customerId)
             .maybeSingle();
-          hatcheryId = row?.id ?? null;
+          nurseryId = row?.id ?? null;
         }
-        if (!hatcheryId) break;
+        if (!nurseryId) break;
 
         const item = sub.items.data[0] as
           | (Stripe.SubscriptionItem & { current_period_end?: number })
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
         const periodEndUnix = item?.current_period_end;
 
         await supabase
-          .from('hatcheries')
+          .from('nurseries')
           .update({
             stripe_subscription_id: sub.id,
             subscription_status: stripeStatusToApp(sub.status),
@@ -143,33 +143,33 @@ export async function POST(req: NextRequest) {
               : null,
             subscription_cancel_at_period_end: sub.cancel_at_period_end,
           })
-          .eq('id', hatcheryId);
+          .eq('id', nurseryId);
         break;
       }
 
       case 'customer.subscription.deleted': {
         const sub = event.data.object as Stripe.Subscription;
-        hatcheryId =
-          (sub.metadata?.hatchery_id as string | undefined) ?? null;
-        if (!hatcheryId) {
+        nurseryId =
+          (sub.metadata?.nursery_id as string | undefined) ?? null;
+        if (!nurseryId) {
           const customerId =
             typeof sub.customer === 'string' ? sub.customer : sub.customer.id;
           const { data: row } = await supabase
-            .from('hatcheries')
+            .from('nurseries')
             .select('id')
             .eq('stripe_customer_id', customerId)
             .maybeSingle();
-          hatcheryId = row?.id ?? null;
+          nurseryId = row?.id ?? null;
         }
-        if (!hatcheryId) break;
+        if (!nurseryId) break;
 
         await supabase
-          .from('hatcheries')
+          .from('nurseries')
           .update({
             subscription_status: 'canceled',
             subscription_cancel_at_period_end: false,
           })
-          .eq('id', hatcheryId);
+          .eq('id', nurseryId);
         break;
       }
 
@@ -179,14 +179,14 @@ export async function POST(req: NextRequest) {
           typeof inv.customer === 'string' ? inv.customer : inv.customer?.id ?? null;
         if (!customerId) break;
         const { data: row } = await supabase
-          .from('hatcheries')
+          .from('nurseries')
           .select('id, subscription_status')
           .eq('stripe_customer_id', customerId)
           .maybeSingle();
-        hatcheryId = row?.id ?? null;
+        nurseryId = row?.id ?? null;
         if (row?.id && row.subscription_status !== 'active') {
           await supabase
-            .from('hatcheries')
+            .from('nurseries')
             .update({ subscription_status: 'active' })
             .eq('id', row.id);
         }
@@ -199,14 +199,14 @@ export async function POST(req: NextRequest) {
           typeof inv.customer === 'string' ? inv.customer : inv.customer?.id ?? null;
         if (!customerId) break;
         const { data: row } = await supabase
-          .from('hatcheries')
+          .from('nurseries')
           .select('id')
           .eq('stripe_customer_id', customerId)
           .maybeSingle();
-        hatcheryId = row?.id ?? null;
+        nurseryId = row?.id ?? null;
         if (row?.id) {
           await supabase
-            .from('hatcheries')
+            .from('nurseries')
             .update({ subscription_status: 'past_due' })
             .eq('id', row.id);
         }
@@ -222,7 +222,7 @@ export async function POST(req: NextRequest) {
     await supabase.from('subscription_events').insert({
       stripe_event_id: event.id,
       type: event.type,
-      hatchery_id: hatcheryId,
+      nursery_id: nurseryId,
       payload: JSON.parse(JSON.stringify(event)) as Json,
     });
 

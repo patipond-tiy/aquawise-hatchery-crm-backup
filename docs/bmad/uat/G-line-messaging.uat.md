@@ -100,7 +100,7 @@ Manual — `USE_MOCK=false` + live LINE OA required.
 > - A `line_outbound_events` row appears with `status='pending'`
 > - Within 30 seconds the bot worker flips status to `sent`
 > - The customer Activity panel in the CRM reflects the `sent` status (via TanStack Query invalidation or Supabase Realtime)
-> - The farmer's LINE account receives the Flex Message with correct hatchery branding
+> - The farmer's LINE account receives the Flex Message with correct nursery branding
 >
 > **Unit tests that can run now:**
 > ```bash
@@ -164,9 +164,9 @@ Manual — `USE_MOCK=false` + live LINE OA + bot worker deployed.
 1. Trigger a send from the CRM customer card.
 2. In Supabase dashboard, poll `line_outbound_events` every 5 seconds.
 3. Confirm `status = 'sent'` within 30 seconds.
-4. Confirm the farmer's LINE app received a Flex Message with the correct hatchery branding (logo, display name, brand color).
+4. Confirm the farmer's LINE app received a Flex Message with the correct nursery branding (logo, display name, brand color).
 
-**Pass/Fail:** PASS if `status='sent'` within 30 seconds and the farmer receives the Flex with correct branding. FAIL if the status remains `pending` after 30 seconds, or if the Flex shows wrong hatchery branding.
+**Pass/Fail:** PASS if `status='sent'` within 30 seconds and the farmer receives the Flex with correct branding. FAIL if the status remains `pending` after 30 seconds, or if the Flex shows wrong nursery branding.
 
 ---
 
@@ -198,7 +198,7 @@ Manual — `USE_MOCK=false` + bot worker deployed.
 
 ### Scenario 1: G4-idempotent — Calling the cron endpoint twice on the same day creates no duplicate rows
 
-**Given:** At least one customer exists with `restock_in IN (7, 3, 0)` days for a hatchery with `notification_settings.restock = true`; the cron endpoint is deployed at `GET /api/cron/daily` with `CRON_SECRET` configured
+**Given:** At least one customer exists with `restock_in IN (7, 3, 0)` days for a nursery with `notification_settings.restock = true`; the cron endpoint is deployed at `GET /api/cron/daily` with `CRON_SECRET` configured
 
 **When:** The endpoint is called twice within the same calendar day (UTC) with the correct `Authorization: Bearer {CRON_SECRET}` header
 
@@ -219,22 +219,22 @@ Or: Manual — `USE_MOCK=false`.
 
 ### Scenario 2: G4-notification-off — Hatchery with `notification_settings.restock = false` receives no enqueued events
 
-**Given:** A hatchery has `notification_settings.restock = false`; one or more of its customers have `restock_in IN (7, 3, 0)` days
+**Given:** A nursery has `notification_settings.restock = false`; one or more of its customers have `restock_in IN (7, 3, 0)` days
 
 **When:** The cron endpoint fires (or `evaluateRestockQueue()` is called in tests)
 
-**Then:** No `line_outbound_events` rows are created for any customer belonging to that hatchery; the endpoint response `enqueued` count does not include these customers
+**Then:** No `line_outbound_events` rows are created for any customer belonging to that nursery; the endpoint response `enqueued` count does not include these customers
 
 **Verification:**
 ```bash
 pnpm vitest run tests/line/cron.test.ts -t "restock toggle false"
 ```
 Or: Manual — `USE_MOCK=false`.
-1. Set `notification_settings.restock = false` for a test hatchery in Supabase dashboard.
+1. Set `notification_settings.restock = false` for a test nursery in Supabase dashboard.
 2. Trigger the cron endpoint.
-3. Query `line_outbound_events` for customers belonging to that hatchery — confirm 0 rows.
+3. Query `line_outbound_events` for customers belonging to that nursery — confirm 0 rows.
 
-**Pass/Fail:** PASS if zero events are enqueued for the hatchery with `restock=false`. FAIL if any `line_outbound_events` rows are created for that hatchery.
+**Pass/Fail:** PASS if zero events are enqueued for the nursery with `restock=false`. FAIL if any `line_outbound_events` rows are created for that nursery.
 
 ---
 

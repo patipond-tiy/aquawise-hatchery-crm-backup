@@ -1,4 +1,4 @@
-# AquaWise Hatchery CRM — Code Design Handbook
+# AquaWise Nursery CRM — Code Design Handbook
 
 > PURPOSE: Recipes, patterns, and anti-patterns for writing code that obeys `architecture.md`.
 > READ ORDER: `architecture.md` (rules) → this file (how to apply them) → story file (today's task).
@@ -110,7 +110,7 @@ Reference end-to-end: adding **Quotes** (planned in `architecture.md` §5). Ever
 ```sql
 create table public.quotes (
   id          uuid primary key default gen_random_uuid(),
-  hatchery_id uuid not null references public.hatcheries(id) on delete cascade,
+  nursery_id uuid not null references public.nurseries(id) on delete cascade,
   customer_id uuid not null references public.customers(id) on delete restrict,
   size        text not null,
   qty         integer not null check (qty > 0),
@@ -122,19 +122,19 @@ create table public.quotes (
   created_by  uuid not null references auth.users(id)
 );
 
-create index quotes_hatchery_id_idx on public.quotes(hatchery_id);
+create index quotes_nursery_id_idx on public.quotes(nursery_id);
 create index quotes_customer_id_idx on public.quotes(customer_id);
 
 alter table public.quotes enable row level security;
 
--- IMPORTANT: existing codebase uses `current_user_hatchery_ids()` returning `setof uuid`,
--- with `IN` operator (NOT `current_hatchery_id()` with `=`). Match the existing pattern.
+-- IMPORTANT: existing codebase uses `current_user_nursery_ids()` returning `setof uuid`,
+-- with `IN` operator (NOT `current_nursery_id()` with `=`). Match the existing pattern.
 -- The `select ()` wrap is essential — it triggers Postgres initPlan caching
 -- (evaluated once per statement instead of once per row). Without it, RLS is ~20× slower
 -- on large tables. See §8 for details.
 create policy quotes_rw on public.quotes for all
-  using (hatchery_id in (select public.current_user_hatchery_ids()))
-  with check (hatchery_id in (select public.current_user_hatchery_ids()));
+  using (nursery_id in (select public.current_user_nursery_ids()))
+  with check (nursery_id in (select public.current_user_nursery_ids()));
 
 -- Future tightening per architecture.md §5: separate insert/update/delete policies
 -- restricting writes to owner/counter_staff. For now, the `for all` policy mirrors
@@ -211,7 +211,7 @@ export async function listQuotes(): Promise<Quote[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('quotes')
-    // Include hatchery_id in the .eq() if you know it client-side, even with RLS — it
+    // Include nursery_id in the .eq() if you know it client-side, even with RLS — it
     // lets Postgres use the index to prune BEFORE applying the policy. RLS alone does
     // not give you index pruning. See §8 perf note.
     .select('id, size, qty, unit_price, status, created_at, customers(id, name)')
@@ -272,7 +272,7 @@ export default async function QuotesPage() {
 
 ### Step 7 — Server action (the real shape)
 
-`app/[locale]/(dashboard)/quotes/actions.ts`. Use the helpers that exist today: `isMockMode()`, `requireActiveSubscription()`, and `currentHatcheryScope()`. There is **no `requireMember`/`requireCan`/`logAudit` helper** in the codebase yet — those names are aspirational. Inline the membership lookup and the RBAC check; the audit-log write is a TBD (see §19).
+`app/[locale]/(dashboard)/quotes/actions.ts`. Use the helpers that exist today: `isMockMode()`, `requireActiveSubscription()`, and `currentNurseryScope()` (FLAG: function name — returns the nursery tenant scope). There is **no `requireMember`/`requireCan`/`logAudit` helper** in the codebase yet — those names are aspirational. Inline the membership lookup and the RBAC check; the audit-log write is a TBD (see §19).
 
 ```typescript
 'use server';
@@ -312,18 +312,18 @@ export async function createQuoteAction(raw: unknown): Promise<Result<{ id: stri
     return { ok: false, error: first.message, field: first.path.join('.') };
   }
 
-  // Auth + membership lookup. Pattern mirrors lib/auth.ts:currentHatcheryScope.
+  // Auth + membership lookup. Pattern mirrors lib/auth.ts:currentNurseryScope.
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: 'Not authenticated' };
 
   const { data: membership } = await supabase
-    .from('hatchery_members')
-    .select('hatchery_id, role')
+    .from('nursery_members')
+    .select('nursery_id, role')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle();
-  if (!membership) return { ok: false, error: 'No hatchery membership found' };
+  if (!membership) return { ok: false, error: 'No hatchery membership found' }; // FLAG: error string references nursery_members table (code identifier — nursery tenant membership)
 
   // RBAC. Use can() — never branch on role strings. Proxy mapping: quotes use customer:write
   // because they're customer-scoped (see §9).
@@ -339,7 +339,7 @@ export async function createQuoteAction(raw: unknown): Promise<Result<{ id: stri
   } catch (e) {
     console.error('[hatchery-crm]', 'createQuoteAction.failed', {
       userId: user.id,
-      hatcheryId: membership.hatchery_id,
+      nurseryId: membership.nursery_id,
       error: e instanceof Error ? e.message : String(e),
     });
     return { ok: false, error: 'Could not create quote' };
@@ -541,7 +541,7 @@ const queryClient = new QueryClient({
 ```
 
 Override per-query as needed:
-- Reference data (roles, hatchery config): `staleTime: Infinity` + manual invalidate.
+- Reference data (roles, nursery config): `staleTime: Infinity` + manual invalidate.
 - Real-time-critical (alert list during active incident): `staleTime: 0`.
 
 ### Loading / pending / fetching (v5 semantics)
@@ -684,12 +684,12 @@ export async function someAction(raw: unknown): Promise<Result<Thing>> {
   if (!user) return { ok: false, error: 'Not authenticated' };
 
   const { data: membership } = await supabase
-    .from('hatchery_members')
-    .select('hatchery_id, role')
+    .from('nursery_members')
+    .select('nursery_id, role')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle();
-  if (!membership) return { ok: false, error: 'No hatchery membership found' };
+  if (!membership) return { ok: false, error: 'No hatchery membership found' }; // FLAG: error string references nursery_members table (code identifier — nursery tenant membership)
 
   // 5. RBAC — via can(), never on role strings
   if (!can(membership.role, 'thing:write')) return { ok: false, error: 'Permission denied' };
@@ -703,7 +703,7 @@ export async function someAction(raw: unknown): Promise<Result<Thing>> {
   } catch (e) {
     console.error('[hatchery-crm]', 'someAction.failed', {
       userId: user.id,
-      hatcheryId: membership.hatchery_id,
+      nurseryId: membership.nursery_id,
       error: e instanceof Error ? e.message : String(e),
     });
     return { ok: false, error: 'Internal error' };
@@ -721,7 +721,7 @@ export async function someAction(raw: unknown): Promise<Result<Thing>> {
 6. **`revalidateTag` (preferred) or `revalidatePath` after every successful write.** Without one, server components still show stale data after navigation.
 7. **Audit-log every state-changing action** that affects another user (invite, role change, batch publish, alert close, export, billing change). Currently the helper doesn't exist (§19); leave `// TODO(audit-log)` comments at each call site so they're trivially grep-able once the helper lands.
 8. **Server actions live next to their route.** `actions.ts` in the same folder as `page.tsx`. Do not move actions into `lib/`.
-9. **Never accept `hatchery_id` / `user_id` / `role` as a server-action argument.** Always derive from the session (see step 4 above). Even with Next.js's AES-encrypted closure variables, the client can replay an action with an attacker-controlled FormData; deriving authority server-side is the only reliable defense.
+9. **Never accept `nursery_id` / `user_id` / `role` as a server-action argument** (FLAG: `nursery_id` is the nursery tenant identifier — code identifier). Always derive from the session (see step 4 above). Even with Next.js's AES-encrypted closure variables, the client can replay an action with an attacker-controlled FormData; deriving authority server-side is the only reliable defense.
 
 ### React 19's `useActionState` — when to use
 
@@ -922,22 +922,22 @@ Every tenant-scoped table must have:
 ```sql
 create table public.<name> (
   id          uuid primary key default gen_random_uuid(),
-  hatchery_id uuid not null references public.hatcheries(id) on delete cascade,
+  nursery_id uuid not null references public.nurseries(id) on delete cascade,
   -- ... domain columns ...
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),
   created_by  uuid references auth.users(id)
 );
 
-create index <name>_hatchery_id_idx on public.<name>(hatchery_id);
+create index <name>_nursery_id_idx on public.<name>(nursery_id);
 
 alter table public.<name> enable row level security;
 
--- IMPORTANT: use the existing `current_user_hatchery_ids()` setof function with IN,
+-- IMPORTANT: use the existing `current_user_nursery_ids()` setof function with IN,
 -- wrapped in (select …) to trigger initPlan caching. This is the codebase pattern.
 create policy <name>_rw on public.<name> for all
-  using (hatchery_id in (select public.current_user_hatchery_ids()))
-  with check (hatchery_id in (select public.current_user_hatchery_ids()));
+  using (nursery_id in (select public.current_user_nursery_ids()))
+  with check (nursery_id in (select public.current_user_nursery_ids()));
 ```
 
 Future tightening: split `for all` into separate insert/update/delete policies that check role membership (see existing 011_rls_tighten.sql). New tables can follow that pattern as soon as the role assertion needs to differ from the membership assertion.
@@ -945,8 +945,8 @@ Future tightening: split `for all` into separate insert/update/delete policies t
 ### RLS performance — three pitfalls to avoid
 
 1. **No `(select …)` wrap.** `using (auth.uid() = user_id)` calls `auth.uid()` per row. Wrap: `using ((select auth.uid()) = user_id)`. Benchmarked ~20× faster on large tables.
-2. **No `.eq('hatchery_id', …)` in the client query.** Even with correct RLS, Postgres cannot use the index to prune rows BEFORE applying the policy if you don't filter by hatchery_id explicitly. Add both: RLS for safety, `.eq` for performance.
-3. **Missing index.** Every tenant-scoped table needs `create index … on public.<name>(hatchery_id)`. The membership table needs `create index … on public.hatchery_members(user_id, hatchery_id)`.
+2. **No `.eq('nursery_id', …)` in the client query** (FLAG: `nursery_id` is the nursery tenant FK — code identifier). Even with correct RLS, Postgres cannot use the index to prune rows BEFORE applying the policy if you don't filter by the tenant ID explicitly. Add both: RLS for safety, `.eq` for performance.
+3. **Missing index.** Every tenant-scoped table needs `create index … on public.<name>(nursery_id)`. The membership table needs `create index … on public.nursery_members(user_id, nursery_id)` (FLAG: all identifiers — pending rename decision).
 
 ### Adding a table — 8-step checklist
 
@@ -966,7 +966,7 @@ The action skeleton in §5 leaves a `// TODO(audit-log)` because the table and h
 ```sql
 create table public.audit_log (
   id            bigserial primary key,
-  hatchery_id   uuid        not null,
+  nursery_id   uuid        not null,
   actor_user_id uuid        not null references auth.users,
   actor_role    text        not null,
   action        text        not null,                  -- 'quote.create', 'alert.close', …
@@ -989,13 +989,13 @@ create trigger no_modify before update or delete on public.audit_log
 
 -- BRIN index for time-range queries (tiny on append-only timestamp columns).
 create index audit_log_created_at_brin on public.audit_log using brin (created_at);
-create index audit_log_hatchery_time on public.audit_log (hatchery_id, created_at desc);
+create index audit_log_hatchery_time on public.audit_log (nursery_id, created_at desc);
 create index audit_log_actor on public.audit_log (actor_user_id);
 
 -- Partition by month for storage growth. Archive cold partitions to Storage after 90 days.
 ```
 
-A helper `logAudit({ action, hatcheryId, targetType, targetId, oldRecord?, newRecord? })` lives in `lib/audit.ts` once the table ships. Until then, the recipe in §5 leaves a comment at each call site.
+A helper `logAudit({ action, nurseryId, targetType, targetId, oldRecord?, newRecord? })` lives in `lib/audit.ts` once the table ships. Until then, the recipe in §5 leaves a comment at each call site.
 
 ### Index policy
 
@@ -1213,7 +1213,7 @@ begin;
   select tests.create_supabase_user('owner_b');
 
   select tests.authenticate_as('owner_a');
-  insert into public.quotes (hatchery_id, customer_id, size, qty, unit_price)
+  insert into public.quotes (nursery_id, customer_id, size, qty, unit_price)
     values (tests.get_supabase_uid('owner_a')::uuid, /* … */);
 
   select tests.authenticate_as('owner_b');
@@ -1333,15 +1333,15 @@ A reviewer runs this top-to-bottom. Any unchecked box = request changes.
 
 - [ ] Files that use Stripe SDK or service-role key import `'server-only'` at the top.
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is referenced only in: `app/api/webhooks/stripe/route.ts`, server actions, and `lib/auth.ts` / `lib/auth/bootstrap.ts` / `lib/billing/guard.ts` / `lib/supabase/storage.ts`. Never in a client component, hook, or any file with `'use client'`.
-- [ ] Every new server action calls `supabase.auth.getUser()` (NOT `getSession()`), inline-looks up `hatchery_members`, and runs `can(role, action)` before doing any work.
-- [ ] Every new tenant-scoped table has RLS enabled with policies referencing `hatchery_id in (select public.current_user_hatchery_ids())`.
+- [ ] Every new server action calls `supabase.auth.getUser()` (NOT `getSession()`), inline-looks up `nursery_members` (FLAG: table name — nursery tenant membership table), and runs `can(role, action)` before doing any work.
+- [ ] Every new tenant-scoped table has RLS enabled with policies referencing `nursery_id in (select public.current_user_nursery_ids())` (FLAG: all identifiers — scope to the nursery tenant).
 - [ ] The **P0 cross-tenant block test** (§11) runs and returns 0 for every new table.
 - [ ] No PII appears in `console.log` (no phone, no email, no `line_user_id`, no Thai national ID, no full LINE Flex payloads).
 - [ ] File uploads go to Supabase Storage with a signed URL **or** a public bucket if the asset is genuinely public (only the logo bucket today). Validate magic bytes (not just `file.type`) before upload — see `security.md` §file-upload.
 - [ ] `audit_log` is written for every state-changing action (placeholder `// TODO(audit-log)` is acceptable until the table ships).
 - [ ] No secrets in commit (`.env.example` has placeholders only; `.env.local` is in `.gitignore`).
 - [ ] If the change touches Stripe webhook handling, signature verification + `subscription_events` idempotency are both preserved. Webhook routes do NOT have JSON body middleware.
-- [ ] No server action accepts `hatchery_id`, `user_id`, or `role` as a parameter — all derived from the session (§5 rule 9).
+- [ ] No server action accepts `nursery_id`, `user_id`, or `role` as a parameter (FLAG: `nursery_id` is the nursery tenant identifier — code identifier) — all derived from the session (§5 rule 9).
 - [ ] `dangerouslySetInnerHTML` is not added (lint rule pending).
 - [ ] Redirect targets are validated against the request origin (auth callbacks, invite acceptance) — see `security.md` §open-redirect.
 - [ ] `pnpm audit --audit-level=high` passes (or every finding is documented with remediation plan in §19).
@@ -1355,7 +1355,7 @@ A reviewer runs this top-to-bottom. Any unchecked box = request changes.
 Every server-side log uses a stable prefix so it can be filtered in Cloud Logging / Vercel.
 
 ```typescript
-console.log('[hatchery-crm]', 'event_name', { hatcheryId, customerId });
+console.log('[hatchery-crm]', 'event_name', { nurseryId, customerId });
 console.error('[hatchery-crm]', 'event_name_failed', { error: e, ...context });
 ```
 
@@ -1364,9 +1364,9 @@ Sub-systems extend the prefix: `[hatchery-crm:stripe]`, `[hatchery-crm:line-work
 ### What to log
 
 For every facade call from a server action:
-- Entry: `facade:<method> start { hatcheryId }`
-- Success: `facade:<method> ok { hatcheryId, durationMs }`
-- Failure: `facade:<method> error { hatcheryId, error }`
+- Entry: `facade:<method> start { nurseryId }` (FLAG: `nurseryId` = nursery tenant ID — code identifier)
+- Success: `facade:<method> ok { nurseryId, durationMs }`
+- Failure: `facade:<method> error { nurseryId, error }`
 
 For every Stripe webhook:
 - Event type, event ID, idempotency hit/miss, action taken.
@@ -1464,15 +1464,15 @@ A reviewer pastes this into the PR thread and checks each item. The author canno
 - [ ] Client component is the leaf, server component wraps it (§3).
 
 ### Data
-- [ ] If a new table: RLS enabled with `IN (select current_user_hatchery_ids())`; both mock and live impls; types regenerated; P0 cross-tenant SQL verified.
+- [ ] If a new table: RLS enabled with `IN (select current_user_nursery_ids())`; both mock and live impls; types regenerated; P0 cross-tenant SQL verified.
 - [ ] If a new facade method: signatures match between `lib/mock/api.ts` and `lib/api/supabase.ts`.
 - [ ] Mutation invalidates the right query keys via the factory (§4).
 - [ ] Mutation that runs via `useActionState` / `<form action>` also triggers TanStack invalidate on success (§4 gotcha).
 
 ### RBAC + auth
-- [ ] Every new server action does the full sequence: `isMockMode()` → `requireActiveSubscription()` → zod parse → `getUser()` → `hatchery_members` lookup → `can(role, action)` → work → revalidate.
+- [ ] Every new server action does the full sequence: `isMockMode()` → `requireActiveSubscription()` → zod parse → `getUser()` → `nursery_members` lookup → `can(role, action)` → work → revalidate.
 - [ ] No code branches on role strings (§9).
-- [ ] No server action accepts `hatchery_id` / `user_id` / `role` as a parameter.
+- [ ] No server action accepts `nursery_id` / `user_id` / `role` as a parameter.
 - [ ] If a new action: matrix in `lib/rbac.ts` and `architecture.md` §4 both updated.
 
 ### i18n
@@ -1728,17 +1728,17 @@ async function listCustomers(): Promise<Customer[]> { /* 12 lines, obvious */ }
 
 ```typescript
 // ❌
-export async function deleteQuote(quoteId: string, hatcheryId: string) {
-  // …attacker controls hatcheryId
+export async function deleteQuote(quoteId: string, nurseryId: string) {
+  // …attacker controls nurseryId
 }
 ```
 
-Why bad: client-supplied authority. Even with Next.js's AES-encrypted closure variables, FormData is fully under the attacker's control. **Always derive `hatchery_id` server-side from the session.**
+Why bad: client-supplied authority. Even with Next.js's AES-encrypted closure variables, FormData is fully under the attacker's control. **Always derive the nursery tenant ID (`nursery_id` — FLAG: code identifier) server-side from the session.**
 
 ```typescript
 // ✅
 export async function deleteQuoteAction(raw: unknown) {
-  // derive hatchery_id from getUser() + hatchery_members lookup (see §5)
+  // derive nursery_id from getUser() + nursery_members lookup (see §5)
 }
 ```
 
@@ -1774,7 +1774,7 @@ Why bad: leaks PII into Vercel/Cloud Logging, indexed for the lifetime of the pr
 console.log('[hatchery-crm]', 'line.send', { customerId: customer.id });
 ```
 
-### N. Missing `.eq('hatchery_id')` with RLS
+### N. Missing `.eq('nursery_id')` with RLS
 
 ```typescript
 // ❌ — RLS will scope correctly, but Postgres can't prune by index before the policy
@@ -1785,7 +1785,7 @@ Why bad: even though RLS gives you correctness, it doesn't give you performance.
 
 ```typescript
 // ✅ — let the index prune first
-const { data } = await supabase.from('customers').select('*').eq('hatchery_id', hatcheryId);
+const { data } = await supabase.from('customers').select('*').eq('nursery_id', nurseryId);
 ```
 
 ---

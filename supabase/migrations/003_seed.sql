@@ -2,12 +2,12 @@
 -- IMPORTANT: this runs as the migration-running user (postgres), so RLS is bypassed.
 -- For local dev only; production should onboard real users.
 
--- One demo hatchery owned by no specific user (membership added at runtime).
-insert into public.hatcheries (id, name, name_en, location, location_en, registration_no, plan)
+-- One demo nursery owned by no specific user (membership added at runtime).
+insert into public.nurseries (id, name, name_en, location, location_en, registration_no, plan)
 values (
   '00000000-0000-0000-0000-00000000aaaa',
   'ฟ้าใส แฮทเชอรี่',
-  'Fasai Hatchery',
+  'Fasai Nursery',
   'สมุทรสาคร',
   'Samut Sakhon',
   'TH-HATCH-23489',
@@ -15,13 +15,13 @@ values (
 )
 on conflict do nothing;
 
-insert into public.scorecard_settings (hatchery_id) values
+insert into public.scorecard_settings (nursery_id) values
   ('00000000-0000-0000-0000-00000000aaaa') on conflict do nothing;
-insert into public.notification_settings (hatchery_id) values
+insert into public.notification_settings (nursery_id) values
   ('00000000-0000-0000-0000-00000000aaaa') on conflict do nothing;
 
 -- Customers
-insert into public.customers (id, hatchery_id, name, farm, farm_en, zone, status, ltv, last_buy)
+insert into public.customers (id, nursery_id, name, farm, farm_en, zone, status, ltv, last_buy)
 values
   ('11111111-1111-1111-1111-000000000001', '00000000-0000-0000-0000-00000000aaaa', 'สมชาย ใจดี',          'ฟาร์มกุ้งบ้านสวน',   'Bansuan Shrimp Farm', 'สมุทรสาคร',   'active',       184000, '2026-04-12'),
   ('11111111-1111-1111-1111-000000000002', '00000000-0000-0000-0000-00000000aaaa', 'ประยุทธ พงษ์ศรี',     'พงษ์ศรีฟาร์ม',       'Phongsri Farm',       'ฉะเชิงเทรา',   'active',       392000, '2026-04-22'),
@@ -48,7 +48,7 @@ values
 on conflict do nothing;
 
 -- Batches
-insert into public.batches (id, hatchery_id, source, pl_produced, pl_sold, date, pcr, mean_d30, dist)
+insert into public.batches (id, nursery_id, source, pl_produced, pl_sold, date, pcr, mean_d30, dist)
 values
   ('B-2604-A', '00000000-0000-0000-0000-00000000aaaa', 'CP-Genetics Line A',     2400000, 1820000, '2026-04-22', 'clean',   84, '[1,2,4,7,12,18,24,16,8,3]'::jsonb),
   ('B-2604-B', '00000000-0000-0000-0000-00000000aaaa', 'SyAqua Line 7',          1800000, 1650000, '2026-04-19', 'clean',   79, '[2,3,5,8,14,16,20,15,9,4]'::jsonb),
@@ -58,7 +58,7 @@ values
 on conflict do nothing;
 
 -- Alerts
-insert into public.alerts (id, hatchery_id, sev, title, description, batch_id, action)
+insert into public.alerts (id, nursery_id, sev, title, description, batch_id, action)
 values
   ('22222222-2222-2222-2222-000000000001', '00000000-0000-0000-0000-00000000aaaa', 'high',   'พบ EHP ในล็อต B-2603-D',                     'ฟาร์ม 2 จาก 4 ที่ซื้อล็อตนี้รายงานอัตรารอด < 60% ที่ D30', 'B-2603-D', 'ติดต่อฟาร์มที่เหลือ + ส่ง PCR ใหม่'),
   ('22222222-2222-2222-2222-000000000002', '00000000-0000-0000-0000-00000000aaaa', 'medium', 'อัตรารอด D30 ของ B-2604-C ต่ำกว่าเป้า',    'ค่าเฉลี่ย 76% (เป้า 80%) จาก 7 ฟาร์ม',                'B-2604-C', 'ตรวจสอบสภาพอากาศ + ปริมาณอาหาร'),

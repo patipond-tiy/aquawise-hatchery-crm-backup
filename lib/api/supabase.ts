@@ -1,7 +1,7 @@
 /**
  * Supabase-backed implementations of the API surface in `lib/api.ts`.
  * These run client-side via the browser Supabase client. RLS scopes results
- * to the user's hatchery membership.
+ * to the user's nursery membership.
  *
  * For mutations that need to write `audit_log`, prefer server actions
  * (see actions.ts files under app/[locale]/(dashboard)/).
@@ -13,7 +13,7 @@ import type {
   Alert,
   Batch,
   Customer,
-  Hatchery,
+  Nursery,
   NotificationSettings,
   Prices,
   ScorecardSettings,
@@ -22,7 +22,7 @@ import type {
   PcrStatus,
 } from '@/lib/types';
 import type { AddBatchInput, AddCustomerInput } from '@/lib/mock/api';
-import { PRICES, TEAM, HATCHERY } from '@/lib/mock/data';
+import { PRICES, TEAM, NURSERY } from '@/lib/mock/data';
 
 function rowToCustomer(
   row: {
@@ -85,13 +85,13 @@ function rowToBatch(row: {
   };
 }
 
-export async function getHatchery(): Promise<Hatchery> {
+export async function getNursery(): Promise<Nursery> {
   const supabase = createClient();
   // Cast to any so we can read restock_thresholds (added by migration 010)
   // without waiting for a generated-types regen.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any)
-    .from('hatcheries')
+    .from('nurseries')
     .select('name, name_en, location, location_en, restock_thresholds')
     .limit(1)
     .single() as { data: {
@@ -101,7 +101,7 @@ export async function getHatchery(): Promise<Hatchery> {
       location_en: string | null;
       restock_thresholds: { now?: number; week?: number; month?: number } | null;
     } | null };
-  if (!data) return HATCHERY;
+  if (!data) return NURSERY;
   const raw = data.restock_thresholds;
   return {
     name: data.name,
@@ -239,7 +239,7 @@ export async function getScorecardSettings(): Promise<ScorecardSettings> {
 export async function getSubscription(): Promise<import('@/lib/types').Subscription> {
   const supabase = createClient();
   const { data } = await supabase
-    .from('hatcheries')
+    .from('nurseries')
     .select(
       `subscription_status, trial_ends_at, stripe_customer_id, stripe_subscription_id,
        subscription_current_period_end, subscription_cancel_at_period_end`
@@ -296,17 +296,17 @@ export async function getNotificationSettings(): Promise<NotificationSettings> {
 
 export async function addCustomer(input: AddCustomerInput): Promise<Customer> {
   const supabase = createClient();
-  const { data: hatchery } = await supabase
-    .from('hatcheries')
+  const { data: nursery } = await supabase
+    .from('nurseries')
     .select('id')
     .limit(1)
     .single();
-  if (!hatchery) throw new Error('No hatchery scope for current user');
+  if (!nursery) throw new Error('No nursery scope for current user');
 
   const { data, error } = await supabase
     .from('customers')
     .insert({
-      hatchery_id: hatchery.id,
+      nursery_id: nursery.id,
       name: input.name,
       farm: input.farm,
       zone: input.zone,
@@ -329,12 +329,12 @@ export async function addCustomer(input: AddCustomerInput): Promise<Customer> {
 
 export async function addBatch(input: AddBatchInput): Promise<Batch> {
   const supabase = createClient();
-  const { data: hatchery } = await supabase
-    .from('hatcheries')
+  const { data: nursery } = await supabase
+    .from('nurseries')
     .select('id')
     .limit(1)
     .single();
-  if (!hatchery) throw new Error('No hatchery scope for current user');
+  if (!nursery) throw new Error('No nursery scope for current user');
 
   const id = `B-${input.date.slice(2, 4)}${input.date.slice(5, 7)}-${Math.random().toString(36).slice(2, 4).toUpperCase()}`;
 
@@ -342,7 +342,7 @@ export async function addBatch(input: AddBatchInput): Promise<Batch> {
     .from('batches')
     .insert({
       id,
-      hatchery_id: hatchery.id,
+      nursery_id: nursery.id,
       source: input.source,
       pl_produced: input.plProduced,
       date: input.date,
@@ -370,12 +370,12 @@ export async function updateScorecardSettings(
   patch: Partial<ScorecardSettings>
 ): Promise<ScorecardSettings> {
   const supabase = createClient();
-  const { data: hatchery } = await supabase
-    .from('hatcheries')
+  const { data: nursery } = await supabase
+    .from('nurseries')
     .select('id')
     .limit(1)
     .single();
-  if (!hatchery) throw new Error('No hatchery scope for current user');
+  if (!nursery) throw new Error('No nursery scope for current user');
 
   const dbPatch: Database['public']['Tables']['scorecard_settings']['Update'] = {};
   if (patch.public !== undefined) dbPatch.public = patch.public;
@@ -388,7 +388,7 @@ export async function updateScorecardSettings(
   await supabase
     .from('scorecard_settings')
     .update(dbPatch)
-    .eq('hatchery_id', hatchery.id);
+    .eq('nursery_id', nursery.id);
 
   return getScorecardSettings();
 }
@@ -397,12 +397,12 @@ export async function updateNotificationSettings(
   patch: Partial<NotificationSettings>
 ): Promise<NotificationSettings> {
   const supabase = createClient();
-  const { data: hatchery } = await supabase
-    .from('hatcheries')
+  const { data: nursery } = await supabase
+    .from('nurseries')
     .select('id')
     .limit(1)
     .single();
-  if (!hatchery) throw new Error('No hatchery scope for current user');
+  if (!nursery) throw new Error('No nursery scope for current user');
 
   const dbPatch: Database['public']['Tables']['notification_settings']['Update'] = {};
   if (patch.restock !== undefined) dbPatch.restock = patch.restock;
@@ -415,7 +415,7 @@ export async function updateNotificationSettings(
   await supabase
     .from('notification_settings')
     .update(dbPatch)
-    .eq('hatchery_id', hatchery.id);
+    .eq('nursery_id', nursery.id);
 
   return getNotificationSettings();
 }

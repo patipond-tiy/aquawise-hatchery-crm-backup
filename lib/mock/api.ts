@@ -4,7 +4,7 @@ import {
   CUSTOMERS,
   DEFAULT_NOTIFICATIONS,
   DEFAULT_SCORECARD,
-  HATCHERY,
+  NURSERY,
   PRICES,
   TEAM,
 } from './data';
@@ -12,7 +12,7 @@ import type {
   Alert,
   Batch,
   Customer,
-  Hatchery,
+  Nursery,
   NotificationSettings,
   Prices,
   ScorecardSettings,
@@ -31,8 +31,8 @@ const state = {
 const delay = <T>(value: T, ms = 80): Promise<T> =>
   new Promise((r) => setTimeout(() => r(value), ms));
 
-export async function getHatchery(): Promise<Hatchery> {
-  return delay(HATCHERY);
+export async function getNursery(): Promise<Nursery> {
+  return delay(NURSERY);
 }
 
 export async function listCustomers(): Promise<Customer[]> {

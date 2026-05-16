@@ -5,12 +5,12 @@
 ## Prerequisites
 
 - Migrations `001`–`014` applied; `customer_cycles`, `batch_buyers`, and `customer_callbacks` tables exist
-- Two separate hatchery workspaces provisioned: **Hatchery A** (owner email A) and **Hatchery B** (owner email B), each with at least 3 customer rows in `customers`
-- A `counter_staff` member exists in Hatchery A (created via A2-happy path)
-- A `lab_tech` member exists in Hatchery A
-- At least one customer in Hatchery A has at least two `customer_cycles` rows and at least two `batch_buyers` rows
-- At least one customer in Hatchery A has zero `customer_cycles` rows
-- At least one customer in Hatchery A has `restockIn <= 14`
+- Two separate nursery workspaces provisioned: **Nursery A** (owner email A) and **Nursery B** (owner email B), each with at least 3 customer rows in `customers`
+- A `counter_staff` member exists in Nursery A (created via A2-happy path)
+- A `lab_tech` member exists in Nursery A
+- At least one customer in Nursery A has at least two `customer_cycles` rows and at least two `batch_buyers` rows
+- At least one customer in Nursery A has zero `customer_cycles` rows
+- At least one customer in Nursery A has `restockIn <= 14`
 
 ---
 
@@ -18,9 +18,9 @@
 
 ### Scenario 1: B1-rls — Cross-tenant isolation
 
-**Given:** Hatchery B owner is signed in; Hatchery A has customers in its `customers` table
-**When:** Hatchery B owner visits `/th/customers`
-**Then:** Zero rows from Hatchery A appear in the list; only Hatchery B's own customers are visible
+**Given:** Nursery B owner is signed in; Nursery A has customers in its `customers` table
+**When:** Nursery B owner visits `/th/customers`
+**Then:** Zero rows from Nursery A appear in the list; only Nursery B's own customers are visible
 
 **Verification:**
 
@@ -30,22 +30,22 @@ pnpm vitest run tests/api/list-customers.test.ts -t "cross-tenant RLS"
 
 Manual — `USE_MOCK=false`:
 
-1. Sign in as Hatchery B owner.
+1. Sign in as Nursery B owner.
 2. Navigate to `/th/customers`.
-3. Confirm the list shows only customers belonging to Hatchery B.
-4. In the Supabase SQL editor (authenticated as Hatchery B's user token), run:
+3. Confirm the list shows only customers belonging to Nursery B.
+4. In the Supabase SQL editor (authenticated as Nursery B's user token), run:
    ```sql
-   SELECT COUNT(*) FROM customers WHERE hatchery_id = '{hatchery_a_id}';
+   SELECT COUNT(*) FROM customers WHERE nursery_id = '{hatchery_a_id}';
    ```
 5. Confirm the result is `0`.
 
-**Pass/Fail:** PASS if the customer list shows zero Hatchery A rows and the SQL query returns `0`. FAIL if any Hatchery A customer row is visible in the UI or returned by the query.
+**Pass/Fail:** PASS if the customer list shows zero Nursery A rows and the SQL query returns `0`. FAIL if any Nursery A customer row is visible in the UI or returned by the query.
 
 ---
 
 ### Scenario 2: B1-search — Case-insensitive search returns only matching farms
 
-**Given:** Hatchery A owner is signed in; at least two customers exist, one with `farm` containing "นาย" and one without
+**Given:** Nursery A owner is signed in; at least two customers exist, one with `farm` containing "นาย" and one without
 **When:** The user types "นาย" in the search field
 **Then:** Only customers whose `farm`, `farmEn`, or `name` field contains "นาย" (case-insensitive) are shown in the list
 
@@ -66,7 +66,7 @@ Manual — `USE_MOCK=true` (search is client-side):
 
 ### Scenario 3: B1-restock-tab — Restock tab shows only customers where restockIn ≤ 14
 
-**Given:** Hatchery A has at least one customer with `restockIn <= 14` and at least one with `restockIn > 14`
+**Given:** Nursery A has at least one customer with `restockIn <= 14` and at least one with `restockIn > 14`
 **When:** The user clicks the "Restock" tab on the customers page
 **Then:** Only customers where `restockIn <= 14` are shown; customers with `restockIn > 14` or `restockIn = null` are absent
 
@@ -86,7 +86,7 @@ Manual — `USE_MOCK=true`:
 
 ### Scenario 4: B1-no-cycle — Customer without customer_cycles row appears in list
 
-**Given:** A customer exists in Hatchery A with no corresponding row in `customer_cycles`
+**Given:** A customer exists in Nursery A with no corresponding row in `customer_cycles`
 **When:** The user visits the "All" tab on `/th/customers`
 **Then:** The customer appears in the list; cycle-derived fields (last D30, restock-in) show a null/empty state, not an error
 
@@ -123,7 +123,7 @@ pnpm vitest run tests/api/add-customer.test.ts -t "required field rejected"
 
 Manual — `USE_MOCK=false`:
 
-1. Note `SELECT COUNT(*) FROM customers WHERE hatchery_id = '{hatchery_id}'`.
+1. Note `SELECT COUNT(*) FROM customers WHERE nursery_id = '{nursery_id}'`.
 2. Open the Add Customer modal; leave "Farm Name" empty; fill in "Owner" and "Province"; click "เพิ่มลูกค้า".
 3. Confirm a validation error appears on the farm name field.
 4. Re-query the count; confirm it is unchanged.
@@ -161,7 +161,7 @@ Manual — `USE_MOCK=false`:
 
 ### Scenario 1: B3-sparkline — Customer with 0 cycles shows empty sparkline, not error
 
-**Given:** A customer with zero `customer_cycles` rows exists in Hatchery A
+**Given:** A customer with zero `customer_cycles` rows exists in Nursery A
 **When:** The user navigates to that customer's detail page at `/th/customers/{customer_id}`
 **Then:** The page loads without a JavaScript error; the D30 trend area shows an explicit empty state (e.g., "ยังไม่มีข้อมูลรอบ"); no chart component crashes
 
@@ -183,7 +183,7 @@ Manual — `USE_MOCK=false`:
 
 ### Scenario 2: B3-history — Batch history rows match batch_buyers for that customer
 
-**Given:** A customer in Hatchery A has at least two rows in `batch_buyers` joined to `batches`
+**Given:** A customer in Nursery A has at least two rows in `batch_buyers` joined to `batches`
 **When:** The user opens that customer's detail page
 **Then:** The batch history table shows exactly the rows present in `batch_buyers` for that `customer_id`; row count and D30 values match the DB
 
@@ -266,7 +266,7 @@ Manual — `USE_MOCK=false`:
 
 ### Scenario 3: B4-rbac-lab-tech — lab_tech cannot insert a callback
 
-**Given:** A `lab_tech` member is signed in for Hatchery A
+**Given:** A `lab_tech` member is signed in for Nursery A
 **When:** The user attempts to click "นัดโทร" on a customer detail page
 **Then:** The "นัดโทร" button is absent or disabled; if the server action is called directly, it returns a permission-denied error; no `customer_callbacks` row is inserted
 

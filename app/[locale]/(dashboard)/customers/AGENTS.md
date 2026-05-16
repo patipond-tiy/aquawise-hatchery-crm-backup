@@ -4,7 +4,7 @@
 # customers
 
 ## Purpose
-Customers (= the farms that buy PL from this hatchery). List + detail.
+Customers (= the farms that buy PL from this nursery). List + detail.
 
 ## Key Files
 

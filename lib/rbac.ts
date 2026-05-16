@@ -1,6 +1,6 @@
 import type { Database } from '@/lib/database.types';
 
-type Role = Database['public']['Enums']['hatchery_role'];
+type Role = Database['public']['Enums']['nursery_role'];
 
 type Action =
   | 'customer:read'

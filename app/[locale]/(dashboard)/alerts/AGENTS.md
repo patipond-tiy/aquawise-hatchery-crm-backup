@@ -4,7 +4,7 @@
 # alerts
 
 ## Purpose
-Active disease and quality alerts. Each alert links back to the source batch and the affected farms, so the hatchery can take corrective action (e.g., re-PCR, contact farms, reduce feed).
+Active disease and quality alerts. Each alert links back to the source batch and the affected farms, so the nursery can take corrective action (e.g., re-PCR, contact farms, reduce feed).
 
 ## Key Files
 

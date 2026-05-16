@@ -3,7 +3,7 @@
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from '@/i18n/navigation';
-import { listCustomers, getHatchery } from '@/lib/api';
+import { listCustomers, getNursery } from '@/lib/api';
 import { useModal } from '@/lib/store/modal';
 import type { Customer } from '@/lib/types';
 import { V3Card } from '@/components/aw/v3-card';
@@ -29,12 +29,12 @@ export default function RestockPage() {
     queryKey: ['customers'],
     queryFn: listCustomers,
   });
-  const { data: hatchery } = useQuery({
-    queryKey: ['hatchery'],
-    queryFn: getHatchery,
+  const { data: nursery } = useQuery({
+    queryKey: ['nursery'],
+    queryFn: getNursery,
   });
 
-  const thresholds = hatchery?.restockThresholds ?? { now: 0, week: 14, month: 45 };
+  const thresholds = nursery?.restockThresholds ?? { now: 0, week: 14, month: 45 };
 
   const due = customers
     .filter((c) => c.restockIn != null)

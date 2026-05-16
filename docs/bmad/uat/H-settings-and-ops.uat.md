@@ -20,7 +20,7 @@
 
 **When:** An owner sets the `disease` toggle to `false` in Settings → Notifications, then a disease alert delivery is triggered (either via test or by the cron/bot worker checking the flag)
 
-**Then:** No `line_outbound_events` row with `template='disease_alert'` is created for that hatchery during this delivery cycle
+**Then:** No `line_outbound_events` row with `template='disease_alert'` is created for that nursery during this delivery cycle
 
 **Verification:**
 ```bash
@@ -30,9 +30,9 @@ Or: Manual — `USE_MOCK=false`.
 1. Navigate to `/th/settings` → Notifications; disable the `disease` toggle.
 2. Insert an open alert row directly in Supabase.
 3. Trigger the delivery path (or wait for cron).
-4. Query `line_outbound_events` — confirm no `disease_alert` rows were created for this hatchery.
+4. Query `line_outbound_events` — confirm no `disease_alert` rows were created for this nursery.
 
-**Pass/Fail:** PASS if zero `disease_alert` events are enqueued for the hatchery after disabling the toggle. FAIL if a `disease_alert` row is inserted despite the toggle being `false`.
+**Pass/Fail:** PASS if zero `disease_alert` events are enqueued for the nursery after disabling the toggle. FAIL if a `disease_alert` row is inserted despite the toggle being `false`.
 
 ---
 
@@ -58,7 +58,7 @@ Or: Manual (mock mode). Set mock session role to `counter_staff`; navigate to Se
 
 ### Scenario 1: H2-csv-header — Exported CSV first row contains expected column headers
 
-**Given:** An authenticated `auditor` or `owner` user; at least one customer record exists for the hatchery
+**Given:** An authenticated `auditor` or `owner` user; at least one customer record exists for the nursery
 
 **When:** The user clicks "ดาวน์โหลด CSV" (customers) in Settings → Data
 
@@ -76,20 +76,20 @@ Or: Manual (mock mode). Click the CSV download button; open the file in a text e
 
 ### Scenario 2: H2-row-count — CSV row count matches the RLS-scoped customer count with no cross-tenant leakage
 
-**Given:** A live Supabase project with two hatchery tenants — hatchery A has 5 customers, hatchery B has 3 customers; an `owner` of hatchery A is authenticated
+**Given:** A live Supabase project with two nursery tenants — nursery A has 5 customers, nursery B has 3 customers; an `owner` of nursery A is authenticated
 
-**When:** The hatchery A owner downloads the customer CSV
+**When:** The nursery A owner downloads the customer CSV
 
-**Then:** The CSV contains exactly 5 data rows (excluding the header); no hatchery B customer rows are present
+**Then:** The CSV contains exactly 5 data rows (excluding the header); no nursery B customer rows are present
 
 **Verification:**
 Manual — `USE_MOCK=false`.
-1. Confirm customer counts in Supabase dashboard: `SELECT hatchery_id, COUNT(*) FROM customers GROUP BY hatchery_id`.
-2. Download CSV as hatchery A owner.
+1. Confirm customer counts in Supabase dashboard: `SELECT nursery_id, COUNT(*) FROM customers GROUP BY nursery_id`.
+2. Download CSV as nursery A owner.
 3. Count data rows in the CSV (total lines minus 1 for header).
-4. Confirm count = 5 and no hatchery B customer data is present (check farm names).
+4. Confirm count = 5 and no nursery B customer data is present (check farm names).
 
-**Pass/Fail:** PASS if CSV row count matches hatchery A's customer count and contains no hatchery B data. FAIL if row count is wrong or any cross-tenant data appears.
+**Pass/Fail:** PASS if CSV row count matches nursery A's customer count and contains no nursery B data. FAIL if row count is wrong or any cross-tenant data appears.
 
 ---
 
@@ -119,11 +119,11 @@ Or: Manual (mock mode). Switch session role to `lab_tech`; navigate to Settings 
 
 ### Scenario 1: H3-trial-30 — Fresh workspace has `trial_ends_at` set to 30 days from creation
 
-**Given:** A newly created hatchery workspace (simulated by setting `MOCK_BILLING_STATE=trialing-25` in mock mode, or by reading a fresh `hatcheries` row in live mode)
+**Given:** A newly created nursery workspace (simulated by setting `MOCK_BILLING_STATE=trialing-25` in mock mode, or by reading a fresh `nurseries` row in live mode)
 
 **When:** The owner navigates to Settings → Billing
 
-**Then:** The billing UI shows a trial countdown consistent with a 30-day trial period (not 14 days); the `trial_ends_at` column in `hatcheries` equals `created_at + interval '30 days'`
+**Then:** The billing UI shows a trial countdown consistent with a 30-day trial period (not 14 days); the `trial_ends_at` column in `nurseries` equals `created_at + interval '30 days'`
 
 **Verification:**
 ```bash
@@ -131,7 +131,7 @@ Or: Manual (mock mode). Switch session role to `lab_tech`; navigate to Settings 
 pnpm vitest run tests/billing/guard.test.ts
 ```
 Or: Manual — `USE_MOCK=false`.
-1. Create a new hatchery in Supabase.
+1. Create a new nursery in Supabase.
 2. Query: `SELECT created_at, trial_ends_at, (trial_ends_at - created_at) AS trial_length FROM hatcheries WHERE id = '{new_id}'`.
 3. Confirm `trial_length = '30 days'`.
 
@@ -203,7 +203,7 @@ Or: Manual — `USE_MOCK=false` + Stripe CLI.
 
 > Requires: bot worker deployed. Cannot fully pass until G3p.i is complete. CRM-side logic (migration + settings UI) can be verified independently.
 
-**Given:** `notification_settings.quiet_hours_start = '21:00'`, `quiet_hours_end = '07:00'` for a hatchery; a `restock_reminder` `line_outbound_events` row is inserted at 22:00 ICT with `is_manual = false`
+**Given:** `notification_settings.quiet_hours_start = '21:00'`, `quiet_hours_end = '07:00'` for a nursery; a `restock_reminder` `line_outbound_events` row is inserted at 22:00 ICT with `is_manual = false`
 
 **When:** The bot worker checks this event at 22:30 ICT
 
@@ -217,7 +217,7 @@ Or: Manual — `USE_MOCK=false` + Stripe CLI.
 pnpm vitest run tests/settings/quiet-hours.test.ts -t "event deferred at 22:00"
 ```
 Or: Manual — `USE_MOCK=false` + bot worker deployed.
-1. Set hatchery quiet hours to 21:00–07:00 in Settings → Notifications.
+1. Set nursery quiet hours to 21:00–07:00 in Settings → Notifications.
 2. Enqueue a `restock_reminder` event at 22:00 (server time in ICT).
 3. Poll `line_outbound_events` — confirm `status = 'pending'` and `scheduled_for` is set to the next 07:00 ICT.
 4. Confirm no LINE message is received before 07:00.
@@ -230,7 +230,7 @@ Or: Manual — `USE_MOCK=false` + bot worker deployed.
 
 > Requires: bot worker deployed. Cannot fully pass until G3p.i is complete.
 
-**Given:** `notification_settings.quiet_hours_start = '21:00'`, `quiet_hours_end = '07:00'` for a hatchery; a `disease_alert` `line_outbound_events` row is inserted at 22:00 ICT with `payload->>'severity' = 'high'` and `is_manual = false`
+**Given:** `notification_settings.quiet_hours_start = '21:00'`, `quiet_hours_end = '07:00'` for a nursery; a `disease_alert` `line_outbound_events` row is inserted at 22:00 ICT with `payload->>'severity' = 'high'` and `is_manual = false`
 
 **When:** The bot worker checks this event at 22:00 ICT
 
@@ -284,7 +284,7 @@ Or: Manual — `USE_MOCK=false`.
 
 ### Scenario 2: X1-bulk — Bulk-selecting 3 dead events and retrying flips all 3 to `pending`
 
-**Given:** Three `line_outbound_events` rows with `status = 'dead'` exist for the hatchery; the owner is on `/th/settings/messaging-failures`
+**Given:** Three `line_outbound_events` rows with `status = 'dead'` exist for the nursery; the owner is on `/th/settings/messaging-failures`
 
 **When:** The owner checks all three rows and clicks "ลองใหม่ที่เลือก (3)"
 
@@ -335,24 +335,24 @@ Or: Manual — `USE_MOCK=false`.
 
 ---
 
-### Scenario 4: X1-cross-tenant — Owner of hatchery B cannot retry an event belonging to hatchery A
+### Scenario 4: X1-cross-tenant — Owner of nursery B cannot retry an event belonging to nursery A
 
-**Given:** A `line_outbound_events` row with `status = 'dead'` belongs to hatchery A; an owner of hatchery B is authenticated
+**Given:** A `line_outbound_events` row with `status = 'dead'` belongs to nursery A; an owner of nursery B is authenticated
 
-**When:** The hatchery B owner calls `retryDeadEvent(eventId)` where `eventId` belongs to hatchery A
+**When:** The nursery B owner calls `retryDeadEvent(eventId)` where `eventId` belongs to nursery A
 
-**Then:** The server action returns a Forbidden or Not Found error; the hatchery A event `status` is not changed
+**Then:** The server action returns a Forbidden or Not Found error; the nursery A event `status` is not changed
 
 **Verification:**
 ```bash
 pnpm vitest run tests/ops/dead-letter.test.ts -t "cross-tenant isolation"
 ```
 Or: Manual — `USE_MOCK=false`.
-1. Insert a `dead` event for hatchery A.
-2. Authenticate as hatchery B owner.
-3. Attempt to call the retry action with hatchery A's event ID.
+1. Insert a `dead` event for nursery A.
+2. Authenticate as nursery B owner.
+3. Attempt to call the retry action with nursery A's event ID.
 4. Confirm the event `status` in Supabase remains `dead`.
 
-**Pass/Fail:** PASS if the action is rejected and the hatchery A event is unchanged. FAIL if hatchery B owner can modify a hatchery A event.
+**Pass/Fail:** PASS if the action is rejected and the nursery A event is unchanged. FAIL if nursery B owner can modify a nursery A event.
 
 ---

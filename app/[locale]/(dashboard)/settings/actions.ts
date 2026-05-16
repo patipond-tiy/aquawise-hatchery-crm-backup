@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { uploadHatcheryLogo } from '@/lib/supabase/storage';
+import { uploadNurseryLogo } from '@/lib/supabase/storage';
 import { requireActiveSubscription } from '@/lib/billing/guard';
 import { isMockMode } from '@/lib/utils/mock-mode';
 
@@ -33,46 +33,46 @@ export async function updateProfile(
   if (!user) return { ok: false, error: 'Not authenticated' };
 
   const { data: membership } = await supabase
-    .from('hatchery_members')
-    .select('hatchery_id, role')
+    .from('nursery_members')
+    .select('nursery_id, role')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle();
 
-  if (!membership) return { ok: false, error: 'No hatchery membership found' };
+  if (!membership) return { ok: false, error: 'No nursery membership found' };
 
-  const { hatchery_id, role } = membership;
+  const { nursery_id, role } = membership;
 
-  const { error: hatcheryError } = await supabase
-    .from('hatcheries')
+  const { error: nurseryError } = await supabase
+    .from('nurseries')
     .update({
       name: fields.name,
       name_en: fields.name_en || null,
       location: fields.location || null,
       location_en: fields.location_en || null,
     })
-    .eq('id', hatchery_id);
+    .eq('id', nursery_id);
 
-  if (hatcheryError) return { ok: false, error: hatcheryError.message };
+  if (nurseryError) return { ok: false, error: nurseryError.message };
 
   let logo_url: string | undefined;
   if (logoFile && role === 'owner') {
-    const result = await uploadHatcheryLogo(hatchery_id, logoFile);
+    const result = await uploadNurseryLogo(nursery_id, logoFile);
     if (!result.ok) return { ok: false, error: result.error };
     logo_url = result.url;
   }
 
   const { error: brandError } = await supabase
-    .from('hatchery_brand')
+    .from('nursery_brand')
     .upsert(
       {
-        hatchery_id,
+        nursery_id,
         display_name_th: fields.display_name_th,
         display_name_en: fields.display_name_en,
         brand_color: fields.brand_color,
         ...(logo_url ? { logo_url } : {}),
       },
-      { onConflict: 'hatchery_id' }
+      { onConflict: 'nursery_id' }
     );
 
   if (brandError) return { ok: false, error: brandError.message };

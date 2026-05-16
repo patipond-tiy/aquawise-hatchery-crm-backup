@@ -3,7 +3,7 @@
 import { headers } from 'next/headers';
 import { getStripe, isStripeConfigured } from '@/lib/stripe/server';
 import { APP_URL, PRO_PRICE_ID } from '@/lib/stripe/config';
-import { currentHatcheryScope } from '@/lib/auth';
+import { currentNurseryScope } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/server';
 import { can } from '@/lib/rbac';
 import type { Invoice } from '@/lib/types';
@@ -30,7 +30,7 @@ export async function createCheckoutSession(): Promise<ActionResult<{ url: strin
     };
   }
 
-  const scope = await currentHatcheryScope();
+  const scope = await currentNurseryScope();
   if (!scope) return { ok: false, error: 'ไม่ได้เข้าสู่ระบบ' };
   if (!can(scope.role, 'billing:manage')) {
     return { ok: false, error: 'ไม่มีสิทธิ์จัดการแพ็กเกจ' };
@@ -46,39 +46,39 @@ export async function createCheckoutSession(): Promise<ActionResult<{ url: strin
   const stripe = getStripe();
   const supabase = await createServiceClient();
 
-  // Look up or create the Stripe customer for this hatchery.
-  const { data: hatchery } = await supabase
-    .from('hatcheries')
+  // Look up or create the Stripe customer for this nursery.
+  const { data: nursery } = await supabase
+    .from('nurseries')
     .select('id, name, stripe_customer_id')
-    .eq('id', scope.hatcheryId)
+    .eq('id', scope.nurseryId)
     .single();
-  if (!hatchery) return { ok: false, error: 'ไม่พบโรงเพาะ' };
+  if (!nursery) return { ok: false, error: 'ไม่พบโรงอนุบาล' };
 
-  let customerId = hatchery.stripe_customer_id;
+  let customerId = nursery.stripe_customer_id;
   if (!customerId) {
     const customer = await stripe.customers.create({
-      name: hatchery.name,
-      metadata: { hatchery_id: hatchery.id },
+      name: nursery.name,
+      metadata: { nursery_id: nursery.id },
     });
     customerId = customer.id;
     await supabase
-      .from('hatcheries')
+      .from('nurseries')
       .update({ stripe_customer_id: customerId })
-      .eq('id', hatchery.id);
+      .eq('id', nursery.id);
   }
 
   const locale = await getLocale();
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     customer: customerId,
-    client_reference_id: hatchery.id,
+    client_reference_id: nursery.id,
     line_items: [{ price: PRO_PRICE_ID, quantity: 1 }],
     allow_promotion_codes: true,
     success_url: `${APP_URL}/${locale}/settings?checkout=success`,
     cancel_url: `${APP_URL}/${locale}/settings?checkout=cancel`,
     locale: locale === 'th' ? 'th' : 'en',
     subscription_data: {
-      metadata: { hatchery_id: hatchery.id },
+      metadata: { nursery_id: nursery.id },
     },
   });
 
@@ -95,26 +95,26 @@ export async function createPortalSession(): Promise<ActionResult<{ url: string 
     return { ok: false, error: 'Stripe ยังไม่ได้ตั้งค่า' };
   }
 
-  const scope = await currentHatcheryScope();
+  const scope = await currentNurseryScope();
   if (!scope) return { ok: false, error: 'ไม่ได้เข้าสู่ระบบ' };
   if (!can(scope.role, 'billing:manage')) {
     return { ok: false, error: 'ไม่มีสิทธิ์จัดการแพ็กเกจ' };
   }
 
   const supabase = await createServiceClient();
-  const { data: hatchery } = await supabase
-    .from('hatcheries')
+  const { data: nursery } = await supabase
+    .from('nurseries')
     .select('stripe_customer_id')
-    .eq('id', scope.hatcheryId)
+    .eq('id', scope.nurseryId)
     .single();
-  if (!hatchery?.stripe_customer_id) {
-    return { ok: false, error: 'ยังไม่มีบัญชี Stripe สำหรับโรงเพาะนี้' };
+  if (!nursery?.stripe_customer_id) {
+    return { ok: false, error: 'ยังไม่มีบัญชี Stripe สำหรับโรงอนุบาลนี้' };
   }
 
   const stripe = getStripe();
   const locale = await getLocale();
   const session = await stripe.billingPortal.sessions.create({
-    customer: hatchery.stripe_customer_id,
+    customer: nursery.stripe_customer_id,
     return_url: `${APP_URL}/${locale}/settings`,
   });
 
@@ -130,20 +130,20 @@ export async function fetchInvoiceHistory(): Promise<Invoice[]> {
     return mockInvoices();
   }
 
-  const scope = await currentHatcheryScope();
+  const scope = await currentNurseryScope();
   if (!scope) return [];
 
   const supabase = await createServiceClient();
-  const { data: hatchery } = await supabase
-    .from('hatcheries')
+  const { data: nursery } = await supabase
+    .from('nurseries')
     .select('stripe_customer_id')
-    .eq('id', scope.hatcheryId)
+    .eq('id', scope.nurseryId)
     .single();
-  if (!hatchery?.stripe_customer_id) return [];
+  if (!nursery?.stripe_customer_id) return [];
 
   const stripe = getStripe();
   const list = await stripe.invoices.list({
-    customer: hatchery.stripe_customer_id,
+    customer: nursery.stripe_customer_id,
     limit: 12,
   });
 

@@ -36,7 +36,7 @@ export function ComingSoon() {
 
       <div style={{ textAlign: 'center', maxWidth: 460 }}>
         <div className="eyebrow" style={{ marginBottom: 14 }}>
-          AquaWise Hatchery CRM
+          AquaWise Nursery CRM
         </div>
         <h1
           style={{
@@ -57,7 +57,7 @@ export function ComingSoon() {
             color: 'var(--color-ink-3)',
           }}
         >
-          We're launching with a Thai-first experience for hatchery operators in
+          We're launching with a Thai-first experience for nursery operators in
           Thailand. The English version is on the way — until then, the full app
           is available in Thai.
         </p>

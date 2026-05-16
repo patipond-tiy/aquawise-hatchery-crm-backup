@@ -21,7 +21,7 @@
 
 **Decision:** Defer to H3.
 
-**Why:** Auditor persona (P5) is already documented as Phase H3 in `01-personas.md`. Building an `auditor`-only DB view in H1 with no H1 consumer is infra leaking forward (PRD rule#7 "slow is right"). No confirmed H1 hatchery is asking for auditor-scoped batch browsing.
+**Why:** Auditor persona (P5) is already documented as Phase H3 in `01-personas.md`. Building an `auditor`-only DB view in H1 with no H1 consumer is infra leaking forward (PRD rule#7 "slow is right"). No confirmed H1 nursery operator is asking for auditor-scoped batch browsing.
 
 **Cascade edits:**
 - `stories/C2.browse-and-review-batches.md`
@@ -36,7 +36,7 @@
 
 ## D2 — Send a quote in one-tap
 
-**Decision:** **Promote G3 → H1.** The quote Flex "ตอบรับ" CTA opens a **full two-way LIFF chat** between the nursery (hatchery's customer) and the hatchery operator, hosted inside our webapp. All hatchery↔nursery communication should be mediated by our system so we keep both sides on AquaWise rather than losing them to native LINE chat.
+**Decision:** **Promote G3 → H1.** The quote Flex "ตอบรับ" CTA opens a **full two-way LIFF chat** between the farm (nursery's customer) and the nursery operator, hosted inside our webapp. All nursery↔farm communication should be mediated by our system so we keep both sides on AquaWise rather than losing them to native LINE chat.
 
 **Rationale (PO):** Brand-owned chat is the strategic moat — if conversations happen in LINE OA, AquaWise becomes a thin notifier and loses the relationship surface. Promoting G3 trades H1 timeline for product defensibility.
 
@@ -54,17 +54,17 @@ This decision reverses the explicit H3 deferral baked into:
   - §8 out-of-scope table: remove the G3 row (or replace with "G3 two-way LIFF — promoted to H1, see decisions-2026-05-15")
   - §5 feature inventory: G3-LIFF-CHAT row — change "Phase H3" → "Phase H1", status "❌ Deferred" → "❌ Not implemented"
 - `architecture.md` — likely no rule change, but §5 RLS tables needs a new entry:
-  - `line_messages` (planned) — message store with `hatchery_id`, `customer_id`, `direction (in|out)`, `body`, `flex_payload`, `delivered_at`, `read_at`
+  - `line_messages` (planned) — message store with `nursery_id` (FLAG: code identifier — nursery tenant FK), `customer_id`, `direction (in|out)`, `body`, `flex_payload`, `delivered_at`, `read_at`
   - Decide: realtime via Supabase Realtime subscription vs. polling?
 - `stories/_hypotheses/G3.two-way-chat-liff-inbox.md` → move to `stories/G3.two-way-chat-liff-inbox.md` and rewrite as ready-for-dev
 - `stories/D2.send-a-quote-in-one-tap.md`
-  - AC#4: replace with "ตอบรับ button opens the AquaWise LIFF chat thread between the nursery and the hatchery"
+  - AC#4: replace with "ตอบรับ button opens the AquaWise LIFF chat thread between the farm and the nursery"
   - Remove ⚠ deferral note
 - `stories/G2.send-one-off-line-message.md` — re-scope: it currently assumes send-only; will likely fold into G3
 - `stories/G3p.send-only-flex-messaging-worker-queue.md` — keep as the infra story for the outbound side of G3, OR retire if G3 supersedes it. Recommend keep + retitle to "Outbound queue + worker (Flex render side of G3)".
 - New stories needed (PO to confirm scope before authoring):
   - **G3a** — LIFF chat inbox surface (nursery-side LIFF page rendering message thread, composer, scroll)
-  - **G3b** — Operator inbox in CRM dashboard (hatchery-side: list of open threads, unread badges, reply composer)
+  - **G3b** — Operator inbox in CRM dashboard (nursery-side: list of open threads, unread badges, reply composer)
   - **G3c** — Inbound LINE webhook to ingest nursery replies into `line_messages`
   - **G3d** — Realtime/polling sync between operator inbox and LIFF
   - **G3e** — Notifications (operator gets a CRM-side ping when a nursery replies; respect quiet hours per H4)
@@ -75,7 +75,7 @@ This decision reverses the explicit H3 deferral baked into:
 
 **Risk flags:**
 - Doubles the "G epic" surface area — may push H1 ship date.
-- LINE webhook signature verification + nursery identity binding becomes P0 (cross-tenant risk if a nursery's LIFF lands them in the wrong hatchery's thread).
+- LINE webhook signature verification + farm identity binding becomes P0 (cross-tenant risk if a farm's LIFF lands them in the wrong nursery's thread).
 - The 2027 P'Bunjong validation premise was "build H1 fast on confirmed scaffold". Promoting G3 widens scaffold scope — re-affirm with CEO that the strategic moat argument outweighs the speed-to-first-tenant goal.
 
 **PO action before fix pass runs:**
@@ -102,7 +102,7 @@ This decision reverses the explicit H3 deferral baked into:
 
 **Decision:** **Add a new `broadcast:write`** action.
 
-**Why:** Clearer audit trail. `settings:write` semantically means changing hatchery config; broadcasting is an outbound comms action and shouldn't be coupled to settings permissions. The cost is one enum entry + matrix update.
+**Why:** Clearer audit trail. `settings:write` semantically means changing nursery config; broadcasting is an outbound comms action and shouldn't be coupled to settings permissions. The cost is one enum entry + matrix update.
 
 **Cascade edits:**
 - `lib/rbac.ts` — add `'broadcast:write'` to action union; update the action matrix with: `owner = Y`, `counter_staff = —`, `lab_tech = —`, `auditor = —`.

@@ -69,7 +69,7 @@ export type RestockThresholds = {
   month: number;
 };
 
-export type Hatchery = {
+export type Nursery = {
   name: string;
   nameEn: string;
   location: string;

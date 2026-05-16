@@ -12,7 +12,7 @@ The mock implementation is the **reference signature** — `lib/api/supabase.ts`
 
 | File | Description |
 |------|-------------|
-| `data.ts` | Constant Thai mock data: `HATCHERY`, `CUSTOMERS` (9 farms), `BATCHES` (5 batches), `ALERTS` (3), `PRICES`, `DEFAULT_SCORECARD`, `DEFAULT_NOTIFICATIONS`, `TEAM` |
+| `data.ts` | Constant Thai mock data: `NURSERY`, `CUSTOMERS` (9 farms), `BATCHES` (5 batches), `ALERTS` (3), `PRICES`, `DEFAULT_SCORECARD`, `DEFAULT_NOTIFICATIONS`, `TEAM` |
 | `api.ts` | Mock implementations of every API function. Holds a mutable `state` so dev mutations persist across navigations within a session (lost on reload) |
 | `billing.ts` | Mock subscription state controlled by `MOCK_BILLING_STATE` env var. Values: `trialing-25` \| `trialing-2` \| `trial_expired` \| `active` \| `past_due` \| `canceled` |
 

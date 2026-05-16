@@ -28,7 +28,7 @@ Tabbed settings page. **Paywall-exempt** (per `BillingGate`) so users with an ex
 - **Team tab** opens `<InviteTeamModal>` for invitations. The team list itself is currently `TEAM` from `lib/mock/data.ts` even in live mode (see comment in `lib/api/supabase.ts` — auth.users is restricted; needs a server action to surface).
 - **Data export** is a stub today.
 - **Billing tab**:
-  - In trial → "Subscribe — 5,000฿/mo" CTA → calls a server action that creates a Stripe Checkout Session with `client_reference_id = hatcheryId` and redirects to Stripe.
+  - In trial → "Subscribe — 5,000฿/mo" CTA → calls a server action that creates a Stripe Checkout Session with `client_reference_id = nurseryId` and redirects to Stripe.
   - Active → "Manage subscription" → calls a server action that creates a Customer Portal session and redirects.
   - Past-due → "Update payment" CTA leading to the Portal.
   - Below the CTA, the payment history table comes from `fetchInvoiceHistory()` server action (Stripe-side; never goes through the API facade because the Stripe secret can't reach the browser).

@@ -52,7 +52,7 @@ export type Database = {
           closed_reason: string | null
           created_at: string
           description: string | null
-          hatchery_id: string
+          nursery_id: string
           id: string
           sev: Database["public"]["Enums"]["alert_severity"]
           title: string
@@ -66,7 +66,7 @@ export type Database = {
           closed_reason?: string | null
           created_at?: string
           description?: string | null
-          hatchery_id: string
+          nursery_id: string
           id?: string
           sev: Database["public"]["Enums"]["alert_severity"]
           title: string
@@ -80,7 +80,7 @@ export type Database = {
           closed_reason?: string | null
           created_at?: string
           description?: string | null
-          hatchery_id?: string
+          nursery_id?: string
           id?: string
           sev?: Database["public"]["Enums"]["alert_severity"]
           title?: string
@@ -94,15 +94,15 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "alerts_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "alerts_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
-            referencedRelation: "hatcheries"
+            referencedRelation: "nurseries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "alerts_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "alerts_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
@@ -113,7 +113,7 @@ export type Database = {
         Row: {
           action: string
           created_at: string
-          hatchery_id: string
+          nursery_id: string
           id: number
           payload: Json | null
           user_id: string | null
@@ -121,7 +121,7 @@ export type Database = {
         Insert: {
           action: string
           created_at?: string
-          hatchery_id: string
+          nursery_id: string
           id?: number
           payload?: Json | null
           user_id?: string | null
@@ -129,22 +129,22 @@ export type Database = {
         Update: {
           action?: string
           created_at?: string
-          hatchery_id?: string
+          nursery_id?: string
           id?: number
           payload?: Json | null
           user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "audit_log_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "audit_log_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
-            referencedRelation: "hatcheries"
+            referencedRelation: "nurseries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "audit_log_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "audit_log_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
@@ -195,7 +195,7 @@ export type Database = {
           created_at: string
           date: string
           dist: Json
-          hatchery_id: string
+          nursery_id: string
           id: string
           mean_d30: number | null
           pcr: Database["public"]["Enums"]["pcr_status"]
@@ -207,7 +207,7 @@ export type Database = {
           created_at?: string
           date: string
           dist?: Json
-          hatchery_id: string
+          nursery_id: string
           id: string
           mean_d30?: number | null
           pcr?: Database["public"]["Enums"]["pcr_status"]
@@ -219,7 +219,7 @@ export type Database = {
           created_at?: string
           date?: string
           dist?: Json
-          hatchery_id?: string
+          nursery_id?: string
           id?: string
           mean_d30?: number | null
           pcr?: Database["public"]["Enums"]["pcr_status"]
@@ -229,15 +229,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "batches_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "batches_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
-            referencedRelation: "hatcheries"
+            referencedRelation: "nurseries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "batches_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "batches_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
@@ -252,7 +252,7 @@ export type Database = {
           created_by: string
           customer_id: string
           expires_at: string
-          hatchery_id: string
+          nursery_id: string
           token: string
         }
         Insert: {
@@ -262,7 +262,7 @@ export type Database = {
           created_by: string
           customer_id: string
           expires_at: string
-          hatchery_id: string
+          nursery_id: string
           token: string
         }
         Update: {
@@ -272,7 +272,7 @@ export type Database = {
           created_by?: string
           customer_id?: string
           expires_at?: string
-          hatchery_id?: string
+          nursery_id?: string
           token?: string
         }
         Relationships: [
@@ -284,15 +284,15 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "customer_bind_tokens_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "customer_bind_tokens_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
-            referencedRelation: "hatcheries"
+            referencedRelation: "nurseries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "customer_bind_tokens_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "customer_bind_tokens_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
@@ -343,7 +343,7 @@ export type Database = {
           created_at: string
           farm: string
           farm_en: string | null
-          hatchery_id: string
+          nursery_id: string
           id: string
           last_buy: string | null
           line_id: string | null
@@ -359,7 +359,7 @@ export type Database = {
           created_at?: string
           farm: string
           farm_en?: string | null
-          hatchery_id: string
+          nursery_id: string
           id?: string
           last_buy?: string | null
           line_id?: string | null
@@ -375,7 +375,7 @@ export type Database = {
           created_at?: string
           farm?: string
           farm_en?: string | null
-          hatchery_id?: string
+          nursery_id?: string
           id?: string
           last_buy?: string | null
           line_id?: string | null
@@ -388,22 +388,22 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "customers_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "customers_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
-            referencedRelation: "hatcheries"
+            referencedRelation: "nurseries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "customers_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "customers_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
           },
         ]
       }
-      hatcheries: {
+      nurseries: {
         Row: {
           created_at: string
           id: string
@@ -457,12 +457,12 @@ export type Database = {
         }
         Relationships: []
       }
-      hatchery_brand: {
+      nursery_brand: {
         Row: {
           brand_color: string
           display_name_en: string
           display_name_th: string
-          hatchery_id: string
+          nursery_id: string
           logo_url: string | null
           updated_at: string
         }
@@ -470,7 +470,7 @@ export type Database = {
           brand_color?: string
           display_name_en: string
           display_name_th: string
-          hatchery_id: string
+          nursery_id: string
           logo_url?: string | null
           updated_at?: string
         }
@@ -478,57 +478,57 @@ export type Database = {
           brand_color?: string
           display_name_en?: string
           display_name_th?: string
-          hatchery_id?: string
+          nursery_id?: string
           logo_url?: string | null
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "hatchery_brand_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "nursery_brand_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: true
-            referencedRelation: "hatcheries"
+            referencedRelation: "nurseries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "hatchery_brand_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "nursery_brand_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: true
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
           },
         ]
       }
-      hatchery_members: {
+      nursery_members: {
         Row: {
           created_at: string
-          hatchery_id: string
-          role: Database["public"]["Enums"]["hatchery_role"]
+          nursery_id: string
+          role: Database["public"]["Enums"]["nursery_role"]
           user_id: string
         }
         Insert: {
           created_at?: string
-          hatchery_id: string
-          role?: Database["public"]["Enums"]["hatchery_role"]
+          nursery_id: string
+          role?: Database["public"]["Enums"]["nursery_role"]
           user_id: string
         }
         Update: {
           created_at?: string
-          hatchery_id?: string
-          role?: Database["public"]["Enums"]["hatchery_role"]
+          nursery_id?: string
+          role?: Database["public"]["Enums"]["nursery_role"]
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "hatchery_members_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "nursery_members_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
-            referencedRelation: "hatcheries"
+            referencedRelation: "nurseries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "hatchery_members_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "nursery_members_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
@@ -541,7 +541,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           customer_id: string
-          hatchery_id: string
+          nursery_id: string
           id: string
           kind: Database["public"]["Enums"]["line_event_kind"]
           last_error: string | null
@@ -557,7 +557,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_id: string
-          hatchery_id: string
+          nursery_id: string
           id?: string
           kind?: Database["public"]["Enums"]["line_event_kind"]
           last_error?: string | null
@@ -573,7 +573,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_id?: string
-          hatchery_id?: string
+          nursery_id?: string
           id?: string
           kind?: Database["public"]["Enums"]["line_event_kind"]
           last_error?: string | null
@@ -593,15 +593,15 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "line_outbound_events_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "line_outbound_events_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
-            referencedRelation: "hatcheries"
+            referencedRelation: "nurseries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "line_outbound_events_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "line_outbound_events_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
@@ -611,7 +611,7 @@ export type Database = {
       notification_settings: {
         Row: {
           disease: boolean
-          hatchery_id: string
+          nursery_id: string
           line_reply: boolean
           low_d30: boolean
           price_move: boolean
@@ -621,7 +621,7 @@ export type Database = {
         }
         Insert: {
           disease?: boolean
-          hatchery_id: string
+          nursery_id: string
           line_reply?: boolean
           low_d30?: boolean
           price_move?: boolean
@@ -631,7 +631,7 @@ export type Database = {
         }
         Update: {
           disease?: boolean
-          hatchery_id?: string
+          nursery_id?: string
           line_reply?: boolean
           low_d30?: boolean
           price_move?: boolean
@@ -641,15 +641,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "notification_settings_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "notification_settings_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: true
-            referencedRelation: "hatcheries"
+            referencedRelation: "nurseries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "notification_settings_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "notification_settings_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: true
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
@@ -699,7 +699,7 @@ export type Database = {
       }
       scorecard_settings: {
         Row: {
-          hatchery_id: string
+          nursery_id: string
           public: boolean
           show_d30: boolean
           show_pcr: boolean
@@ -709,7 +709,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          hatchery_id: string
+          nursery_id: string
           public?: boolean
           show_d30?: boolean
           show_pcr?: boolean
@@ -719,7 +719,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          hatchery_id?: string
+          nursery_id?: string
           public?: boolean
           show_d30?: boolean
           show_pcr?: boolean
@@ -730,15 +730,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "scorecard_settings_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "scorecard_settings_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: true
-            referencedRelation: "hatcheries"
+            referencedRelation: "nurseries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "scorecard_settings_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "scorecard_settings_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: true
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
@@ -748,7 +748,7 @@ export type Database = {
       subscription_events: {
         Row: {
           created_at: string
-          hatchery_id: string | null
+          nursery_id: string | null
           id: number
           payload: Json | null
           stripe_event_id: string
@@ -756,7 +756,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          hatchery_id?: string | null
+          nursery_id?: string | null
           id?: number
           payload?: Json | null
           stripe_event_id: string
@@ -764,7 +764,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          hatchery_id?: string | null
+          nursery_id?: string | null
           id?: number
           payload?: Json | null
           stripe_event_id?: string
@@ -772,15 +772,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "subscription_events_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "subscription_events_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
-            referencedRelation: "hatcheries"
+            referencedRelation: "nurseries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "subscription_events_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "subscription_events_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
@@ -794,9 +794,9 @@ export type Database = {
           created_by: string
           email: string
           expires_at: string
-          hatchery_id: string
+          nursery_id: string
           id: string
-          role: Database["public"]["Enums"]["hatchery_role"]
+          role: Database["public"]["Enums"]["nursery_role"]
           token: string
         }
         Insert: {
@@ -805,9 +805,9 @@ export type Database = {
           created_by: string
           email: string
           expires_at?: string
-          hatchery_id: string
+          nursery_id: string
           id?: string
-          role: Database["public"]["Enums"]["hatchery_role"]
+          role: Database["public"]["Enums"]["nursery_role"]
           token: string
         }
         Update: {
@@ -816,22 +816,22 @@ export type Database = {
           created_by?: string
           email?: string
           expires_at?: string
-          hatchery_id?: string
+          nursery_id?: string
           id?: string
-          role?: Database["public"]["Enums"]["hatchery_role"]
+          role?: Database["public"]["Enums"]["nursery_role"]
           token?: string
         }
         Relationships: [
           {
-            foreignKeyName: "team_invites_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "team_invites_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
-            referencedRelation: "hatcheries"
+            referencedRelation: "nurseries"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "team_invites_hatchery_id_fkey"
-            columns: ["hatchery_id"]
+            foreignKeyName: "team_invites_nursery_id_fkey"
+            columns: ["nursery_id"]
             isOneToOne: false
             referencedRelation: "public_scorecard"
             referencedColumns: ["id"]
@@ -857,11 +857,11 @@ export type Database = {
       }
     }
     Functions: {
-      create_hatchery: {
+      create_nursery: {
         Args: { p_location?: string; p_name: string; p_name_en?: string }
         Returns: string
       }
-      current_user_hatchery_ids: { Args: never; Returns: string[] }
+      current_user_nursery_ids: { Args: never; Returns: string[] }
     }
     Enums: {
       alert_severity: "high" | "medium" | "low"
@@ -871,7 +871,7 @@ export type Database = {
         | "restock-now"
         | "concern"
         | "quiet"
-      hatchery_role: "owner" | "counter_staff" | "lab_tech" | "auditor"
+      nursery_role: "owner" | "counter_staff" | "lab_tech" | "auditor"
       line_event_kind: "template_push" | "chat_nudge"
       line_event_status: "pending" | "sending" | "sent" | "failed" | "dead"
       pcr_status: "clean" | "flagged" | "pending"
@@ -1010,7 +1010,7 @@ export const Constants = {
         "concern",
         "quiet",
       ],
-      hatchery_role: ["owner", "counter_staff", "lab_tech", "auditor"],
+      nursery_role: ["owner", "counter_staff", "lab_tech", "auditor"],
       line_event_kind: ["template_push", "chat_nudge"],
       line_event_status: ["pending", "sending", "sent", "failed", "dead"],
       pcr_status: ["clean", "flagged", "pending"],

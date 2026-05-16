@@ -6,7 +6,7 @@
 ## Purpose
 Domain code, infra clients, and shared helpers — everything that isn't a route, a component, or a static asset.
 
-The most important file is **`lib/types.ts`** — the canonical domain shape (`Customer`, `Batch`, `Alert`, `Hatchery`, `ScorecardSettings`, `NotificationSettings`, `TeamMember`, `Subscription`, `Invoice`). Both the mock layer and the Supabase layer are adapters that produce these types; pages never see DB column names.
+The most important file is **`lib/types.ts`** — the canonical domain shape (`Customer`, `Batch`, `Alert`, `Nursery`, `ScorecardSettings`, `NotificationSettings`, `TeamMember`, `Subscription`, `Invoice`). Both the mock layer and the Supabase layer are adapters that produce these types; pages never see DB column names.
 
 The next most important is **`lib/api/`** — the facade that pages import. It picks between mock and Supabase based on `USE_MOCK`.
 
@@ -16,8 +16,8 @@ The next most important is **`lib/api/`** — the facade that pages import. It p
 |------|-------------|
 | `types.ts` | Domain types — single source of truth. Pages, components, and adapters all consume these |
 | `database.types.ts` | Supabase-generated row/insert/update/enum types. Re-generate with `supabase gen types typescript --linked > lib/database.types.ts` after schema changes |
-| `auth.ts` | `currentHatcheryScope()` — server-only helper that resolves `{ userId, hatcheryId, role }` from the cookie session. Returns `null` in mock mode |
-| `rbac.ts` | `can(role, action)` permission checker. Roles: `owner`/`admin`/`editor`/`viewer`/`technician`. Actions: `customer:read/write`, `batch:read/write`, `alert:close`, `team:invite`, `settings:write`, `data:export`, `billing:manage` |
+| `auth.ts` | `currentNurseryScope()` — server-only helper that resolves `{ userId, nurseryId, role }` from the cookie session. Returns `null` in mock mode |
+| `rbac.ts` | `can(role, action)` permission checker. Roles: `owner`/`counter_staff`/`lab_tech`/`auditor`. Actions: `customer:read/write`, `batch:read/write`, `alert:close`, `team:invite`, `settings:write`, `data:export`, `billing:manage` |
 | `utils.ts` | `cn()` — clsx + tailwind-merge composition helper |
 
 ## Subdirectories

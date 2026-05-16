@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { can } from '@/lib/rbac';
 import type { Database } from '@/lib/database.types';
 
-type Role = Database['public']['Enums']['hatchery_role'];
+type Role = Database['public']['Enums']['nursery_role'];
 
 // Source of truth: `lib/rbac.ts` RULES matrix and `docs/bmad/architecture.md` §4.
 // If you change either, update this table in the same commit — the §16 review

@@ -9,7 +9,7 @@ vi.mock('@/lib/supabase/server', () => ({
 }));
 
 import { createClient } from '@/lib/supabase/server';
-import { bootstrapHatchery } from '@/lib/auth/bootstrap';
+import { bootstrapNursery } from '@/lib/auth/bootstrap';
 
 const mockRpc = vi.fn();
 const mockMaybeSingle = vi.fn();
@@ -29,29 +29,29 @@ function makeClient() {
   };
 }
 
-describe('bootstrapHatchery', () => {
+describe('bootstrapNursery', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRpc.mockResolvedValue({ error: null });
     (createClient as ReturnType<typeof vi.fn>).mockResolvedValue(makeClient());
   });
 
-  it('calls create_hatchery RPC for a new user (no existing membership)', async () => {
+  it('calls create_nursery RPC for a new user (no existing membership)', async () => {
     mockMaybeSingle.mockResolvedValue({ data: null, error: null });
 
-    await bootstrapHatchery('new-user-id');
+    await bootstrapNursery('new-user-id');
 
     expect(mockRpc).toHaveBeenCalledOnce();
-    expect(mockRpc).toHaveBeenCalledWith('create_hatchery', { p_name: 'My Hatchery' });
+    expect(mockRpc).toHaveBeenCalledWith('create_nursery', { p_name: 'My Nursery' });
   });
 
-  it('skips create_hatchery RPC for a returning user (membership exists)', async () => {
+  it('skips create_nursery RPC for a returning user (membership exists)', async () => {
     mockMaybeSingle.mockResolvedValue({
-      data: { hatchery_id: 'existing-hatchery-id' },
+      data: { nursery_id: 'existing-nursery-id' },
       error: null,
     });
 
-    await bootstrapHatchery('existing-user-id');
+    await bootstrapNursery('existing-user-id');
 
     expect(mockRpc).not.toHaveBeenCalled();
   });
@@ -60,6 +60,6 @@ describe('bootstrapHatchery', () => {
     mockMaybeSingle.mockResolvedValue({ data: null, error: null });
     mockRpc.mockResolvedValue({ error: { message: 'DB error' } });
 
-    await expect(bootstrapHatchery('user-id')).rejects.toBeDefined();
+    await expect(bootstrapNursery('user-id')).rejects.toBeDefined();
   });
 });

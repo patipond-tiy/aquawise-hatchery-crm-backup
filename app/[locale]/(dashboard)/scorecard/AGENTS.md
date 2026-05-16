@@ -17,7 +17,7 @@ The **public scorecard** that customers can view by scanning a QR code. Mostly a
 ### Working In This Directory
 - **Reads via `getScorecardSettings()`**, writes via `updateScorecardSettings(patch)` — both go through `@/lib/api`.
 - **Toggles are partial updates**: each switch fires `updateScorecardSettings({ showD30: false })` independently, not a full payload. The mock and Supabase impls both support partials.
-- **The QR / shareable URL** isn't fully wired yet — placeholder uses `https://aquawise.com/s/<hatchery-slug>`. When the public scorecard route lands, replace this with the real URL.
+- **The QR / shareable URL** isn't fully wired yet — placeholder uses `https://aquawise.com/s/<nursery-slug>`. When the public scorecard route lands, replace this with the real URL.
 - **Live preview**: render with the same logic the public surface will use, gated by the toggles. Keep the preview component reusable so it can be lifted out when the public scorecard route is built.
 
 ## Dependencies
