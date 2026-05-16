@@ -12,30 +12,28 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),
 }));
 
+// Tenant scope is now resolved by the one canonical helper in lib/auth.ts.
+// The action no longer inlines the nursery_members lookup, so we mock the
+// helper seam directly (the helper has its own coverage in lib/auth).
+vi.mock('@/lib/auth', () => ({
+  currentNurseryScope: vi.fn(),
+}));
+
 import { createClient } from '@/lib/supabase/server';
+import { currentNurseryScope } from '@/lib/auth';
 import { uploadNurseryLogo } from '@/lib/supabase/storage';
 import { updateProfile } from '@/app/[locale]/(dashboard)/settings/actions';
 
 const mockUpsert = vi.fn();
 const mockNurseryEq = vi.fn(() => ({ error: null }));
 const mockNurseryUpdate = vi.fn(() => ({ eq: mockNurseryEq }));
-const mockMaybeSingle = vi.fn();
 
 function makeClient() {
   return {
-    auth: {
-      getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'uid-1' } } }),
-    },
     from: vi.fn((table: string) => {
       if (table === 'nursery_brand') return { upsert: mockUpsert };
       if (table === 'nurseries') return { update: mockNurseryUpdate };
-      return {
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            limit: vi.fn(() => ({ maybeSingle: mockMaybeSingle })),
-          })),
-        })),
-      };
+      return {};
     }),
   };
 }
@@ -53,9 +51,10 @@ const BASE_FIELDS = {
 describe('updateProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockMaybeSingle.mockResolvedValue({
-      data: { nursery_id: 'hid-1', role: 'owner' },
-      error: null,
+    (currentNurseryScope as ReturnType<typeof vi.fn>).mockResolvedValue({
+      userId: 'uid-1',
+      nurseryId: 'hid-1',
+      role: 'owner',
     });
     mockNurseryEq.mockReturnValue({ error: null });
     mockNurseryUpdate.mockReturnValue({ eq: mockNurseryEq });

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { uploadNurseryLogo } from '@/lib/supabase/storage';
 import { requireActiveSubscription } from '@/lib/billing/guard';
+import { currentNurseryScope } from '@/lib/auth';
 import { isMockMode } from '@/lib/utils/mock-mode';
 
 export interface ProfileFields {
@@ -25,23 +26,13 @@ export async function updateProfile(
   }
   await requireActiveSubscription();
 
+  // Canonical server-side tenant scope (see lib/auth.ts) — do not re-inline
+  // the nursery_members lookup here.
+  const scope = await currentNurseryScope();
+  if (!scope) return { ok: false, error: 'No nursery membership found' };
+  const { nurseryId: nursery_id, role } = scope;
+
   const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: 'Not authenticated' };
-
-  const { data: membership } = await supabase
-    .from('nursery_members')
-    .select('nursery_id, role')
-    .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle();
-
-  if (!membership) return { ok: false, error: 'No nursery membership found' };
-
-  const { nursery_id, role } = membership;
 
   const { error: nurseryError } = await supabase
     .from('nurseries')

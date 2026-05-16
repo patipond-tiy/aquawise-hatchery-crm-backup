@@ -17,25 +17,23 @@ let capturedInsert: InsertedInvite | null = null;
 let membershipRole = 'owner';
 let existingInvite: { token: string; accepted_at: string | null; expires_at: string } | null = null;
 
+// Tenant scope is now resolved by the one canonical helper in lib/auth.ts.
+// `inviteTeamMember` no longer inlines the nursery_members lookup; it calls
+// currentNurseryScope() and checks scope.role === 'owner' itself.
+vi.mock('@/lib/auth', () => ({
+  currentNurseryScope: async () =>
+    membershipRole === 'owner'
+      ? { userId: 'user-owner-1', nurseryId: 'nursery-1', role: 'owner' }
+      : { userId: 'user-owner-1', nurseryId: 'nursery-1', role: membershipRole },
+}));
+
 vi.mock('@/lib/supabase/server', () => {
   return {
     createClient: async () => ({
-      auth: {
-        getUser: async () => ({ data: { user: { id: 'user-owner-1' } } }),
-      },
       from: (table: string) => ({
         select: () => ({
           eq: (_col: string, _val: string) => ({
             eq: (_col2: string, _val2: string) => ({
-              limit: () => ({
-                single: async () => {
-                  if (table === 'nursery_members') {
-                    if (membershipRole !== 'owner') return { data: null, error: { message: 'not found' } };
-                    return { data: { nursery_id: 'nursery-1' }, error: null };
-                  }
-                  return { data: null, error: null };
-                },
-              }),
               single: async () => {
                 if (table === 'team_invites') {
                   return existingInvite
@@ -45,13 +43,6 @@ vi.mock('@/lib/supabase/server', () => {
                 return { data: null, error: null };
               },
             }),
-            single: async () => {
-              if (table === 'nursery_members') {
-                if (membershipRole !== 'owner') return { data: null, error: { message: 'not found' } };
-                return { data: { nursery_id: 'nursery-1' }, error: null };
-              }
-              return { data: null, error: null };
-            },
           }),
         }),
         insert: (rows: InsertedInvite | InsertedInvite[]) => {

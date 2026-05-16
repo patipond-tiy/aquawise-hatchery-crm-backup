@@ -3,6 +3,7 @@
 import { randomBytes } from 'crypto';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { requireActiveSubscription } from '@/lib/billing/guard';
+import { currentNurseryScope } from '@/lib/auth';
 import { isMockMode } from '@/lib/utils/mock-mode';
 
 type NurseryRole = 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
@@ -30,24 +31,18 @@ export async function inviteTeamMember(
     return { ok: false, error: 'สิทธิ์ไม่ถูกต้อง' };
   }
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: 'ไม่ได้เข้าสู่ระบบ' };
+  // Canonical server-side tenant scope (see lib/auth.ts) — do not re-inline
+  // the nursery_members lookup here. Only owners may invite.
+  const scope = await currentNurseryScope();
+  if (!scope) return { ok: false, error: 'ไม่ได้เข้าสู่ระบบ' };
+  if (scope.role !== 'owner') {
+    return { ok: false, error: 'ไม่มีสิทธิ์เชิญสมาชิก' };
+  }
 
-  // Find the nursery where caller is owner
-  const { data: membership } = await supabase
-    .from('nursery_members')
-    .select('nursery_id')
-    .eq('user_id', user.id)
-    .eq('role', 'owner')
-    .limit(1)
-    .single();
-
-  if (!membership) return { ok: false, error: 'ไม่มีสิทธิ์เชิญสมาชิก' };
-
-  const nurseryId = membership.nursery_id;
+  const nurseryId = scope.nurseryId;
   const token = generateToken();
 
+  const supabase = await createClient();
   const { error: insertError } = await supabase
     .from('team_invites')
     .insert({
@@ -55,7 +50,7 @@ export async function inviteTeamMember(
       email: email.toLowerCase(),
       role: role as NurseryRole,
       token,
-      created_by: user.id,
+      created_by: scope.userId,
     });
 
   if (insertError) {

@@ -36,3 +36,16 @@ export async function currentNurseryScope(): Promise<{
     role: membership.role,
   };
 }
+
+/**
+ * Convenience tenant-scope accessor: the calling user's `nursery_id` or null.
+ *
+ * This is the ONE canonical server-side tenant lookup. Do NOT re-inline the
+ * `.from('nursery_members').select('nursery_id').eq('user_id', …).limit(1)`
+ * idiom in server actions / RSC — call this (or `currentNurseryScope()` when
+ * the role is also needed). See CLAUDE.md "Server-component data-fetching".
+ */
+export async function getCurrentTenantId(): Promise<string | null> {
+  const scope = await currentNurseryScope();
+  return scope?.nurseryId ?? null;
+}
