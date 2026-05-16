@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # messages
 
@@ -34,4 +34,4 @@ Translation bundles for `next-intl`. One JSON per supported locale.
 ### Internal
 - Loaded by `i18n/request.ts` via dynamic import based on the resolved locale.
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

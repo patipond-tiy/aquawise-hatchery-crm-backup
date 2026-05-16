@@ -1,12 +1,12 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-29 | Updated: 2026-04-29 -->
+<!-- Generated: 2026-04-29 | Updated: 2026-05-16 -->
 
 # docs/work-breakdown
 
 ## Purpose
-Team-assignable execution layer. Maps every user story (`product-spec/03-user-stories.md`) and every functional requirement (`business-guide/aquawise-hatchery-functional-requirements (2).md`) to its current implementation status, decomposed into `implement` / `test` / `verify` subtasks each owner can pick up.
+Team-assignable execution layer. Maps every user story (`docs/product-spec/03-user-stories.md`) and every functional requirement (the FR doc, now archived at `docs/archive/business-guide/aquawise-hatchery-functional-requirements (2).md` — historical filename frozen; the product is "nursery") to its current implementation status, decomposed into `implement` / `test` / `verify` subtasks each owner can pick up.
 
-This folder does NOT replace `PLAN.md` (the historical 5-phase port log) or `CHECKLIST.md` (its checkbox state). It tracks ongoing post-port work toward the H1 / H2 / H3 paying-tenant cuts defined in `06-production-gap.md`.
+This folder does NOT replace the historical port log (`docs/archive/PLAN.md`, the 5-phase log) or its checkbox state (`docs/archive/CHECKLIST.md`). It tracks ongoing post-port work toward the H1 / H2 / H3 paying-tenant cuts defined in `docs/product-spec/06-production-gap.md`. Note: `docs/bmad/` is now the execution source of truth — this work-breakdown is a load-bearing input cited by bmad stories.
 
 ## Key Files
 
@@ -42,4 +42,4 @@ This folder does NOT replace `PLAN.md` (the historical 5-phase port log) or `CHE
 - New ID convention: epic letter (A–H, X for ops) + next integer.
 - Add it to: `MATRIX.md` (full block), `JTBD-ALIGNMENT.md` (under each JTBD it serves), `FR-COVERAGE.md` (against the FR-IDs it satisfies), `BY-PHASE.md` (under its phase). Same commit.
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

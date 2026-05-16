@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # modals
 
@@ -52,4 +52,4 @@ The 8 modals correspond 1:1 with the prototype.
 ### External
 - `react-hook-form`, `zod`, `@hookform/resolvers`, `sonner`, Radix UI primitives (some forms use Select/Switch/RadioGroup), `lucide-react`
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # customers
 
@@ -34,4 +34,4 @@ Customers (= the farms that buy PL from this nursery). List + detail.
 - `@/components/aw/*` (chip, card, avatar, ring, sparkline)
 - `@/lib/store/modal` (open `addCustomer` / `sendLine` / `quote` / `schedule` modals)
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

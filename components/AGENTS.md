@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # components
 
@@ -47,4 +47,4 @@ React components grouped by role:
 ### External
 - Radix primitives (`@radix-ui/react-*`), `lucide-react`, `sonner`, `framer-motion` (sparingly), `@tanstack/react-query`, `recharts`
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

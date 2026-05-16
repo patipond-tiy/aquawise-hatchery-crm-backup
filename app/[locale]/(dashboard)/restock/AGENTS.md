@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # restock
 
@@ -31,4 +31,4 @@ Customers grouped by **how soon they're due to restock**. Drives outbound sales:
 - `@/components/aw/v3-chip`, `@/components/aw/v3-card`
 - `@/lib/store/modal`
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

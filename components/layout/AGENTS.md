@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # layout
 
@@ -44,4 +44,4 @@ Layout: `[ LeftRail | (TopBar over scrollable main) | RightRail ]` with widths `
 ### External
 - `lucide-react` icons, `next-intl` (`useTranslations`)
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

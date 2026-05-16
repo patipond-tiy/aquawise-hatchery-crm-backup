@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # auth
 
@@ -19,4 +19,4 @@ Locale-agnostic Supabase auth callback. Lives outside `[locale]/` so the redirec
 - **The callback is a route handler (`route.ts`)**, not a page. It calls `supabase.auth.exchangeCodeForSession(code)` then redirects.
 - New auth flows (e.g., LINE Login in a future phase) should land as siblings here (`auth/line/callback/`).
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

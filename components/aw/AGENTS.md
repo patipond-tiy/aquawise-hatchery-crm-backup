@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # aw
 
@@ -50,4 +50,4 @@ These primitives consume CSS custom properties (`var(--color-hero)`, `var(--radi
 ### External
 - `lucide-react` (icons), `next/image` (logo)
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

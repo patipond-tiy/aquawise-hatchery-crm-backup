@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # [locale]
 
@@ -49,4 +49,4 @@ The locale layout (`layout.tsx`) sets up fonts, the `<NextIntlClientProvider>`, 
 - `next-intl/server` (`setRequestLocale`, `hasLocale`), `next-intl` (`NextIntlClientProvider`)
 - `next/font/google` for Inter (Latin/body), Plus Jakarta Sans (display headings only — design-system-v1 sanctioned exception, not the default), Noto Sans Thai (Thai), JetBrains Mono (numerics). Canonical stack: `../../../design-system-v1/colors_and_type.css`
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

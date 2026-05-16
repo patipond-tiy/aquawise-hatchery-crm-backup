@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # app
 
@@ -51,4 +51,4 @@ The `globals.css` file at this level holds the Tailwind 4 `@theme inline` token 
 ### External
 - `next-intl` (routing, RSC config), `@supabase/ssr` (auth), `stripe` (webhook)
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

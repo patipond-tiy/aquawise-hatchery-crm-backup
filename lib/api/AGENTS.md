@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # api
 
@@ -55,4 +55,4 @@ Switching providers is a one-line change to `.env.local` — no page edits.
 ### External
 - `@supabase/ssr` (via `lib/supabase/client`)
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

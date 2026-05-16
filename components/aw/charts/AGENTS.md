@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # charts
 
@@ -35,4 +35,4 @@ Hand-rolled SVG chart components ported from `prototypes/_archive/components/v3/
 - `@/lib/utils` (`cn`)
 - Token CSS vars from `@/app/globals.css`
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-05-15 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # docs
 
@@ -36,4 +36,4 @@ Specs, runbooks, and the BMAD execution layer. Hand-written, not auto-generated.
 - Conventional-commits style (`feat(scope):`, `fix(scope):`, `docs(scope):`). Story-ID scope where applicable (see `bmad/code-design.md` §17).
 - The merge gate is `bmad/code-design.md` §16. Epic UAT gates are in `bmad/uat/`.
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

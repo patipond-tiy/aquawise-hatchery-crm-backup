@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # prototypes
 
@@ -29,4 +29,4 @@ When porting a page, **open the HTML prototype in a browser** and aim for visual
 - **Don't import from `prototypes/` anywhere in app code** — `tsconfig.json` excludes the directory.
 - If you need to look at how a chart was originally drawn, open `_archive/components/v3/v3-charts.jsx`. If you need a token's original value, open `_archive/styles/tokens-v3.css`.
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

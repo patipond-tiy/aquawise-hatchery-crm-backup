@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # mock
 
@@ -44,4 +44,4 @@ Set `MOCK_BILLING_STATE` in `.env.local`:
 - `@/lib/types` (domain types)
 - `@/lib/stripe/config` (only for `TRIAL_DAYS`; doesn't actually hit Stripe)
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

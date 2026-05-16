@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # alerts
 
@@ -28,4 +28,4 @@ Active disease and quality alerts. Each alert links back to the source batch and
 - `@/lib/store/modal` (open `closeAlert`)
 - `@/components/aw/v3-chip`
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

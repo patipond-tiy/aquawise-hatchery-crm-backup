@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # supabase
 
@@ -18,6 +18,7 @@ Supabase client factories. Three flavors for three runtime contexts:
 | `client.ts` | `createBrowserClient` from `@supabase/ssr`. Reads `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Used by `lib/api/supabase.ts` |
 | `server.ts` | `createClient()` (anon, RSC-aware cookies) + `createServiceClient()` (service role; bypasses RLS). Both async — they `await cookies()` |
 | `middleware.ts` | `updateSession(request)` — refreshes the auth session and rewrites cookies onto the response. Call from middleware before any RSC tries to read `auth.getUser()` |
+| `storage.ts` | `uploadNurseryLogo(...)` — uploads to the `nursery-logos` bucket (`BUCKET = 'nursery-logos'`, path `{nurseryId}/logo.{ext}`) and returns the public URL. Pairs with migration `012_storage_logos.sql`; used by the settings `updateProfile` action |
 
 ## For AI Agents
 
@@ -43,4 +44,4 @@ Supabase client factories. Three flavors for three runtime contexts:
 - `@supabase/ssr` (`createBrowserClient`, `createServerClient`)
 - `next/headers` (`cookies()`)
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

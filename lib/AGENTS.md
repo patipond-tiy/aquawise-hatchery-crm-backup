@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # lib
 
@@ -16,9 +16,10 @@ The next most important is **`lib/api/`** — the facade that pages import. It p
 |------|-------------|
 | `types.ts` | Domain types — single source of truth. Pages, components, and adapters all consume these |
 | `database.types.ts` | Supabase-generated row/insert/update/enum types. Re-generate with `supabase gen types typescript --linked > lib/database.types.ts` after schema changes |
-| `auth.ts` | `currentNurseryScope()` — server-only helper that resolves `{ userId, nurseryId, role }` from the cookie session. Returns `null` in mock mode |
-| `rbac.ts` | `can(role, action)` permission checker. Roles: `owner`/`counter_staff`/`lab_tech`/`auditor`. Actions: `customer:read/write`, `batch:read/write`, `alert:close`, `team:invite`, `settings:write`, `data:export`, `billing:manage` |
-| `utils.ts` | `cn()` — clsx + tailwind-merge composition helper |
+| `auth.ts` | `'server-only'`. `currentNurseryScope()` resolves `{ userId, nurseryId, role }` from the cookie session; `getCurrentTenantId()` returns just the nursery id. Returns `null` in mock mode. (First-sign-in bootstrap is separate — see `auth/AGENTS.md`) |
+| `audit.ts` | `'server-only'`. `writeAuditLog(action, payload)` — appends to `audit_log` from server actions on every audited write |
+| `rbac.ts` | `can(role, action)` permission checker. Roles (`nursery_role`): `owner`/`counter_staff`/`lab_tech`/`auditor`. Actions: `customer:read/write`, `batch:read/write`, `alert:close`, `team:invite`, `settings:write`, `broadcast:write`, `data:export`, `billing:manage` |
+| `utils.ts` | `cn()` — clsx + tailwind-merge composition helper (note: the `utils/` directory is separate — see `utils/AGENTS.md`) |
 
 ## Subdirectories
 
@@ -28,8 +29,12 @@ The next most important is **`lib/api/`** — the facade that pages import. It p
 | `mock/` | In-memory mock data + mock API + mock billing state (see `mock/AGENTS.md`) |
 | `supabase/` | Browser/server/service clients + middleware session refresh (see `supabase/AGENTS.md`) |
 | `stripe/` | Server-only SDK init (`server.ts`) + plan config (`config.ts`) (see `stripe/AGENTS.md`) |
-| `billing/` | Pure helpers for trial/subscription state derivation (see `billing/AGENTS.md`) |
+| `billing/` | Pure trial/subscription derivation + the `requireActiveSubscription` write guard (see `billing/AGENTS.md`) |
 | `store/` | Zustand stores: modal stack + sidebar collapsed flag (see `store/AGENTS.md`) |
+| `auth/` | First-sign-in tenant bootstrap (`bootstrap.ts`) — distinct from `auth.ts` (see `auth/AGENTS.md`) |
+| `derive/` | Pure view-model derivation, e.g. `dashboard-stats.ts` (see `derive/AGENTS.md`) |
+| `query/` | Server-side per-request TanStack QueryClient for RSC prefetch/hydrate (see `query/AGENTS.md`) |
+| `utils/` | Standalone utilities, e.g. `mock-mode.ts` — distinct from `utils.ts` (see `utils/AGENTS.md`) |
 
 ## For AI Agents
 
@@ -58,4 +63,4 @@ The next most important is **`lib/api/`** — the facade that pages import. It p
 - `zustand` (+ `zustand/middleware` `persist` for sidebar)
 - `clsx`, `tailwind-merge`
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # batches
 
@@ -34,4 +34,4 @@ Batches of post-larvae produced and sold. List + detail.
 - `@/components/aw/charts/v3-dist-chart`, `@/components/aw/v3-chip`
 - `@/lib/store/modal` (open `addBatch` / `cert`)
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->

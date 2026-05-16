@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-04-26 | Updated: 2026-04-26 -->
+<!-- Generated: 2026-04-26 | Updated: 2026-05-16 -->
 
 # (dashboard)
 
@@ -20,12 +20,12 @@ The layout (`layout.tsx`) wraps everything in `<BillingGate>` (server-side paywa
 
 | Directory | Purpose |
 |-----------|---------|
-| `customers/` | List of farms + per-farm detail pages |
-| `batches/` | List of PL batches + per-batch detail pages |
-| `restock/` | Customers grouped by restock urgency |
-| `alerts/` | Active disease/quality alerts with close action |
-| `scorecard/` | Public scorecard preview + visibility toggles + QR |
-| `settings/` | Profile + notifications + team + data export + billing tabs |
+| `customers/` | List of farms + per-farm detail pages (see `customers/AGENTS.md`) |
+| `batches/` | List of PL batches + per-batch detail pages (see `batches/AGENTS.md`) |
+| `restock/` | Customers grouped by restock urgency (see `restock/AGENTS.md`) |
+| `alerts/` | Active disease/quality alerts with close action — read-only RSC reference impl (see `alerts/AGENTS.md`) |
+| `scorecard/` | Public scorecard configurator — full RSC reference impl (page + view + audited action) (see `scorecard/AGENTS.md`) |
+| `settings/` | Profile + notifications + team + data export + billing tabs; paywall-exempt (see `settings/AGENTS.md`) |
 
 ## For AI Agents
 
@@ -52,4 +52,4 @@ The layout (`layout.tsx`) wraps everything in `<BillingGate>` (server-side paywa
 ### External
 - `next/headers` (`headers()`), `next/navigation` (`redirect`, `notFound`)
 
-<!-- MANUAL: -->
+<!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->
