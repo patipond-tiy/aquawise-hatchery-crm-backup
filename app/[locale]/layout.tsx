@@ -2,15 +2,26 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { Plus_Jakarta_Sans, Noto_Sans_Thai, JetBrains_Mono } from 'next/font/google';
+import { Inter, Plus_Jakarta_Sans, Noto_Sans_Thai, JetBrains_Mono } from 'next/font/google';
 import { routing } from '@/i18n/routing';
 import { Providers } from '@/components/providers';
 import { ComingSoon } from '@/components/coming-soon';
 import '../globals.css';
 
-const jakarta = Plus_Jakarta_Sans({
+// Per design-system-v1 (../../../design-system-v1/colors_and_type.css):
+// Inter = canonical Latin/body workhorse (tables, forms, eyebrows, dense data).
+const inter = Inter({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+// Plus Jakarta Sans = the design-system-v1 *sanctioned exception*: display
+// headings + hero only, paired with Inter for body. Flagged, not the default.
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['600', '700', '800'],
   variable: '--font-jakarta',
   display: 'swap',
 });
@@ -55,15 +66,15 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${jakarta.variable} ${noto.variable} ${jetbrains.variable}`}
+      className={`${inter.variable} ${jakarta.variable} ${noto.variable} ${jetbrains.variable}`}
       suppressHydrationWarning
     >
       <body
         style={{
           fontFamily:
             locale === 'th'
-              ? "var(--font-noto-thai), var(--font-jakarta), system-ui, sans-serif"
-              : "var(--font-jakarta), var(--font-noto-thai), system-ui, sans-serif",
+              ? "var(--font-noto-thai), var(--font-inter), system-ui, sans-serif"
+              : "var(--font-inter), var(--font-noto-thai), system-ui, sans-serif",
         }}
       >
         <NextIntlClientProvider>

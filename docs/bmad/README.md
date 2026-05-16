@@ -4,6 +4,10 @@ This folder is the **BMAD-METHOD execution layer** for the AquaWise Nursery CRM.
 
 Each story file is self-contained: it embeds the exact acceptance criteria, file paths to touch, API facade methods, RBAC actions, RLS tables, and i18n keys needed to implement and verify the feature autonomously.
 
+> **Design system:** the canonical visual source of truth is the umbrella-level `../../../design-system-v1/` (start at its `SKILL.md`). This repo conforms via ported tokens; divergences are tracked in [`design-system-conformance.md`](./design-system-conformance.md). UI stories are visually QA'd against it via [`qa/05.playwright-mcp-evaluation-loop.md`](./qa/05.playwright-mcp-evaluation-loop.md).
+>
+> **Before unattended agent runs:** check [`READINESS.md`](./READINESS.md) (this repo's Go/No-Go) → rolls up to the umbrella `../../../docs/ai-agent-dev-readiness.md`.
+
 ---
 
 ## Folder layout
@@ -17,6 +21,7 @@ docs/bmad/
 ├── security.md          # OWASP-style threat catalog + pre-launch hardening (how to NOT get pwned)
 ├── CHANGELOG.md         # consolidated record of doc-state changes (PRs, durable decisions, gated follow-ups)
 ├── decisions-2026-05-15-fix-review.md  # PO/CEO decision record (cited by qa/01-04 + story cascades)
+├── design-system-conformance.md        # conformance map to canonical ../../../design-system-v1/ + drift list
 ├── stories/             # one .md per story (A1..S9, K1..K6), ready-for-dev — RUNNABLE stories only
 │   ├── _hypotheses/     # 2027+ / unvalidated stories (F1-F4, G3) — do not implement
 │   └── _integration-with-line-bot-Epic-K.md  # cross-product brief; not a runnable story
@@ -25,7 +30,8 @@ docs/bmad/
 │   ├── 01.qa-user-story-audit.md         # alignment scorecard (story↔business-plan)
 │   ├── 02.to-fix.md                      # FIX-REVIEW human-decision punch list
 │   ├── 03.fix-auto-ultrawork-command.md  # the /ultrawork FIX-AUTO batch command
-│   └── 04.executability-audit.md         # executability audit + resolution log + SYS-1 ledger
+│   ├── 04.executability-audit.md         # executability audit + resolution log + SYS-1 ledger
+│   └── 05.playwright-mcp-evaluation-loop.md  # functional+visual QA loop (run on the running app, per story)
 └── uat/                 # one .md per epic, QA-gate style
 ```
 
@@ -57,7 +63,7 @@ Story IDs (A1, B2, …, K1..K4) are stable and trace to matching rows in `docs/w
 | Architect | Authors and maintains `architecture.md` from `CLAUDE.md` + `08-roles-and-rls.md` |
 | SM (Scrum Master) | Shards PRD/architecture into individual story files |
 | Dev | Implements one story file end-to-end; marks tasks `[x]`; sets Status to `review` |
-| QA | Executes UAT gate files; records pass/fail evidence |
+| QA | Executes UAT gate files; **drives the running app via Playwright MCP, evaluates renders against `design-system-v1`, iterates to green** (`qa/05.playwright-mcp-evaluation-loop.md`); records pass/fail evidence |
 
 ---
 
@@ -87,7 +93,18 @@ or use `/bmad-dev-story` and supply the path when prompted.
 pnpm typecheck && pnpm lint && pnpm test
 ```
 
-All three must pass before the story is considered done.
+All three must pass before proceeding.
+
+**Step 6.** For any story with a UI surface (a `(dashboard)` page, modal, or
+other rendered view), run the **Playwright-MCP evaluation loop**
+([`qa/05.playwright-mcp-evaluation-loop.md`](./qa/05.playwright-mcp-evaluation-loop.md)):
+drive the running app (`pnpm dev`, mock mode) with `mcp__playwright__browser_*`,
+evaluate renders against the story AC, the matching `uat/<epic>.uat.md`, and
+the canonical `../../../design-system-v1/` (tokens, fonts, brand gates), and
+iterate to green. Record screenshot evidence inline in the UAT file.
+Pure-backend/migration stories may skip Step 6 (note "no UI surface" in UAT).
+
+Steps 5 **and** 6 must pass before the story is considered done.
 
 ---
 
