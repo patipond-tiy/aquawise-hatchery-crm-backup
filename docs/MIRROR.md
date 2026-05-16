@@ -1,6 +1,6 @@
 # Personal-account backup mirror
 
-The org repo `aquawise-tech/aquawise-hatchery-crm` is mirrored to a personal-account backup at `patipond-tiy/aquawise-hatchery-crm-backup` for redundancy.
+The org repo `aquawise-tech/aquawise-nursery-crm` is mirrored to a personal-account backup at `patipond-tiy/aquawise-nursery-crm-backup` for redundancy.
 
 The mirror is a **complete copy**: every branch, every tag, every commit. It is force-synced — anything in the backup that doesn't exist in the source is deleted. Treat the backup as read-only; never push to it directly.
 
@@ -22,9 +22,9 @@ It clones the source as a `--mirror` (bare) and pushes that to the backup.
 On the `patipond-tiy` account:
 
 1. Go to https://github.com/settings/personal-access-tokens/new
-2. **Token name**: `aquawise-hatchery-crm mirror`
+2. **Token name**: `aquawise-nursery-crm mirror`
 3. **Resource owner**: `patipond-tiy`
-4. **Repository access**: **Only select repositories** → pick `aquawise-hatchery-crm-backup`
+4. **Repository access**: **Only select repositories** → pick `aquawise-nursery-crm-backup`
 5. **Repository permissions**:
    - Contents: **Read and write**
    - Metadata: Read-only (auto)
@@ -33,7 +33,7 @@ On the `patipond-tiy` account:
 
 ### 2. Add the token as a repo secret
 
-On the source repo (`aquawise-tech/aquawise-hatchery-crm`):
+On the source repo (`aquawise-tech/aquawise-nursery-crm`):
 
 1. Go to **Settings → Secrets and variables → Actions**
 2. Click **New repository secret**
@@ -52,7 +52,7 @@ The first run takes ~30 s to clone + push. Subsequent runs are faster (only delt
 After a successful run:
 
 ```bash
-git ls-remote https://github.com/patipond-tiy/aquawise-hatchery-crm-backup.git | head
+git ls-remote https://github.com/patipond-tiy/aquawise-nursery-crm-backup.git | head
 ```
 
 Should show `refs/heads/main` with the same SHA as the source.

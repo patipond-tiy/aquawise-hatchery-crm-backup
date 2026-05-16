@@ -32,6 +32,10 @@ concurrency:
 jobs:
   mirror:
     name: Mirror push
+    # The mirror copies this workflow into the backup repo too. This guard keeps
+    # it running ONLY on the source org repo, so the backup never tries to
+    # mirror itself (which always fails the secret check).
+    if: github.repository == 'aquawise-tech/aquawise-nursery-crm'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

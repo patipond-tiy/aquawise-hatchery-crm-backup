@@ -7,6 +7,9 @@ on:
 
 jobs:
   dispatch:
+    # The backup mirror also receives this workflow. Restrict it to the source
+    # org repo so the backup never fires a (token-less) dispatch.
+    if: github.repository == 'aquawise-tech/aquawise-nursery-crm'
     runs-on: ubuntu-latest
     steps:
       - name: Send repository_dispatch to ecosystem umbrella
