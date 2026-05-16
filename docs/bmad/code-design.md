@@ -1931,6 +1931,12 @@ Format:
 - Owner: Patipond.
 - Link: this commit.
 
+### 2026-05-16 · S6 — Role-string violations eliminated
+
+- Decision: refactored the 2 remaining role-string comparisons to `can()`: `settings/actions.ts:50` (`role === 'owner'` → `can(role, 'settings:write')`) and `settings/team/actions.ts:38` (`scope.role !== 'owner'` → `!can(scope.role, 'team:invite')`). No new `Action` added — existing matrix actions express both intents. Post-refactor scan: 0 role-string comparisons outside `lib/rbac.ts`. `tests/rbac/can.test.ts` already provided the full table-driven matrix; no change needed there. Unblocks S9's role-string ESLint ban.
+- Owner: Patipond (story S6).
+- Link: this commit.
+
 ### 2026-05-16 · S1 — Next.js i18n middleware-bypass CVE: verified already patched
 
 - Decision: GHSA-36qx-fr4f-26g5 (Next.js i18n middleware bypass, vulnerable `>=16.0.0 <16.2.5`) is already remediated — `pnpm-lock.yaml` resolves `next@16.2.6`, `next-intl@4.12.0`, direct `postcss@8.5.14`. No `pnpm up` required. `pnpm audit --audit-level=high` exits 0.

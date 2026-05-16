@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { uploadNurseryLogo } from '@/lib/supabase/storage';
 import { requireActiveSubscription } from '@/lib/billing/guard';
 import { currentNurseryScope } from '@/lib/auth';
+import { can } from '@/lib/rbac';
 import { isMockMode } from '@/lib/utils/mock-mode';
 
 export interface ProfileFields {
@@ -47,7 +48,7 @@ export async function updateProfile(
   if (nurseryError) return { ok: false, error: nurseryError.message };
 
   let logo_url: string | undefined;
-  if (logoFile && role === 'owner') {
+  if (logoFile && can(role, 'settings:write')) {
     const result = await uploadNurseryLogo(nursery_id, logoFile);
     if (!result.ok) return { ok: false, error: result.error };
     logo_url = result.url;

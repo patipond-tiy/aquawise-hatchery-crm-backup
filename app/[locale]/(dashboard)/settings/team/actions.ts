@@ -4,6 +4,7 @@ import { randomBytes } from 'crypto';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { requireActiveSubscription } from '@/lib/billing/guard';
 import { currentNurseryScope } from '@/lib/auth';
+import { can } from '@/lib/rbac';
 import { isMockMode } from '@/lib/utils/mock-mode';
 
 type NurseryRole = 'owner' | 'counter_staff' | 'lab_tech' | 'auditor';
@@ -35,7 +36,7 @@ export async function inviteTeamMember(
   // the nursery_members lookup here. Only owners may invite.
   const scope = await currentNurseryScope();
   if (!scope) return { ok: false, error: 'ไม่ได้เข้าสู่ระบบ' };
-  if (scope.role !== 'owner') {
+  if (!can(scope.role, 'team:invite')) {
     return { ok: false, error: 'ไม่มีสิทธิ์เชิญสมาชิก' };
   }
 
