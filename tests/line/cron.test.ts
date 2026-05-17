@@ -110,3 +110,42 @@ describe('cron route auth', () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe('cron route mock-mode guard (G4 Task 4 / AC #1)', () => {
+  it('short-circuits with a mock response and skip log when USE_MOCK is on', async () => {
+    process.env.CRON_SECRET = 'secret-x';
+    const prevPub = process.env.NEXT_PUBLIC_USE_MOCK;
+    const prevSrv = process.env.USE_MOCK;
+    process.env.NEXT_PUBLIC_USE_MOCK = 'true';
+    process.env.USE_MOCK = 'true';
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      const { GET } = await import('@/app/api/cron/daily/route');
+      const req = {
+        headers: {
+          get: (k: string) =>
+            k === 'authorization' ? 'Bearer secret-x' : null,
+        },
+      } as unknown as import('next/server').NextRequest;
+      const res = await GET(req);
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as {
+        mock?: boolean;
+        enqueued?: number;
+      };
+      expect(body.mock).toBe(true);
+      expect(body.enqueued).toBe(0);
+      expect(
+        logSpy.mock.calls.some((c) =>
+          String(c[0]).includes('[mock] cron/daily skipped — mock mode')
+        )
+      ).toBe(true);
+    } finally {
+      logSpy.mockRestore();
+      if (prevPub === undefined) delete process.env.NEXT_PUBLIC_USE_MOCK;
+      else process.env.NEXT_PUBLIC_USE_MOCK = prevPub;
+      if (prevSrv === undefined) delete process.env.USE_MOCK;
+      else process.env.USE_MOCK = prevSrv;
+    }
+  });
+});

@@ -2,7 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from '@/i18n/navigation';
-import { listCustomers, getNursery } from '@/lib/api';
+import { listCustomers, getNursery, getCurrentUser } from '@/lib/api';
+import { can } from '@/lib/rbac';
 import { useModal } from '@/lib/store/modal';
 import type { Customer } from '@/lib/types';
 import { V3Card } from '@/components/aw/v3-card';
@@ -34,6 +35,15 @@ export default function RestockPage() {
     queryKey: ['nursery'],
     queryFn: getNursery,
   });
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: getCurrentUser,
+  });
+
+  // D3 — broadcast is owner-only (`broadcast:write`). The server action
+  // re-checks this (defense-in-depth); the button itself must not render for
+  // non-owner roles (NEG-D3-role).
+  const canBroadcast = can(currentUser?.role ?? undefined, 'broadcast:write');
 
   const thresholds = nursery?.restockThresholds ?? { now: 0, week: 14, month: 45 };
 
@@ -202,21 +212,23 @@ export default function RestockPage() {
                   >
                     · {g.items.length}
                   </span>
-                  <button
-                    type="button"
-                    className="aw3-btn aw3-btn-soft aw3-btn-sm"
-                    style={{ marginLeft: 'auto' }}
-                    onClick={() =>
-                      openModal('broadcastConfirm', {
-                        broadcast: {
-                          filterId: g.id,
-                          farmCount: g.items.length,
-                        },
-                      })
-                    }
-                  >
-                    ส่งข้อความหาทุกคน
-                  </button>
+                  {canBroadcast && (
+                    <button
+                      type="button"
+                      className="aw3-btn aw3-btn-soft aw3-btn-sm"
+                      style={{ marginLeft: 'auto' }}
+                      onClick={() =>
+                        openModal('broadcastConfirm', {
+                          broadcast: {
+                            filterId: g.id,
+                            farmCount: g.items.length,
+                          },
+                        })
+                      }
+                    >
+                      ส่งข้อความหาทุกคน
+                    </button>
+                  )}
                 </span>
               }
             >

@@ -149,3 +149,74 @@ export async function mintBindLink(
     url: `https://liff.line.me/${liffId}/bind?token=${token}`,
   };
 }
+
+export type QuoteDecision = 'accepted' | 'declined' | 'expired';
+
+/**
+ * D2 (status machine) — rep-driven quote status transition from the CRM.
+ *
+ * Per the D2 story, the farmer responds through the existing phone / LINE-OA
+ * channel and the rep records the outcome here: `sent → accepted | declined
+ * | expired`. Owner + counter_staff (`customer:write`, Pro-gated). Sets
+ * `quotes.status` + `quotes.decided_at` and writes audit_log. Idempotent: a
+ * quote already in the target state is a no-op success; a quote no longer in
+ * `sent` cannot be re-decided.
+ */
+export async function updateQuoteStatus(
+  quoteId: string,
+  decision: QuoteDecision
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (
+    decision !== 'accepted' &&
+    decision !== 'declined' &&
+    decision !== 'expired'
+  ) {
+    return { ok: false, error: 'invalid status' };
+  }
+
+  if (isMockMode()) {
+    return { ok: true };
+  }
+
+  await requireActiveSubscription();
+
+  const scope = await currentNurseryScope();
+  if (!scope) return { ok: false, error: 'unauthorized' };
+  if (!can(scope.role, 'customer:write')) {
+    return { ok: false, error: 'Forbidden' };
+  }
+
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+
+  const { data: quote } = await supabase
+    .from('quotes')
+    .select('id, status')
+    .eq('id', quoteId)
+    .maybeSingle();
+  if (!quote) return { ok: false, error: 'ไม่พบใบเสนอราคา' };
+  const current = (quote as { status: string }).status;
+  if (current === decision) return { ok: true }; // idempotent no-op
+  if (current !== 'sent') {
+    return {
+      ok: false,
+      error: 'ใบเสนอราคานี้ตัดสินผลแล้ว ไม่สามารถเปลี่ยนสถานะได้',
+    };
+  }
+
+  const { error } = await supabase
+    .from('quotes')
+    .update({
+      status: decision,
+      decided_at: new Date().toISOString(),
+    } as never)
+    .eq('id', quoteId);
+  if (error) return { ok: false, error: error.message };
+
+  await writeAuditLog('quote.status_update', {
+    quote_id: quoteId,
+    status: decision,
+  } as Json);
+
+  return { ok: true };
+}

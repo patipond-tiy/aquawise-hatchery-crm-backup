@@ -7,7 +7,7 @@ import { useState, useTransition } from 'react';
 import { getCustomer, listCallbacks, listQuotes } from '@/lib/api';
 import type { QuoteStatus } from '@/lib/types';
 import { completeCallbackAction } from '../actions';
-import { mintBindLink } from './actions';
+import { mintBindLink, updateQuoteStatus, type QuoteDecision } from './actions';
 import { listLineEvents } from '@/lib/api';
 import { useModal } from '@/lib/store/modal';
 import { V3Card } from '@/components/aw/v3-card';
@@ -112,6 +112,21 @@ export function CustomerDetailView({ id }: { id: string }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['callbacks', id] });
       toast.success('ทำเครื่องหมายว่าเสร็จแล้ว');
+    },
+    onError: (e) =>
+      toast.error(e instanceof Error ? e.message : 'ไม่สำเร็จ'),
+  });
+
+  const decideQuote = useMutation({
+    mutationFn: (vars: { quoteId: string; decision: QuoteDecision }) =>
+      updateQuoteStatus(vars.quoteId, vars.decision),
+    onSuccess: (res) => {
+      if (res.ok) {
+        qc.invalidateQueries({ queryKey: ['quotes', id] });
+        toast.success('อัปเดตสถานะใบเสนอราคาแล้ว');
+      } else {
+        toast.error(res.error);
+      }
     },
     onError: (e) =>
       toast.error(e instanceof Error ? e.message : 'ไม่สำเร็จ'),
@@ -689,9 +704,55 @@ export function CustomerDetailView({ id }: { id: string }) {
                         )}`
                       : '—'}
                   </span>
-                  <V3Chip tone={st.tone} size="xs">
-                    {st.label}
-                  </V3Chip>
+                  {q.status === 'sent' ? (
+                    <span
+                      style={{ display: 'flex', gap: 6, alignItems: 'center' }}
+                    >
+                      <button
+                        type="button"
+                        className="aw3-btn aw3-btn-soft aw3-btn-sm"
+                        disabled={decideQuote.isPending}
+                        onClick={() =>
+                          decideQuote.mutate({
+                            quoteId: q.id,
+                            decision: 'accepted',
+                          })
+                        }
+                      >
+                        ตอบรับ
+                      </button>
+                      <button
+                        type="button"
+                        className="aw3-btn aw3-btn-ghost aw3-btn-sm"
+                        disabled={decideQuote.isPending}
+                        onClick={() =>
+                          decideQuote.mutate({
+                            quoteId: q.id,
+                            decision: 'declined',
+                          })
+                        }
+                      >
+                        ปฏิเสธ
+                      </button>
+                      <button
+                        type="button"
+                        className="aw3-btn aw3-btn-ghost aw3-btn-sm"
+                        disabled={decideQuote.isPending}
+                        onClick={() =>
+                          decideQuote.mutate({
+                            quoteId: q.id,
+                            decision: 'expired',
+                          })
+                        }
+                      >
+                        หมดอายุ
+                      </button>
+                    </span>
+                  ) : (
+                    <V3Chip tone={st.tone} size="xs">
+                      {st.label}
+                    </V3Chip>
+                  )}
                 </div>
               );
             })

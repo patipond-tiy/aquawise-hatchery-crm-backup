@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
 import { createServiceClient } from '@/lib/supabase/server';
+import { isMockMode } from '@/lib/utils/mock-mode';
 import { evaluateRestockQueue, type QueuedEvent } from '@/lib/cron/restock';
 import { evaluateHarvestWindowQueue } from '@/lib/cron/harvest';
 import type { Json } from '@/lib/database.types';
@@ -30,6 +31,22 @@ function authorized(req: NextRequest): boolean {
 async function handle(req: NextRequest) {
   if (!authorized(req)) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  }
+
+  // G4 Task 4 (AC #1) — mock-mode guard. In mock mode there is no Supabase
+  // project to write to; short-circuit with a zero-count mock response and a
+  // visible log so a developer can see the route was hit without attempting
+  // a real insert.
+  if (isMockMode()) {
+    console.log('[mock] cron/daily skipped — mock mode');
+    return NextResponse.json({
+      ok: true,
+      mock: true,
+      evaluated: 0,
+      enqueued: 0,
+      deduped: 0,
+      digests: 0,
+    });
   }
 
   const supabase = await createServiceClient();
