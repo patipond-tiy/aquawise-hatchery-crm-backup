@@ -1,11 +1,23 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { V3Mark } from '@/components/aw/v3-mark';
+
+// A6 — Google is a Supabase-native provider; LINE has no native provider so it
+// goes through the custom OIDC bridge at /auth/line/start (a Route Handler).
+// Both buttons keep the existing magic-link form (A1) as the fallback below a
+// divider. The Google button is hidden in mock mode (no Supabase to round-trip
+// against); the LINE button always renders but the start handler redirects
+// with ?error=line_unconfigured when LINE env is absent (AC #8).
+const IS_MOCK =
+  (process.env.NEXT_PUBLIC_USE_MOCK ?? 'true') !== 'false' ||
+  !process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 // Story S2 AC#6 — Cloudflare Turnstile on the magic-link OTP endpoint.
 // The widget only renders when NEXT_PUBLIC_TURNSTILE_SITE_KEY is configured
@@ -32,14 +44,37 @@ declare global {
   }
 }
 
-export default function LoginPage() {
+function LoginInner() {
   const t = useTranslations();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const captchaRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
+
+  const errorParam = searchParams.get('error');
+  const errorNotice =
+    errorParam === 'line_unconfigured'
+      ? t('login.error_line_unconfigured')
+      : errorParam === 'line_failed'
+        ? t('login.error_line_failed')
+        : null;
+
+  const signInWithGoogle = async () => {
+    setPending(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) {
+      setPending(false);
+      toast.error(error.message);
+    }
+    // On success the browser is navigated away by Supabase; no setState needed.
+  };
 
   useEffect(() => {
     if (!TURNSTILE_SITE_KEY || sent) return;
@@ -150,6 +185,72 @@ export default function LoginPage() {
           </div>
         ) : (
           <>
+            {errorNotice && (
+              <div
+                role="alert"
+                style={{
+                  background: 'var(--color-rose)',
+                  color: 'var(--color-rose-fg)',
+                  fontSize: 13,
+                  borderRadius: 10,
+                  padding: '10px 14px',
+                  marginBottom: 16,
+                }}
+              >
+                {errorNotice}
+              </div>
+            )}
+
+            {!IS_MOCK && (
+              <button
+                type="button"
+                className="aw3-btn"
+                onClick={signInWithGoogle}
+                disabled={pending}
+                style={{
+                  width: '100%',
+                  justifyContent: 'center',
+                  marginBottom: 10,
+                }}
+              >
+                {t('login.continue_google')}
+              </button>
+            )}
+            {/* Route Handler, not a page — prefetch disabled so the GET (which
+                mints state/nonce cookies) only fires on an explicit click. */}
+            <Link
+              href="/auth/line/start"
+              prefetch={false}
+              className="aw3-btn"
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                marginBottom: 18,
+                textDecoration: 'none',
+              }}
+            >
+              {t('login.continue_line')}
+            </Link>
+
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                color: 'var(--color-ink-4)',
+                fontSize: 12,
+                marginBottom: 18,
+              }}
+            >
+              <span
+                style={{ flex: 1, height: 1, background: 'var(--color-line)' }}
+              />
+              {t('login.or_divider')}
+              <span
+                style={{ flex: 1, height: 1, background: 'var(--color-line)' }}
+              />
+            </div>
+
             <input
               className="aw3-input"
               type="email"
@@ -199,5 +300,25 @@ export default function LoginPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'var(--color-canvas)',
+          }}
+        />
+      }
+    >
+      <LoginInner />
+    </Suspense>
   );
 }

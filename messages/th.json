@@ -9,6 +9,13 @@
       "required": "กรุณายืนยันว่าท่านไม่ใช่บอทก่อนดำเนินการต่อ"
     }
   },
+  "login": {
+    "continue_google": "เข้าสู่ระบบด้วย Google",
+    "continue_line": "เข้าสู่ระบบด้วย LINE",
+    "or_divider": "หรือ",
+    "error_line_unconfigured": "การเข้าสู่ระบบด้วย LINE ยังไม่พร้อมใช้งาน กรุณาใช้อีเมล",
+    "error_line_failed": "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
+  },
   "Settings": {
     "profile": {
       "upload": {

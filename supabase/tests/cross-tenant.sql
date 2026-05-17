@@ -20,7 +20,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(18);
+select plan(19);
 
 -- ---- fixtures (seeded as superuser; RLS bypassed) -----------------------
 \set na '11111111-1111-1111-1111-111111111111'
@@ -75,6 +75,10 @@ insert into public.team_invites
   values (:'na', 'invitee_a@test.local', 'counter_staff', 'tok_a', :'ua');
 insert into public.audit_log (nursery_id, action, actor_user_id)
   values (:'na', 'test.seed', :'ua');
+-- A6: LINE identity is keyed by user (not nursery); owner_A's identity row
+-- must be invisible to owner_B (RLS: user_id = auth.uid(), no write policy).
+insert into public.line_identities (user_id, line_sub, email_at_link, display_name)
+  values (:'ua', 'Uline_test_a', 'owner_a@test.local', 'Owner A');
 
 -- ---- authenticate as owner_B (no membership in nursery A) ---------------
 set local role authenticated;
@@ -117,6 +121,8 @@ select is((select count(*) from public.team_invites where nursery_id = :'na')::i
   0, 'owner_B cannot read nursery A team_invites');
 select is((select count(*) from public.audit_log where nursery_id = :'na')::int,
   0, 'owner_B cannot read nursery A audit_log');
+select is((select count(*) from public.line_identities where user_id = :'ua')::int,
+  0, 'owner_B cannot read owner_A line_identities (A6, user-keyed)');
 
 -- sanity: owner_B authenticated as a real user, and a positive control —
 -- owner_B CAN see its own nursery (proves the policy is not just deny-all

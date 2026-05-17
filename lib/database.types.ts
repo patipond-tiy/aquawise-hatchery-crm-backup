@@ -928,6 +928,30 @@ export type Database = {
           },
         ];
       };
+      line_identities: {
+        Row: {
+          created_at: string;
+          display_name: string | null;
+          email_at_link: string | null;
+          line_sub: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          display_name?: string | null;
+          email_at_link?: string | null;
+          line_sub: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          display_name?: string | null;
+          email_at_link?: string | null;
+          line_sub?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       line_outbound_events: {
         Row: {
           attempts: number;

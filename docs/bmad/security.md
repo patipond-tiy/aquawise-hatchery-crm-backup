@@ -226,7 +226,7 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
 - **How to prevent:**
   1. Rule: **NEVER** use `getSession()` for authorization decisions in server contexts. Always `getUser()`. ESLint rule (custom): forbid `getSession` outside `lib/supabase/middleware.ts` (where it's used only for cookie refresh).
   2. In RLS policies, `auth.uid()` is safe — Supabase validates the JWT at the PostgREST boundary. Don't trust `auth.jwt() ->> 'aud'` for authorization — use `auth.uid()` + membership lookups.
-  3. The service-role client (`createServiceClient` in `lib/supabase/server.ts`) bypasses RLS entirely. Restrict its use to: Stripe webhook, LINE worker, cron endpoints. Never use it inside a user-facing action.
+  3. The service-role client (`createServiceClient` in `lib/supabase/server.ts`) bypasses RLS entirely. Restrict its use to: Stripe webhook, LINE worker, cron endpoints, and the **auth-provider callback Route Handler** (`app/auth/line/callback/route.ts` — A6 LINE-login OIDC bridge; sanctioned by DECISIONS.md **D-007**). Never use it inside a user-facing server action or page. The A6 bridge additionally mints the session **server-side** (`generateLink`→`verifyOtp`, no `access_token` URL fragment) so it does not widen the §3 magic-link / §4 open-redirect surface.
 - **How to verify:** Forge a JWT with a different `sub` claim and inject it as the auth cookie. Call a server action. `getUser()` should reject the request.
 - **Source:** [Supabase Server-Side Auth (Next.js)](https://supabase.com/docs/guides/auth/server-side/nextjs) — see the "Important" callout about `getUser` vs `getSession`.
 

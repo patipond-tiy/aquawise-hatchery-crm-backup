@@ -9,6 +9,13 @@
       "required": "Please confirm you are not a bot before continuing"
     }
   },
+  "login": {
+    "continue_google": "Continue with Google",
+    "continue_line": "Continue with LINE",
+    "or_divider": "or",
+    "error_line_unconfigured": "LINE sign-in isn't available yet — please use email.",
+    "error_line_failed": "LINE sign-in failed. Please try again."
+  },
   "Settings": {
     "profile": {
       "upload": {
