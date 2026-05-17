@@ -154,40 +154,59 @@ end $$;
 -- ---- nursery-logos storage bucket (migration 012 parity) -----------------
 -- The pre-rename live snapshot had zero storage buckets. A3 logo upload needs
 -- this bucket + tenant-scoped RLS. Mirrors 012_storage_logos.sql.
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'nursery-logos', 'nursery-logos', true, 2097152,
-  array['image/jpeg','image/png','image/webp','image/gif']
-)
-on conflict (id) do update
-  set public = excluded.public,
-      file_size_limit = excluded.file_size_limit,
-      allowed_mime_types = excluded.allowed_mime_types;
+--
+-- Guard: skipped when storage schema is absent (pgtap/bare-DB CI). On a real
+-- Supabase project storage is always present — behaviour unchanged.
+do $$
+begin
+  if to_regclass('storage.buckets') is null then
+    raise notice '015_rename_hatchery_to_nursery: storage schema absent — skipping storage section (pgtap/bare-DB mode)';
+    return;
+  end if;
 
-drop policy if exists nursery_logos_public_read on storage.objects;
-create policy nursery_logos_public_read on storage.objects
-  for select using (bucket_id = 'nursery-logos');
+  insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+  values (
+    'nursery-logos', 'nursery-logos', true, 2097152,
+    array['image/jpeg','image/png','image/webp','image/gif']
+  )
+  on conflict (id) do update
+    set public = excluded.public,
+        file_size_limit = excluded.file_size_limit,
+        allowed_mime_types = excluded.allowed_mime_types;
 
-drop policy if exists nursery_logos_insert on storage.objects;
-create policy nursery_logos_insert on storage.objects
-  for insert to authenticated
-  with check (
-    bucket_id = 'nursery-logos'
-    and (storage.foldername(name))[1]::uuid in (select public.current_user_nursery_ids())
-  );
+  execute $p$ drop policy if exists nursery_logos_public_read on storage.objects $p$;
+  execute $p$
+    create policy nursery_logos_public_read on storage.objects
+      for select using (bucket_id = 'nursery-logos')
+  $p$;
 
-drop policy if exists nursery_logos_update on storage.objects;
-create policy nursery_logos_update on storage.objects
-  for update to authenticated
-  using (
-    bucket_id = 'nursery-logos'
-    and (storage.foldername(name))[1]::uuid in (select public.current_user_nursery_ids())
-  );
+  execute $p$ drop policy if exists nursery_logos_insert on storage.objects $p$;
+  execute $p$
+    create policy nursery_logos_insert on storage.objects
+      for insert to authenticated
+      with check (
+        bucket_id = 'nursery-logos'
+        and (storage.foldername(name))[1]::uuid in (select public.current_user_nursery_ids())
+      )
+  $p$;
 
-drop policy if exists nursery_logos_delete on storage.objects;
-create policy nursery_logos_delete on storage.objects
-  for delete to authenticated
-  using (
-    bucket_id = 'nursery-logos'
-    and (storage.foldername(name))[1]::uuid in (select public.current_user_nursery_ids())
-  );
+  execute $p$ drop policy if exists nursery_logos_update on storage.objects $p$;
+  execute $p$
+    create policy nursery_logos_update on storage.objects
+      for update to authenticated
+      using (
+        bucket_id = 'nursery-logos'
+        and (storage.foldername(name))[1]::uuid in (select public.current_user_nursery_ids())
+      )
+  $p$;
+
+  execute $p$ drop policy if exists nursery_logos_delete on storage.objects $p$;
+  execute $p$
+    create policy nursery_logos_delete on storage.objects
+      for delete to authenticated
+      using (
+        bucket_id = 'nursery-logos'
+        and (storage.foldername(name))[1]::uuid in (select public.current_user_nursery_ids())
+      )
+  $p$;
+end $$;

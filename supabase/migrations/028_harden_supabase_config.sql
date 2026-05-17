@@ -58,9 +58,19 @@ create policy nurseries_public_scorecard_read
 -- ONLY enables directory listing via `/storage/v1/object/list/<bucket>`.
 -- Dropping it removes listing while public GET-by-URL keeps working.
 -- nursery-logos = live app bucket; hatchery-logos = legacy pre-rename bucket.
+--
+-- Guard: skipped when storage schema is absent (pgtap/bare-DB CI). On a real
+-- Supabase project storage is always present — behaviour unchanged.
+do $$
+begin
+  if to_regclass('storage.buckets') is null then
+    raise notice '028_harden_supabase_config: storage schema absent — skipping SF-004 storage policy drops (pgtap/bare-DB mode)';
+    return;
+  end if;
 
-drop policy if exists nursery_logos_public_read  on storage.objects;
-drop policy if exists hatchery_logos_public_read on storage.objects;
+  execute $p$ drop policy if exists nursery_logos_public_read  on storage.objects $p$;
+  execute $p$ drop policy if exists hatchery_logos_public_read on storage.objects $p$;
+end $$;
 
 -- ============================================================
 -- SF-005 — relocate citext out of the public schema
