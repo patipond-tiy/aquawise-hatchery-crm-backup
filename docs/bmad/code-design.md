@@ -957,7 +957,7 @@ Future tightening: split `for all` into separate insert/update/delete policies t
 5. Add mock data + mock methods to `lib/mock/api.ts`.
 6. Add live methods to `lib/api/supabase.ts` (with `rowTo*` mapper — the **only** place `as` is allowed).
 7. Export through `lib/api/index.ts`.
-8. Run the **P0 cross-tenant block test** (see `security.md` §22) against the new table.
+8. Run the **P0 cross-tenant block test** against the new table. **If the new table is tenant-scoped (directly via `nursery_id` or via an FK chain), you MUST add it to `supabase/tests/cross-tenant.sql` in the SAME PR** — seed one nursery-A row and add an `is(count, 0, …)` assertion that owner_B cannot read it. This pgTAP suite is a **required CI check** (`.github/workflows/ci.yml` job `pgtap-cross-tenant`, story S8); a missing table = an unprotected leak path that CI cannot catch. (Canonical path: `supabase/tests/cross-tenant.sql`; see `security.md` §22.)
 
 ### Audit log table (planned)
 
@@ -1344,7 +1344,7 @@ A reviewer runs this top-to-bottom. Any unchecked box = request changes.
 - [ ] No server action accepts `nursery_id`, `user_id`, or `role` as a parameter (FLAG: `nursery_id` is the nursery tenant identifier — code identifier) — all derived from the session (§5 rule 9).
 - [ ] `dangerouslySetInnerHTML` is not added (lint rule pending).
 - [ ] Redirect targets are validated against the request origin (auth callbacks, invite acceptance) — see `security.md` §open-redirect.
-- [ ] `pnpm audit --audit-level=high` passes (or every finding is documented with remediation plan in §19).
+- [ ] `pnpm audit --audit-level=high` passes (or every finding is documented with remediation plan in §19). **Enforced in CI** (`.github/workflows/ci.yml`, story S5) — the build fails on any unaddressed high-severity advisory. **Dependabot** (`.github/dependabot.yml`) opens grouped weekly PRs (Mondays); the team reviews + merges them weekly, and any high-severity advisory must be merged or explicitly waived (via `--ignore <id>` + a §19 deferral entry) within 48 hours. Dependabot PRs that fail CI are fixed or closed — never merged red.
 
 ---
 
@@ -1465,6 +1465,7 @@ A reviewer pastes this into the PR thread and checks each item. The author canno
 
 ### Data
 - [ ] If a new table: RLS enabled with `IN (select current_user_nursery_ids())`; both mock and live impls; types regenerated; P0 cross-tenant SQL verified.
+- [ ] If a new **tenant-scoped** table: `supabase/tests/cross-tenant.sql` is updated with that table (seed + `is(count,0,…)` assertion) in the same PR — the `pgtap-cross-tenant` CI gate (story S8) only protects tables present in that file.
 - [ ] If a new facade method: signatures match between `lib/mock/api.ts` and `lib/api/supabase.ts`.
 - [ ] Mutation invalidates the right query keys via the factory (§4).
 - [ ] Mutation that runs via `useActionState` / `<form action>` also triggers TanStack invalidate on success (§4 gotcha).

@@ -1,0 +1,35 @@
+# Story S5 — automated weekly dependency-upgrade PRs.
+# Grouping keeps PR noise down: dev-deps, Radix UI, and the Next.js core
+# stack each batch into one PR; everything else stays one-per-PR so a risky
+# bump is reviewed in isolation. CI (.github/workflows/ci.yml) runs the
+# `pnpm audit --audit-level=high` gate + typecheck/lint/test/build on every
+# Dependabot PR automatically.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+      radix-ui:
+        patterns:
+          - "@radix-ui/*"
+      next-stack:
+        patterns:
+          - "next"
+          - "next-intl"
+          - "react"
+          - "react-dom"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"

@@ -17,6 +17,13 @@ jobs:
         run: corepack enable
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      # Story S5 — fail the build on any unaddressed HIGH-severity advisory.
+      # Moderate findings (e.g. the bundled-postcss GHSA-qx2v-qp2m-jg93 noted
+      # in code-design.md §19 / S1) do not trip --audit-level=high. If a HIGH
+      # has no upstream patch, add `--ignore <id>` here AND a §19 deferral
+      # entry, then re-evaluate weekly (see Edge cases in story S5).
+      - name: Dependency audit (high severity gate)
+        run: pnpm audit --audit-level=high
       - name: Typecheck
         run: pnpm run typecheck
       - name: Lint
@@ -25,3 +32,20 @@ jobs:
         run: pnpm run test
       - name: Build
         run: pnpm run build
+
+  # Story S8 — cross-tenant RLS isolation gate. A separate REQUIRED job so a
+  # failure (a developer ships an RLS regression — the #1 multi-tenant SaaS
+  # incident class) blocks the PR independently of the JS gate. Spins up a
+  # fresh local Supabase, applies ALL migrations via `db reset`, then runs
+  # the pgTAP suite (supabase/tests/cross-tenant.sql).
+  pgtap-cross-tenant:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start local Supabase + apply all migrations
+        run: supabase db start
+      - name: Run pgTAP cross-tenant isolation test
+        run: supabase test db
