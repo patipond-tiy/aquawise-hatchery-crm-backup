@@ -5,6 +5,7 @@ import {
   getCustomerServer,
   listCallbacksServer,
   listQuotesServer,
+  listLineEventsServer,
 } from '@/lib/api/server-reads';
 import { CustomerDetailView } from './customer-detail-view';
 
@@ -31,6 +32,10 @@ export default async function CustomerDetailPage({
     await listCallbacksServer(id)
   );
   queryClient.setQueryData(['quotes', id], await listQuotesServer(id));
+  queryClient.setQueryData(
+    ['line-events', id],
+    await listLineEventsServer(id)
+  );
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

@@ -276,6 +276,43 @@ export async function listQuotesServer(
   }));
 }
 
+export type LineEventServerRow = {
+  id: string;
+  template: string;
+  status: string;
+  attempts: number;
+  createdAt: string;
+  sentAt: string | null;
+  lastError: string | null;
+  isManual: boolean;
+};
+
+export async function listLineEventsServer(
+  customerId: string
+): Promise<LineEventServerRow[]> {
+  if (mockActive()) return [];
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('line_outbound_events')
+    .select(
+      'id, template, status, attempts, created_at, sent_at, last_error, is_manual'
+    )
+    .eq('customer_id', customerId)
+    .order('created_at', { ascending: false })
+    .limit(20);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    template: r.template,
+    status: r.status,
+    attempts: r.attempts,
+    createdAt: r.created_at,
+    sentAt: r.sent_at,
+    lastError: r.last_error,
+    isManual: r.is_manual,
+  }));
+}
+
 export async function getBatchServer(
   id: string
 ): Promise<BatchDetail | null> {

@@ -7,7 +7,8 @@ import { currentNurseryScope } from '@/lib/auth';
 import { can } from '@/lib/rbac';
 import { isMockMode } from '@/lib/utils/mock-mode';
 import { writeAuditLog } from '@/lib/audit';
-import type { RestockThresholds } from '@/lib/types';
+import type { RestockThresholds, NotificationSettings } from '@/lib/types';
+import type { Json } from '@/lib/database.types';
 
 export interface ProfileFields {
   name: string;
@@ -121,5 +122,62 @@ export async function updateRestockThresholdsAction(
   if (error) return { ok: false, error: error.message };
 
   await writeAuditLog('restock_thresholds.update', { now, week, month });
+  return { ok: true };
+}
+
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/**
+ * H1 + H4 — persist notification toggles and quiet-hours window. Owner-only
+ * (`settings:write`); RLS also enforces owner-UPDATE at the DB layer. Writes
+ * audit_log. The cron (G4) + worker (G3p) read these at delivery time so a
+ * toggled-off channel / quiet window suppresses real pushes.
+ */
+export async function updateNotificationSettingsAction(
+  patch: Partial<NotificationSettings> & {
+    quietHoursStart?: string;
+    quietHoursEnd?: string;
+  }
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (
+    (patch.quietHoursStart && !TIME_RE.test(patch.quietHoursStart)) ||
+    (patch.quietHoursEnd && !TIME_RE.test(patch.quietHoursEnd))
+  ) {
+    return { ok: false, error: 'รูปแบบเวลาไม่ถูกต้อง (HH:MM)' };
+  }
+
+  if (isMockMode()) {
+    return { ok: false, error: 'โหมดเดโม — ยังไม่บันทึกจริง' };
+  }
+
+  await requireActiveSubscription();
+
+  const scope = await currentNurseryScope();
+  if (!scope) return { ok: false, error: 'No nursery membership found' };
+  if (!can(scope.role, 'settings:write')) {
+    return { ok: false, error: 'Forbidden' };
+  }
+
+  const dbPatch: Record<string, boolean | string> = {};
+  if (patch.restock !== undefined) dbPatch.restock = patch.restock;
+  if (patch.lowD30 !== undefined) dbPatch.low_d30 = patch.lowD30;
+  if (patch.disease !== undefined) dbPatch.disease = patch.disease;
+  if (patch.lineReply !== undefined) dbPatch.line_reply = patch.lineReply;
+  if (patch.weekly !== undefined) dbPatch.weekly = patch.weekly;
+  if (patch.priceMove !== undefined) dbPatch.price_move = patch.priceMove;
+  if (patch.quietHoursStart)
+    dbPatch.quiet_hours_start = `${patch.quietHoursStart}:00`;
+  if (patch.quietHoursEnd)
+    dbPatch.quiet_hours_end = `${patch.quietHoursEnd}:00`;
+  if (Object.keys(dbPatch).length === 0) return { ok: true };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('notification_settings')
+    .update(dbPatch as never)
+    .eq('nursery_id', scope.nurseryId);
+  if (error) return { ok: false, error: error.message };
+
+  await writeAuditLog('notification_settings.update', dbPatch as Json);
   return { ok: true };
 }

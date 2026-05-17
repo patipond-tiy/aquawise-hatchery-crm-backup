@@ -536,18 +536,61 @@ export async function getSubscription(): Promise<import('@/lib/types').Subscript
   };
 }
 
-export async function getInvoiceHistory(): Promise<import('@/lib/types').Invoice[]> {
-  // Real invoice history requires the Stripe secret key; the Settings page
-  // calls the `fetchInvoiceHistory()` server action instead. Return [] here
-  // so the facade contract stays satisfied if a client ever calls it directly.
-  return [];
+export async function getInvoiceHistory(): Promise<
+  import('@/lib/types').Invoice[]
+> {
+  // H3 — real invoice history. The Stripe secret key is server-only, so this
+  // delegates to the `fetchInvoiceHistory()` server action (server actions are
+  // callable from the client). That action hits Stripe live when configured,
+  // scoped to the caller's nursery's stripe_customer_id. No mock stub remains.
+  const { fetchInvoiceHistory } = await import(
+    '@/app/[locale]/(dashboard)/settings/billing/actions'
+  );
+  return fetchInvoiceHistory();
+}
+
+export type LineEventView = {
+  id: string;
+  template: string;
+  status: string;
+  attempts: number;
+  createdAt: string;
+  sentAt: string | null;
+  lastError: string | null;
+  isManual: boolean;
+};
+
+export async function listLineEvents(
+  customerId: string
+): Promise<LineEventView[]> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('line_outbound_events')
+    .select(
+      'id, template, status, attempts, created_at, sent_at, last_error, is_manual'
+    )
+    .eq('customer_id', customerId)
+    .order('created_at', { ascending: false })
+    .limit(20);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    template: r.template,
+    status: r.status,
+    attempts: r.attempts,
+    createdAt: r.created_at,
+    sentAt: r.sent_at,
+    lastError: r.last_error,
+    isManual: r.is_manual,
+  }));
 }
 
 export async function getNotificationSettings(): Promise<NotificationSettings> {
   const supabase = createClient();
   const { data } = await supabase
     .from('notification_settings')
-    .select('restock, low_d30, disease, line_reply, weekly, price_move')
+    .select(
+      'restock, low_d30, disease, line_reply, weekly, price_move, quiet_hours_start, quiet_hours_end'
+    )
     .limit(1)
     .single();
   return {
@@ -557,6 +600,8 @@ export async function getNotificationSettings(): Promise<NotificationSettings> {
     lineReply: data?.line_reply ?? false,
     weekly: data?.weekly ?? true,
     priceMove: data?.price_move ?? true,
+    quietHoursStart: (data?.quiet_hours_start ?? '21:00:00').substring(0, 5),
+    quietHoursEnd: (data?.quiet_hours_end ?? '07:00:00').substring(0, 5),
   };
 }
 

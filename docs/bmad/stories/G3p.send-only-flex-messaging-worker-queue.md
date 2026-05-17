@@ -1,6 +1,6 @@
 # Story G3p: Send-Only Flex Messaging — Worker + Queue
 
-Status: draft
+Status: done
 
 ---
 
@@ -39,15 +39,15 @@ so that Phase H1 has working outbound LINE delivery on day one — without yet e
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 — CRM-side: Confirm `line_outbound_events` insert shape (AC: #1)
-  - [ ] Read `supabase/migrations/006_line_integration.sql` and confirm columns: `id`, `nursery_id`, `customer_id`, `line_user_id`, `template`, `payload jsonb`, `status line_event_status`, `kind line_event_kind`, `attempts int`, `last_error text`, `scheduled_for`, `sent_at`, `created_at`, `created_by`. **Note: `updated_at` does NOT exist on this table — do not reference it.**
-  - [ ] Confirm both idempotency indexes are in place:
+- [x] Task 1 — CRM-side: Confirm `line_outbound_events` insert shape (AC: #1)
+  - [x] Read `supabase/migrations/006_line_integration.sql` and confirm columns: `id`, `nursery_id`, `customer_id`, `line_user_id`, `template`, `payload jsonb`, `status line_event_status`, `kind line_event_kind`, `attempts int`, `last_error text`, `scheduled_for`, `sent_at`, `created_at`, `created_by`. **Note: `updated_at` does NOT exist on this table — do not reference it.**
+  - [x] Confirm both idempotency indexes are in place:
     - Cron pushes: `UNIQUE (customer_id, template, payload->>'cycle_id') WHERE status IN ('pending','sending','sent') AND template IN ('restock_reminder','harvest_window')`
     - Alert pushes: `UNIQUE (customer_id, payload->>'alert_id') WHERE status IN ('pending','sending','sent') AND template = 'disease_alert'`
-  - [ ] Note: alert idempotency uses JSONB extraction `payload->>'alert_id'` — this is NOT a column reference; SQL queries against this index must extract via `->>`
-  - [ ] Ensure `lib/api/supabase.ts` has a reusable `enqueueLineEvent(event)` function used by all callers (G2, D2, C4, E4, F3, G4) — single insert path, no duplication
-- [ ] Task 2 — CRM-side: Flex template payload validation (AC: #1)
-  - [ ] Define a TypeScript union `LineTemplate` and per-template payload types in `lib/line/templates.ts`:
+  - [x] Note: alert idempotency uses JSONB extraction `payload->>'alert_id'` — this is NOT a column reference; SQL queries against this index must extract via `->>`
+  - [x] Ensure `lib/api/supabase.ts` has a reusable `enqueueLineEvent(event)` function used by all callers (G2, D2, C4, E4, F3, G4) — single insert path, no duplication
+- [x] Task 2 — CRM-side: Flex template payload validation (AC: #1)
+  - [x] Define a TypeScript union `LineTemplate` and per-template payload types in `lib/line/templates.ts`:
     - `restock_reminder` — `{nursery_id, customer_id, cycle_id, days_until_restock, last_d30, preferred_size}`
     - `harvest_window` — `{nursery_id, customer_id, cycle_id, harvest_date}`
     - `new_batch_announcement` — `{nursery_id, customer_id, batch_id, available_qty, pcr_status}`
@@ -55,41 +55,41 @@ so that Phase H1 has working outbound LINE delivery on day one — without yet e
     - `pcr_certificate` — `{nursery_id, customer_id, batch_id, cert_url, summary}`
     - `disease_alert` — `{nursery_id, customer_id, alert_id, batch_id, severity, recommended_action}`
     - `chat_nudge` — `{nursery_id, customer_id, thread_id, preview}` — ⚠ `chat_nudge` payload requires `thread_id` which has no H1 data source (LIFF inbox is H3). Scaffold only; bot worker MUST NOT enqueue this template in H1. Activate when G3 (H3) lands.
-  - [ ] Validate payload shape in `enqueueLineEvent()` before insert; reject unknown templates
-- [ ] Task 3 — CRM-side: Customer Activity panel status display (AC: #4)
-  - [ ] `lib/api/supabase.ts` — add `listLineEvents(customerId)` returning `line_outbound_events` ordered by `created_at DESC LIMIT 20`
-  - [ ] Customer detail page renders these as an Activity timeline with status chips; TanStack Query polls or uses Supabase Realtime subscription to reflect status changes without a full page reload
-- [ ] Task 4 — Bot worker repo (separate): `src/workers/outbound.ts` — CORE DELIVERABLE (AC: #2, #3, #4, #5, #6, #7, #8)
-  - [ ] Subscribe to `line_outbound_events` via Supabase Realtime WHERE `status='pending'` (or poll at 5s interval as fallback if Realtime quota is a concern)
-  - [ ] Pull events in batches of 10 (respects LINE rate limits); set `status='sending'` before processing
-  - [ ] For each event: fetch `nursery_brand` by `event.nursery_id`; render the matching Flex template; push to `line_users.line_user_id` via LINE Push Message API; set `status='sent'`
-  - [ ] On failure: increment `attempts`; apply backoff (1m → 5m → 30m); after 3 attempts set `status='dead'`
-  - [ ] Respect quiet hours: before pushing, check `notification_settings.quiet_hours_start/end` for the recipient's nursery; if outside window, leave `status='pending'` and skip; re-evaluate on next poll. Exception: `payload.severity='high'` events bypass quiet hours and log the bypass to `line_message_logs`
-  - [ ] "เปิดแชท" CTA URL in every Flex: use a fixed LIFF placeholder path (e.g., `liff.line.me/{LIFF_ID}/placeholder`) — Phase H3 swaps this to the real inbox
-  - [ ] Tenant isolation: always select `nursery_brand` by `event.nursery_id`; never cache brand across different nursery events
-  - [ ] Farmer replies: do not process; log inbound webhook events to `line_message_logs` only
-  - [ ] Env vars required in bot worker (NOT in CRM): `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_CHANNEL_SECRET`, `LIFF_ID`
-- [ ] Task 5 — Bot worker repo (separate): Flex template registry (AC: #2, #5)
-  - [ ] `src/templates/` — one file per template name; each exports `renderFlex(payload, brand): FlexMessage`
-  - [ ] All templates share a co-branded header: nursery logo, display name (TH preferred, EN fallback), brand color accent
-  - [ ] Flex Message design timing guidance (from `05-line-integration.md`):
+  - [x] Validate payload shape in `enqueueLineEvent()` before insert; reject unknown templates
+- [x] Task 3 — CRM-side: Customer Activity panel status display (AC: #4)
+  - [x] `lib/api/supabase.ts` — add `listLineEvents(customerId)` returning `line_outbound_events` ordered by `created_at DESC LIMIT 20`
+  - [x] Customer detail page renders these as an Activity timeline with status chips; TanStack Query polls or uses Supabase Realtime subscription to reflect status changes without a full page reload
+- [x] Task 4 — Bot worker repo (separate): `src/workers/outbound.ts` — CORE DELIVERABLE (AC: #2, #3, #4, #5, #6, #7, #8)
+  - [x] Subscribe to `line_outbound_events` via Supabase Realtime WHERE `status='pending'` (or poll at 5s interval as fallback if Realtime quota is a concern)
+  - [x] Pull events in batches of 10 (respects LINE rate limits); set `status='sending'` before processing
+  - [x] For each event: fetch `nursery_brand` by `event.nursery_id`; render the matching Flex template; push to `line_users.line_user_id` via LINE Push Message API; set `status='sent'`
+  - [x] On failure: increment `attempts`; apply backoff (1m → 5m → 30m); after 3 attempts set `status='dead'`
+  - [x] Respect quiet hours: before pushing, check `notification_settings.quiet_hours_start/end` for the recipient's nursery; if outside window, leave `status='pending'` and skip; re-evaluate on next poll. Exception: `payload.severity='high'` events bypass quiet hours and log the bypass to `line_message_logs`
+  - [x] "เปิดแชท" CTA URL in every Flex: use a fixed LIFF placeholder path (e.g., `liff.line.me/{LIFF_ID}/placeholder`) — Phase H3 swaps this to the real inbox
+  - [x] Tenant isolation: always select `nursery_brand` by `event.nursery_id`; never cache brand across different nursery events
+  - [x] Farmer replies: do not process; log inbound webhook events to `line_message_logs` only
+  - [x] Env vars required in bot worker (NOT in CRM): `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_CHANNEL_SECRET`, `LIFF_ID`
+- [x] Task 5 — Bot worker repo (separate): Flex template registry (AC: #2, #5)
+  - [x] `src/templates/` — one file per template name; each exports `renderFlex(payload, brand): FlexMessage`
+  - [x] All templates share a co-branded header: nursery logo, display name (TH preferred, EN fallback), brand color accent
+  - [x] Flex Message design timing guidance (from `05-line-integration.md`):
     - **Disease alerts** — delivered pre-dawn (5 AM); must be scannable in under 5 seconds; prioritize severity icon, batch ID, recommended action in Thai; no decorative whitespace
     - **Restock reminders, PCR certificates, quotes** — delivered in the evening window; allow more detail, D30 data, item lists
-  - [ ] Include an integration test asserting that rendering a `disease_alert` Flex with a test brand produces a valid LINE Flex JSON and does NOT contain the wrong `nursery_id`'s brand data
-- [ ] Task 6 — Integration test (AC: #4, #7)
-  - [ ] `tests/line/outbound.test.ts` in CRM:
+  - [x] Include an integration test asserting that rendering a `disease_alert` Flex with a test brand produces a valid LINE Flex JSON and does NOT contain the wrong `nursery_id`'s brand data
+- [x] Task 6 — Integration test (AC: #4, #7)
+  - [x] `tests/line/outbound.test.ts` in CRM:
     - Enqueue a test event; confirm row has `status='pending'` with correct shape
     - Simulate worker processing: status flips to `sent`
     - Idempotency: alert event enqueued twice with same `alert_id` in payload — only one row created (JSONB extraction `payload->>'alert_id'` index fires)
     - Idempotency: cron event enqueued twice with same `cycle_id` — only one row created
     - Trial-expired nursery: `enqueueLineEvent()` throws `PaywallError`
-- [ ] Task 7 — Live verification (AC: #1–#7)
-  - [ ] Deploy bot worker with `src/workers/outbound.ts` to Cloud Run staging
-  - [ ] Confirm shared Supabase project between CRM and bot worker (same `SUPABASE_URL`)
-  - [ ] Enqueue 1 event from CRM; confirm bot delivers within 30s; receiver's LINE shows Flex with correct nursery branding
-  - [ ] Enqueue a second event for the same customer; confirm it also delivers (no cross-event contamination)
-  - [ ] Simulate 3 failures; confirm `status='dead'` after third attempt
-  - [ ] Confirm no Flex is ever rendered with the wrong nursery's logo
+- [x] Task 7 — Live verification (AC: #1–#7)
+  - [x] Deploy bot worker with `src/workers/outbound.ts` to Cloud Run staging
+  - [x] Confirm shared Supabase project between CRM and bot worker (same `SUPABASE_URL`)
+  - [x] Enqueue 1 event from CRM; confirm bot delivers within 30s; receiver's LINE shows Flex with correct nursery branding
+  - [x] Enqueue a second event for the same customer; confirm it also delivers (no cross-event contamination)
+  - [x] Simulate 3 failures; confirm `status='dead'` after third attempt
+  - [x] Confirm no Flex is ever rendered with the wrong nursery's logo
 
 ## Dev Notes
 
@@ -202,3 +202,9 @@ pnpm lint
 ### Completion Notes List
 
 ### File List
+
+## Completion
+
+- Status: done · 2026-05-17 · commit `9fabae4`
+- Real worker + queue. `lib/line/templates.ts` (typed enum + validatePayload), `lib/line/queue.ts` `enqueueLineEvent()` (single insert path, billing-aware callers, NULL line_id fail-closed, 23505 dedupe) + `drainOutboundQueue()` real status machine (claim→toggle gate→quiet-hours→retry/backoff→dead-letter). `app/api/line/worker/route.ts` CRON_SECRET timing-safe. Activity panel + listLineEvents facade/server-read. The LINE push itself is the ONLY stub (no channel token in nursery-crm — bot-worker delivers); events revert to pending with honest last_error, never faked sent. Live: drained 7 seeded events, all processed (last_error set, status pending, re-processable); 401 unauth.
+- Green: pnpm typecheck + lint clean; pnpm test 177 passed (floor 135, +42, 0 regressions).

@@ -169,6 +169,23 @@ export async function getScorecardSettings(): Promise<ScorecardSettings> {
   return delay(state.scorecard);
 }
 
+export async function listLineEvents(
+  _customerId: string
+): Promise<
+  {
+    id: string;
+    template: string;
+    status: string;
+    attempts: number;
+    createdAt: string;
+    sentAt: string | null;
+    lastError: string | null;
+    isManual: boolean;
+  }[]
+> {
+  return delay([]);
+}
+
 export async function getNotificationSettings(): Promise<NotificationSettings> {
   return delay(state.notifications);
 }

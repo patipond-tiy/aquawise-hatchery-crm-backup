@@ -286,6 +286,8 @@ export const DEFAULT_NOTIFICATIONS: NotificationSettings = {
   lineReply: false,
   weekly: true,
   priceMove: true,
+  quietHoursStart: '21:00',
+  quietHoursEnd: '07:00',
 };
 
 export const TEAM: TeamMember[] = [

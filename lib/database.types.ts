@@ -349,6 +349,55 @@ export type Database = {
           },
         ]
       }
+      chat_threads: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          last_message_at: string | null
+          line_user_id: string
+          nursery_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          last_message_at?: string | null
+          line_user_id: string
+          nursery_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          last_message_at?: string | null
+          line_user_id?: string
+          nursery_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_threads_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: true
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_threads_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "nurseries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_threads_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "public_scorecard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_bind_tokens: {
         Row: {
           consumed_at: string | null
@@ -631,6 +680,96 @@ export type Database = {
           },
         ]
       }
+      data_exports: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          file_url: string | null
+          id: string
+          kind: string
+          nursery_id: string
+          requested_by: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          kind: string
+          nursery_id: string
+          requested_by?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          kind?: string
+          nursery_id?: string
+          requested_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_exports_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "nurseries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_exports_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "public_scorecard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      line_message_logs: {
+        Row: {
+          body: Json | null
+          created_at: string
+          direction: string
+          id: string
+          kind: string | null
+          line_user_id: string
+          nursery_id: string | null
+        }
+        Insert: {
+          body?: Json | null
+          created_at?: string
+          direction: string
+          id?: string
+          kind?: string | null
+          line_user_id: string
+          nursery_id?: string | null
+        }
+        Update: {
+          body?: Json | null
+          created_at?: string
+          direction?: string
+          id?: string
+          kind?: string | null
+          line_user_id?: string
+          nursery_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "line_message_logs_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "nurseries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "line_message_logs_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "public_scorecard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       line_outbound_events: {
         Row: {
           attempts: number
@@ -638,6 +777,7 @@ export type Database = {
           created_by: string | null
           customer_id: string
           id: string
+          is_manual: boolean
           kind: Database["public"]["Enums"]["line_event_kind"]
           last_error: string | null
           line_user_id: string
@@ -654,6 +794,7 @@ export type Database = {
           created_by?: string | null
           customer_id: string
           id?: string
+          is_manual?: boolean
           kind?: Database["public"]["Enums"]["line_event_kind"]
           last_error?: string | null
           line_user_id: string
@@ -670,6 +811,7 @@ export type Database = {
           created_by?: string | null
           customer_id?: string
           id?: string
+          is_manual?: boolean
           kind?: Database["public"]["Enums"]["line_event_kind"]
           last_error?: string | null
           line_user_id?: string
@@ -704,6 +846,64 @@ export type Database = {
           },
         ]
       }
+      line_users: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          display_name: string | null
+          last_seen_at: string | null
+          line_user_id: string
+          nursery_id: string
+          picture_url: string | null
+          status_message: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          display_name?: string | null
+          last_seen_at?: string | null
+          line_user_id: string
+          nursery_id: string
+          picture_url?: string | null
+          status_message?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          display_name?: string | null
+          last_seen_at?: string | null
+          line_user_id?: string
+          nursery_id?: string
+          picture_url?: string | null
+          status_message?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "line_users_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "line_users_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "nurseries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "line_users_nursery_id_fkey"
+            columns: ["nursery_id"]
+            isOneToOne: false
+            referencedRelation: "public_scorecard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_settings: {
         Row: {
           disease: boolean
@@ -711,6 +911,8 @@ export type Database = {
           low_d30: boolean
           nursery_id: string
           price_move: boolean
+          quiet_hours_end: string
+          quiet_hours_start: string
           restock: boolean
           updated_at: string
           weekly: boolean
@@ -721,6 +923,8 @@ export type Database = {
           low_d30?: boolean
           nursery_id: string
           price_move?: boolean
+          quiet_hours_end?: string
+          quiet_hours_start?: string
           restock?: boolean
           updated_at?: string
           weekly?: boolean
@@ -731,6 +935,8 @@ export type Database = {
           low_d30?: boolean
           nursery_id?: string
           price_move?: boolean
+          quiet_hours_end?: string
+          quiet_hours_start?: string
           restock?: boolean
           updated_at?: string
           weekly?: boolean

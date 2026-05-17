@@ -183,6 +183,9 @@ export type NotificationSettings = {
   lineReply: boolean;
   weekly: boolean;
   priceMove: boolean;
+  /** H4 — quiet-hours window (ICT, "HH:MM"). */
+  quietHoursStart: string;
+  quietHoursEnd: string;
 };
 
 export type TeamMember = {

@@ -173,7 +173,8 @@ export async function POST(req: NextRequest) {
         break;
       }
 
-      case 'invoice.paid': {
+      case 'invoice.paid':
+      case 'invoice.payment_succeeded': {
         const inv = event.data.object as Stripe.Invoice;
         const customerId =
           typeof inv.customer === 'string' ? inv.customer : inv.customer?.id ?? null;

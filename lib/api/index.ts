@@ -29,6 +29,7 @@ export const listQuotes = impl.listQuotes;
 export const getPrices = impl.getPrices;
 export const listTeam = impl.listTeam;
 export const getScorecardSettings = impl.getScorecardSettings;
+export const listLineEvents = impl.listLineEvents;
 export const getNotificationSettings = impl.getNotificationSettings;
 export const addCustomer = impl.addCustomer;
 export const addBatch = impl.addBatch;

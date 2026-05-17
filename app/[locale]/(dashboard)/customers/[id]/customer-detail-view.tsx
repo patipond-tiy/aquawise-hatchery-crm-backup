@@ -3,9 +3,12 @@
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from '@/i18n/navigation';
+import { useState, useTransition } from 'react';
 import { getCustomer, listCallbacks, listQuotes } from '@/lib/api';
 import type { QuoteStatus } from '@/lib/types';
 import { completeCallbackAction } from '../actions';
+import { mintBindLink } from './actions';
+import { listLineEvents } from '@/lib/api';
 import { useModal } from '@/lib/store/modal';
 import { V3Card } from '@/components/aw/v3-card';
 import { V3Grid, V3Col } from '@/components/aw/v3-grid';
@@ -29,6 +32,27 @@ const QUOTE_STATUS: Record<
   accepted: { label: 'ตอบรับแล้ว', tone: 'good' },
   declined: { label: 'ปฏิเสธ', tone: 'bad' },
   expired: { label: 'หมดอายุ', tone: 'lav' },
+};
+
+const LINE_STATUS: Record<
+  string,
+  { label: string; tone: 'amber' | 'good' | 'bad' | 'lav' | 'sky' }
+> = {
+  pending: { label: 'รอส่ง', tone: 'amber' },
+  sending: { label: 'กำลังส่ง', tone: 'sky' },
+  sent: { label: 'ส่งแล้ว', tone: 'good' },
+  failed: { label: 'ส่งไม่สำเร็จ', tone: 'bad' },
+  dead: { label: 'ล้มเหลว', tone: 'bad' },
+};
+
+const LINE_TEMPLATE_LABEL: Record<string, string> = {
+  restock_reminder: 'แจ้งเตือนรีสต็อก',
+  harvest_window: 'แจ้งช่วงจับ',
+  new_batch_announcement: 'ประกาศล็อตใหม่',
+  quote: 'ใบเสนอราคา',
+  pcr_certificate: 'ใบรับรอง PCR',
+  disease_alert: 'แจ้งเตือนโรค',
+  custom_note: 'ข้อความอิสระ',
 };
 
 function fmtThaiDateTime(iso: string): string {
@@ -58,6 +82,30 @@ export function CustomerDetailView({ id }: { id: string }) {
     queryKey: ['quotes', id],
     queryFn: () => listQuotes(id),
   });
+  const { data: lineEvents = [] } = useQuery({
+    queryKey: ['line-events', id],
+    queryFn: () => listLineEvents(id),
+  });
+
+  const [bindPending, startBind] = useTransition();
+  const [bindUrl, setBindUrl] = useState<string | null>(null);
+
+  const connectLine = () => {
+    startBind(async () => {
+      const res = await mintBindLink(id);
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      setBindUrl(res.url);
+      try {
+        await navigator.clipboard.writeText(res.url);
+        toast.success('ลิงก์พร้อมแล้ว — คัดลอกแล้ว');
+      } catch {
+        toast.success('ลิงก์พร้อมแล้ว');
+      }
+    });
+  };
 
   const complete = useMutation({
     mutationFn: (callbackId: string) => completeCallbackAction(callbackId),
@@ -184,9 +232,28 @@ export function CustomerDetailView({ id }: { id: string }) {
                   ติดต่อด่วน
                 </V3Chip>
               )}
+              {c.lineId ? (
+                <V3Chip tone="good" size="xs">
+                  LINE เชื่อมแล้ว
+                </V3Chip>
+              ) : (
+                <V3Chip tone="lav" size="xs">
+                  ยังไม่ได้เชื่อม LINE
+                </V3Chip>
+              )}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
+            {!c.lineId && (
+              <button
+                type="button"
+                className="aw3-btn aw3-btn-soft"
+                onClick={connectLine}
+                disabled={bindPending}
+              >
+                {bindPending ? 'กำลังสร้าง…' : 'เชื่อม LINE'}
+              </button>
+            )}
             <button
               type="button"
               className="aw3-btn aw3-btn-soft"
@@ -300,6 +367,88 @@ export function CustomerDetailView({ id }: { id: string }) {
                 </button>
               </div>
             ))}
+          </div>
+        )}
+      </V3Card>
+
+      {bindUrl && (
+        <V3Card
+          pad={18}
+          style={{
+            border: '1px solid var(--color-line)',
+            marginBottom: 20,
+            background: 'var(--color-soft)',
+          }}
+        >
+          <div style={{ fontSize: 12, color: 'var(--color-ink-4)', fontWeight: 600 }}>
+            ลิงก์เชื่อม LINE (ส่งให้ลูกค้าเปิดในแอป LINE — ใช้ได้ 7 วัน)
+          </div>
+          <div
+            className="mono"
+            style={{
+              fontSize: 12,
+              marginTop: 6,
+              wordBreak: 'break-all',
+              color: 'var(--color-ink-3)',
+            }}
+          >
+            {bindUrl}
+          </div>
+        </V3Card>
+      )}
+
+      {/* G2/G3p — LINE Activity */}
+      <V3Card
+        pad={22}
+        style={{ border: '1px solid var(--color-line)', marginBottom: 20 }}
+      >
+        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
+          กิจกรรม LINE
+        </h3>
+        {lineEvents.length === 0 ? (
+          <div
+            style={{ fontSize: 13, color: 'var(--color-ink-4)', marginTop: 12 }}
+          >
+            ยังไม่มีข้อความ
+          </div>
+        ) : (
+          <div style={{ marginTop: 12 }}>
+            {lineEvents.map((e, i) => {
+              const st = LINE_STATUS[e.status] ?? {
+                label: e.status,
+                tone: 'lav' as const,
+              };
+              return (
+                <div
+                  key={e.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '12px 0',
+                    borderTop: i > 0 ? '1px solid var(--color-line)' : 0,
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 700 }}>
+                      {LINE_TEMPLATE_LABEL[e.template] ?? e.template}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: 'var(--color-ink-4)',
+                        marginTop: 2,
+                      }}
+                    >
+                      {fmtThaiDateTime(e.createdAt)}
+                    </div>
+                  </div>
+                  <V3Chip tone={st.tone} size="xs">
+                    {st.label}
+                  </V3Chip>
+                </div>
+              );
+            })}
           </div>
         )}
       </V3Card>
