@@ -41,7 +41,7 @@ async function handle(req: NextRequest) {
   const { data: rows, error } = await supabase
     .from('crm_event_log')
     .select(
-      'id, correlation_id, batch_id, severity, payload, attempts, posted_at, delivered_at'
+      'id, correlation_id, batch_id, severity, payload, attempts, posted_at, last_attempt_at, delivered_at'
     )
     .is('delivered_at', null)
     .lt('attempts', MAX_ATTEMPTS)
@@ -59,11 +59,15 @@ async function handle(req: NextRequest) {
   let deadLettered = 0;
 
   for (const row of rows ?? []) {
-    // Respect exponential backoff: only attempt if enough time elapsed since
-    // posted_at given the current attempt count.
-    const dueAfterMs =
-      new Date(row.posted_at).getTime() +
-      backoffDueSeconds(row.attempts) * 1000;
+    // Respect exponential backoff: anchor to the later of posted_at and
+    // last_attempt_at so the window resets after each attempt rather than
+    // always measuring from the original post time (which caps at 60 s and
+    // then retries every tick indefinitely).
+    const anchorMs = Math.max(
+      new Date(row.posted_at).getTime(),
+      row.last_attempt_at ? new Date(row.last_attempt_at).getTime() : 0
+    );
+    const dueAfterMs = anchorMs + backoffDueSeconds(row.attempts) * 1000;
     if (Date.now() < dueAfterMs) {
       skipped += 1;
       continue;
@@ -80,10 +84,11 @@ async function handle(req: NextRequest) {
         10000
       );
 
+      const nowIso = new Date().toISOString();
       if (result.ok) {
         await supabase
           .from('crm_event_log')
-          .update({ delivered_at: new Date().toISOString() })
+          .update({ delivered_at: nowIso, last_attempt_at: nowIso })
           .eq('id', row.id);
         delivered += 1;
       } else if (
@@ -96,6 +101,7 @@ async function handle(req: NextRequest) {
           .from('crm_event_log')
           .update({
             attempts: MAX_ATTEMPTS,
+            last_attempt_at: nowIso,
             last_error: result.error ?? `http_${result.status}`,
           })
           .eq('id', row.id);
@@ -106,6 +112,7 @@ async function handle(req: NextRequest) {
           .from('crm_event_log')
           .update({
             attempts: nextAttempts,
+            last_attempt_at: nowIso,
             last_error: result.error ?? `http_${result.status}`,
           })
           .eq('id', row.id);
@@ -118,10 +125,12 @@ async function handle(req: NextRequest) {
         row.correlation_id,
         e instanceof Error ? e.message : e
       );
+      const nowIso = new Date().toISOString();
       await supabase
         .from('crm_event_log')
         .update({
           attempts: row.attempts + 1,
+          last_attempt_at: nowIso,
           last_error: e instanceof Error ? e.message : 'unknown',
         })
         .eq('id', row.id);

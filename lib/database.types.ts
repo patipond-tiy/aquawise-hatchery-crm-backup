@@ -476,6 +476,7 @@ export type Database = {
           delivered_at: string | null;
           event_type: string;
           id: string;
+          last_attempt_at: string | null;
           last_error: string | null;
           nursery_id: string;
           payload: Json;
@@ -489,6 +490,7 @@ export type Database = {
           delivered_at?: string | null;
           event_type: string;
           id?: string;
+          last_attempt_at?: string | null;
           last_error?: string | null;
           nursery_id: string;
           payload: Json;
@@ -502,6 +504,7 @@ export type Database = {
           delivered_at?: string | null;
           event_type?: string;
           id?: string;
+          last_attempt_at?: string | null;
           last_error?: string | null;
           nursery_id?: string;
           payload?: Json;
