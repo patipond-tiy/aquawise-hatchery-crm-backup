@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { getNursery } from '@/lib/api';
+import { yearsSince } from '@/lib/derive/years-since';
 import type { Nursery } from '@/lib/types';
 import { V3Card } from '@/components/aw/v3-card';
 import { V3Grid, V3Col } from '@/components/aw/v3-grid';
@@ -42,6 +43,8 @@ function ProfileForm({ nursery }: { nursery: Nursery | null }) {
   const [displayNameTh, setDisplayNameTh] = useState(nursery?.name ?? '');
   const [displayNameEn, setDisplayNameEn] = useState(nursery?.nameEn ?? '');
   const [brandColor, setBrandColor] = useState('#1F6FEB');
+  const [now] = useState(() => Date.now());
+  const yearsOpen = yearsSince(nursery?.createdAt, now);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -210,7 +213,7 @@ function ProfileForm({ nursery }: { nursery: Nursery | null }) {
               letterSpacing: '-0.02em',
             }}
           >
-            8{' '}
+            {yearsOpen ?? '—'}{' '}
             <span
               style={{
                 fontSize: 14,

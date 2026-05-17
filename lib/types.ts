@@ -165,6 +165,21 @@ export type Nursery = {
   location: string;
   locationEn: string;
   restockThresholds: RestockThresholds;
+  /** ISO timestamp the nursery workspace was created (for "open since"). */
+  createdAt?: string;
+};
+
+/**
+ * The authenticated user rendered in identity surfaces (top-bar, right-rail).
+ * Sourced from the live Supabase session — never a hardcoded literal. `null`
+ * means no resolvable session (mock mode with no seed, or signed-out).
+ */
+export type CurrentUser = {
+  id: string;
+  /** Best available human label: full_name → name → email local-part. */
+  displayName: string;
+  email: string | null;
+  role: 'owner' | 'counter_staff' | 'lab_tech' | 'auditor' | null;
 };
 
 export type ScorecardSettings = {

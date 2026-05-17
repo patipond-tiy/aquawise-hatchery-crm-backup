@@ -1,7 +1,9 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { usePathname, Link } from '@/i18n/navigation';
+import { getNursery } from '@/lib/api';
 import { V3Mark } from '@/components/aw/v3-mark';
 import { Icon } from '@/components/aw/icon';
 import { LogoutButton } from '@/components/layout/logout-button';
@@ -50,6 +52,10 @@ export function LeftRail() {
   const t = useTranslations();
   const pathname = usePathname();
   const collapsed = useSidebar((s) => s.collapsed);
+  const { data: nursery } = useQuery({
+    queryKey: ['nursery'],
+    queryFn: getNursery,
+  });
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
@@ -130,7 +136,7 @@ export function LeftRail() {
                 textOverflow: 'ellipsis',
               }}
             >
-              ฟ้าใส แฮทเชอรี่
+              {nursery?.name ?? ''}
             </div>
           </div>
         )}

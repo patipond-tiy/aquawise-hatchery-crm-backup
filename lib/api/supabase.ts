@@ -17,6 +17,7 @@ import type {
   CustomerDetail,
   CustomerCallback,
   ContinueWatchingItem,
+  CurrentUser,
   Nursery,
   NotificationSettings,
   Prices,
@@ -98,7 +99,7 @@ export async function getNursery(): Promise<Nursery> {
   // without waiting for a generated-types regen.
   const { data } = await (supabase as any)
     .from('nurseries')
-    .select('name, name_en, location, location_en, restock_thresholds')
+    .select('name, name_en, location, location_en, restock_thresholds, created_at')
     .limit(1)
     .single() as { data: {
       name: string;
@@ -106,6 +107,7 @@ export async function getNursery(): Promise<Nursery> {
       location: string | null;
       location_en: string | null;
       restock_thresholds: { now?: number; week?: number; month?: number } | null;
+      created_at: string | null;
     } | null };
   if (!data) return NURSERY;
   const raw = data.restock_thresholds;
@@ -119,6 +121,44 @@ export async function getNursery(): Promise<Nursery> {
       week: raw?.week ?? 14,
       month: raw?.month ?? 45,
     },
+    createdAt: data.created_at ?? undefined,
+  };
+}
+
+/**
+ * The authenticated user for identity surfaces (top-bar, right-rail).
+ * Reads the live Supabase session + the caller's nursery_members role.
+ * Returns null when signed out — callers fall back to a neutral label,
+ * never a hardcoded name literal.
+ */
+export async function getCurrentUser(): Promise<CurrentUser | null> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  const metaName =
+    (typeof meta.full_name === 'string' && meta.full_name.trim()) ||
+    (typeof meta.name === 'string' && meta.name.trim()) ||
+    (typeof meta.display_name === 'string' && meta.display_name.trim()) ||
+    '';
+  const emailLocal = user.email ? user.email.split('@')[0] : '';
+  const displayName = metaName || emailLocal || 'ผู้ใช้';
+
+  const { data: membership } = await supabase
+    .from('nursery_members')
+    .select('role')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single();
+
+  return {
+    id: user.id,
+    displayName,
+    email: user.email ?? null,
+    role: (membership?.role as CurrentUser['role']) ?? null,
   };
 }
 

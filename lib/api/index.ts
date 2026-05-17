@@ -18,6 +18,7 @@ const useMock =
 const impl = useMock ? mock : live;
 
 export const getNursery = impl.getNursery;
+export const getCurrentUser = impl.getCurrentUser;
 export const listCustomers = impl.listCustomers;
 export const getCustomer = impl.getCustomer;
 export const listCallbacks = impl.listCallbacks;

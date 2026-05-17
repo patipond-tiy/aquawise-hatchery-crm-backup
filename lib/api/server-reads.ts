@@ -2,13 +2,17 @@ import 'server-only';
 import type {
   Batch,
   BatchDetail,
+  CurrentUser,
   Customer,
   CustomerDetail,
   CustomerCallback,
+  Nursery,
   PcrStatus,
   Quote,
   QuoteLineItem,
   QuoteStatus,
+  ScorecardSettings,
+  TeamMember,
 } from '@/lib/types';
 
 function mockActive(): boolean {
@@ -464,5 +468,124 @@ export async function getBatchServer(
       : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     buyers,
     pcrResults,
+  };
+}
+
+/**
+ * Server-client variants for identity/brand surfaces prefetched in RSCs
+ * (per MOCK-TO-PROD §7 — never `await` the browser-client `@/lib/api`
+ * facade in a Server Component under live config). Client views still
+ * hydrate then refetch through the browser facade with the same queryKey.
+ */
+export async function getNurseryServer(): Promise<Nursery> {
+  if (mockActive()) {
+    const { getNursery } = await import('@/lib/mock/api');
+    return getNursery();
+  }
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+  const { data } = (await (supabase as never as {
+    from: (t: string) => {
+      select: (c: string) => {
+        limit: (n: number) => { single: () => Promise<{ data: unknown }> };
+      };
+    };
+  })
+    .from('nurseries')
+    .select('name, name_en, location, location_en, restock_thresholds, created_at')
+    .limit(1)
+    .single()) as {
+    data: {
+      name: string;
+      name_en: string | null;
+      location: string | null;
+      location_en: string | null;
+      restock_thresholds: { now?: number; week?: number; month?: number } | null;
+      created_at: string | null;
+    } | null;
+  };
+  if (!data) {
+    const { getNursery } = await import('@/lib/mock/api');
+    return getNursery();
+  }
+  const raw = data.restock_thresholds;
+  return {
+    name: data.name,
+    nameEn: data.name_en ?? data.name,
+    location: data.location ?? '',
+    locationEn: data.location_en ?? '',
+    restockThresholds: {
+      now: raw?.now ?? 0,
+      week: raw?.week ?? 14,
+      month: raw?.month ?? 45,
+    },
+    createdAt: data.created_at ?? undefined,
+  };
+}
+
+export async function getCurrentUserServer(): Promise<CurrentUser | null> {
+  if (mockActive()) {
+    const { getCurrentUser } = await import('@/lib/mock/api');
+    return getCurrentUser();
+  }
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  const metaName =
+    (typeof meta.full_name === 'string' && meta.full_name.trim()) ||
+    (typeof meta.name === 'string' && meta.name.trim()) ||
+    (typeof meta.display_name === 'string' && meta.display_name.trim()) ||
+    '';
+  const emailLocal = user.email ? user.email.split('@')[0] : '';
+  const displayName = metaName || emailLocal || 'ผู้ใช้';
+
+  const { data: membership } = await supabase
+    .from('nursery_members')
+    .select('role')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single();
+
+  return {
+    id: user.id,
+    displayName,
+    email: user.email ?? null,
+    role: (membership?.role as CurrentUser['role']) ?? null,
+  };
+}
+
+export async function listTeamServer(): Promise<TeamMember[]> {
+  const { listTeam } = await import('@/lib/api/supabase');
+  if (mockActive()) {
+    const { listTeam: mockListTeam } = await import('@/lib/mock/api');
+    return mockListTeam();
+  }
+  return listTeam();
+}
+
+export async function getScorecardSettingsServer(): Promise<ScorecardSettings> {
+  if (mockActive()) {
+    const { getScorecardSettings } = await import('@/lib/mock/api');
+    return getScorecardSettings();
+  }
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('scorecard_settings')
+    .select('public, show_d30, show_pcr, show_retention, show_volume, show_reviews')
+    .limit(1)
+    .single();
+  return {
+    public: data?.public ?? true,
+    showD30: data?.show_d30 ?? true,
+    showPCR: data?.show_pcr ?? true,
+    showRetention: data?.show_retention ?? true,
+    showVolume: data?.show_volume ?? true,
+    showReviews: data?.show_reviews ?? false,
   };
 }

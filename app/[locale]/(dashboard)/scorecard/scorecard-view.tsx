@@ -1,21 +1,28 @@
 'use client';
 
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getScorecardSettings } from '@/lib/api';
+import {
+  getScorecardSettings,
+  getNursery,
+  listCustomers,
+  listBatches,
+} from '@/lib/api';
 import { updateScorecardSettingsAction } from './actions';
+import { deriveScorecardStats } from '@/lib/derive/scorecard-stats';
+import { yearsSince } from '@/lib/derive/years-since';
 import type { ScorecardSettings } from '@/lib/types';
 import { V3Card } from '@/components/aw/v3-card';
 import { V3Grid, V3Col } from '@/components/aw/v3-grid';
 import { V3Mark } from '@/components/aw/v3-mark';
 import { Toggle } from '@/components/modals/modal-shell';
 
-const STATS_ROWS = [
-  { label: 'อัตรารอด D30', val: 'สูงกว่ามัธยฐาน', accent: 'good' },
-  { label: 'ผ่าน PCR (4 โรค)', val: '100%', accent: 'good' },
-  { label: 'ฟาร์มที่กลับมาซื้อ', val: '78%', accent: 'good' },
-  { label: 'เฉลี่ย 12 ล็อต / 47 ฟาร์ม', val: '', accent: 'soft' },
-] as const;
+const D30_STATUS_LABEL: Record<string, string> = {
+  above: 'สูงกว่ามัธยฐาน',
+  at: 'เท่ามัธยฐาน',
+  below: 'ต่ำกว่ามัธยฐาน',
+};
 
 const CONTROLS = [
   {
@@ -51,6 +58,43 @@ export function ScorecardView() {
     queryKey: ['scorecard'],
     queryFn: getScorecardSettings,
   });
+  const { data: nursery } = useQuery({
+    queryKey: ['nursery'],
+    queryFn: getNursery,
+  });
+  const { data: customers = [] } = useQuery({
+    queryKey: ['customers'],
+    queryFn: listCustomers,
+  });
+  const { data: batches = [] } = useQuery({
+    queryKey: ['batches'],
+    queryFn: () => listBatches(),
+  });
+  const [now] = useState(() => Date.now());
+  const stats = deriveScorecardStats(customers, batches);
+  const yearsOpen = yearsSince(nursery?.createdAt, now);
+  const statsRows: { label: string; val: string; accent: string }[] = [
+    {
+      label: 'อัตรารอด D30',
+      val: stats.d30Status ? D30_STATUS_LABEL[stats.d30Status] : '—',
+      accent: stats.d30Status === 'below' ? 'soft' : 'good',
+    },
+    {
+      label: 'ผ่าน PCR',
+      val: stats.pcrPassPct != null ? `${stats.pcrPassPct}%` : '—',
+      accent: 'good',
+    },
+    {
+      label: 'ฟาร์มที่กลับมาซื้อ',
+      val: stats.retentionPct != null ? `${stats.retentionPct}%` : '—',
+      accent: 'good',
+    },
+    {
+      label: `รวม ${stats.lotCount} ล็อต / ${stats.farmCount} ฟาร์ม`,
+      val: '',
+      accent: 'soft',
+    },
+  ];
   const mutation = useMutation({
     mutationFn: updateScorecardSettingsAction,
     onMutate: async (patch) => {
@@ -132,10 +176,15 @@ export function ScorecardView() {
                   letterSpacing: '-0.01em',
                 }}
               >
-                ฟ้าใส แฮทเชอรี่
+                {nursery?.name ?? ''}
               </h2>
               <div style={{ fontSize: 13, color: 'var(--color-ink-3)' }}>
-                สมุทรสาคร · เปิดมาแล้ว 8 ปี
+                {[
+                  nursery?.location,
+                  yearsOpen != null ? `เปิดมาแล้ว ${yearsOpen} ปี` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
               </div>
 
               <div
@@ -151,7 +200,7 @@ export function ScorecardView() {
                 <div className="eyebrow" style={{ marginBottom: 14 }}>
                   ผลงาน 6 เดือนล่าสุด
                 </div>
-                {STATS_ROWS.map((r, i) => (
+                {statsRows.map((r, i) => (
                   <div
                     key={i}
                     style={{
@@ -159,7 +208,7 @@ export function ScorecardView() {
                       justifyContent: 'space-between',
                       padding: '10px 0',
                       borderBottom:
-                        i < STATS_ROWS.length - 1
+                        i < statsRows.length - 1
                           ? '1px solid var(--color-line)'
                           : 0,
                     }}

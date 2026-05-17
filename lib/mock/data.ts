@@ -2,6 +2,7 @@ import type {
   Alert,
   Batch,
   Customer,
+  CurrentUser,
   Nursery,
   NotificationSettings,
   Prices,
@@ -15,6 +16,17 @@ export const NURSERY: Nursery = {
   location: 'สมุทรสาคร',
   locationEn: 'Samut Sakhon',
   restockThresholds: { now: 0, week: 14, month: 45 },
+  createdAt: '2018-01-01T00:00:00.000Z',
+};
+
+// Mock authenticated user — the dev-mode stand-in for the live Supabase
+// session. Identity surfaces read this via getCurrentUser(); they must
+// never embed an inline name literal.
+export const CURRENT_USER: CurrentUser = {
+  id: 'mock-user-owner',
+  displayName: 'สุเทพ ฟ้าใส',
+  email: 'owner@fasai-nursery.example',
+  role: 'owner',
 };
 
 export const CUSTOMERS: Customer[] = [

@@ -114,6 +114,12 @@
   "user": {
     "greeting": "Hello, {name}",
     "owner": "Farm Owner",
+    "roles": {
+      "owner": "Owner",
+      "counter_staff": "Counter Staff",
+      "lab_tech": "Lab Technician",
+      "auditor": "Auditor"
+    },
     "your_stats": "Your stats",
     "your_team": "Your team",
     "follow_ups": "Follow-ups"

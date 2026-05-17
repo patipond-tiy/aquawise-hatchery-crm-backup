@@ -1,14 +1,31 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
+import { getCurrentUser } from '@/lib/api';
 import { Icon } from '@/components/aw/icon';
 import { V3Avatar } from '@/components/aw/v3-avatar';
 import { useSidebar } from '@/lib/store/sidebar';
+
+const ROLE_LABEL_KEY: Record<string, string> = {
+  owner: 'user.roles.owner',
+  counter_staff: 'user.roles.counter_staff',
+  lab_tech: 'user.roles.lab_tech',
+  auditor: 'user.roles.auditor',
+};
 
 export function TopBar() {
   const t = useTranslations();
   const collapsed = useSidebar((s) => s.collapsed);
   const toggle = useSidebar((s) => s.toggle);
+  const { data: user } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: getCurrentUser,
+  });
+  const displayName = user?.displayName ?? '';
+  const roleLabel = user?.role
+    ? t(ROLE_LABEL_KEY[user.role] ?? 'user.owner')
+    : t('user.owner');
 
   return (
     <header
@@ -88,11 +105,13 @@ export function TopBar() {
       <div className="w-px h-[26px] mx-1" style={{ background: 'var(--color-line-2)' }} />
 
       <div className="flex items-center gap-2.5">
-        <V3Avatar name="สุเทพ" tone="lav" size={36} />
+        <V3Avatar name={displayName || '·'} tone="lav" size={36} />
         <div className="whitespace-nowrap">
-          <div className="text-[15px] font-bold">คุณสุเทพ</div>
+          <div className="text-[15px] font-bold">
+            {displayName || ' '}
+          </div>
           <div className="text-xs" style={{ color: 'var(--color-ink-3)' }}>
-            {t('user.owner')}
+            {roleLabel}
           </div>
         </div>
       </div>

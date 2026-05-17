@@ -1,6 +1,7 @@
 import {
   ALERTS,
   BATCHES,
+  CURRENT_USER,
   CUSTOMERS,
   DEFAULT_NOTIFICATIONS,
   DEFAULT_SCORECARD,
@@ -12,6 +13,7 @@ import type {
   Alert,
   Batch,
   BatchDetail,
+  CurrentUser,
   Customer,
   CustomerDetail,
   CustomerCallback,
@@ -40,6 +42,10 @@ const delay = <T>(value: T, ms = 80): Promise<T> =>
 
 export async function getNursery(): Promise<Nursery> {
   return delay(NURSERY);
+}
+
+export async function getCurrentUser(): Promise<CurrentUser | null> {
+  return delay(CURRENT_USER);
 }
 
 export async function listCustomers(): Promise<Customer[]> {
