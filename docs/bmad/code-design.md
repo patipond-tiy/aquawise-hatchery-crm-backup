@@ -1472,7 +1472,7 @@ A reviewer pastes this into the PR thread and checks each item. The author canno
 
 ### RBAC + auth
 - [ ] Every new server action does the full sequence: `isMockMode()` → `requireActiveSubscription()` → zod parse → `getUser()` → `nursery_members` lookup → `can(role, action)` → work → revalidate.
-- [ ] No code branches on role strings (§9).
+- [ ] No code branches on role strings (§9). *(Story S9: `pnpm lint` now auto-catches `getSession`, `dangerouslySetInnerHTML`, and role-string equality — the three §18 ESLint bans catch most violations before review.)*
 - [ ] No server action accepts `nursery_id` / `user_id` / `role` as a parameter.
 - [ ] If a new action: matrix in `lib/rbac.ts` and `architecture.md` §4 both updated.
 
@@ -1589,6 +1589,9 @@ Why bad: the matrix drifts. Adding a role requires touching every branch.
 if (can(member.role, 'customer:write')) { ... }
 ```
 
+> **Enforced via ESLint as of story S9** — `no-restricted-syntax` fails
+> `pnpm lint` on `<x>.role === '<role>'` / `!==` outside `lib/rbac.ts`.
+
 ### C. `getSession()` for authorization
 
 ```typescript
@@ -1604,6 +1607,10 @@ Why bad: `getSession()` only decodes the JWT locally. A tampered cookie passes t
 const { data: { user } } = await supabase.auth.getUser();  // server round-trip
 if (user) { /* trust */ }
 ```
+
+> **Enforced via ESLint as of story S9** — `no-restricted-syntax` fails
+> `pnpm lint` on any `.getSession()` call except in
+> `lib/supabase/middleware.ts` (the single sanctioned cookie-refresh site).
 
 ### D. Hardcoded strings in JSX
 

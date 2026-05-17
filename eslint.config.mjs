@@ -22,6 +22,50 @@ const config = [
       "react-hooks/set-state-in-effect": "warn",
     },
   },
+  {
+    // Story S9 — shift §18 anti-pattern enforcement left (lint-time, not
+    // review-time). All three are syntactic `no-restricted-syntax` selectors
+    // + the built-in react/no-danger; no custom plugin needed. Relies on S6
+    // (role-string → can()) having landed, so the codebase passes clean.
+    rules: {
+      // §18 — never render raw HTML (XSS). React escapes by default.
+      "react/no-danger": "error",
+      "no-restricted-syntax": [
+        "error",
+        {
+          // §18(C) — getSession() does not validate the JWT. Authorization
+          // decisions must use getUser() (verifies server-side).
+          selector:
+            "CallExpression[callee.property.name='getSession']",
+          message:
+            "Do not call supabase.auth.getSession() for authorization. Use getUser() — it validates the JWT server-side. See code-design.md §18(C) and security.md §9.",
+        },
+        {
+          // §18(B) — no role-string branching; use can(role, action).
+          // Matches `<x>.role === 'owner'` / `!==` for any of the 4 roles
+          // (either operand order).
+          selector:
+            "BinaryExpression[operator=/^(===|!==)$/] > MemberExpression[property.name='role'] ~ Literal[value=/^(owner|counter_staff|lab_tech|auditor)$/]",
+          message:
+            "Do not branch on role strings. Use can(role, action) from lib/rbac. See code-design.md §9 and §18(B).",
+        },
+      ],
+    },
+  },
+  {
+    // Forward-compatibility guard: the auth cookie-refresh middleware is the
+    // single sanctioned place a getSession() call could legitimately live
+    // (it currently uses getUser()). Suppress the getSession ban here so the
+    // file is not blanket-disabled in future. (S9 Task 4)
+    files: ["lib/supabase/middleware.ts"],
+    rules: { "no-restricted-syntax": "off" },
+  },
+  {
+    // lib/rbac.ts IS the RBAC matrix — role literals are the source of
+    // truth here, not an anti-pattern. (S9 Task 4)
+    files: ["lib/rbac.ts"],
+    rules: { "no-restricted-syntax": "off" },
+  },
 ];
 
 export default config;
