@@ -18,6 +18,32 @@
           "too_large": "The file is too large. Please use a file smaller than 2 MB."
         }
       }
+    },
+    "privacy": {
+      "title": "Privacy & Personal Data",
+      "intro": "Under Thailand's PDPA you may request a copy of your personal data and request its deletion. Financial records are retained as required by law.",
+      "working": "Working",
+      "error": "Something went wrong. Please try again later.",
+      "rate_limited": "You have reached the request limit for the last 24 hours. Please try again tomorrow.",
+      "export": {
+        "title": "Request a copy of your data",
+        "desc": "Download all personal data the system holds about your account as a JSON file.",
+        "button": "Download my data",
+        "done": "Your data file is ready.",
+        "empty": "This system holds no personal data of yours to export."
+      },
+      "delete": {
+        "title": "Request data deletion",
+        "desc": "Your personal data will be anonymized. Financial records are retained by law. This action cannot be undone.",
+        "button": "Request deletion of my data",
+        "done": "Your data has been anonymized. You will be signed out.",
+        "confirm": {
+          "title": "Confirm personal data deletion",
+          "body": "Once confirmed, your personal data will be anonymized and you will be signed out. Financial records will be retained as required by law. This action cannot be undone.",
+          "confirm": "Confirm deletion",
+          "cancel": "Cancel"
+        }
+      }
     }
   },
   "nav": {

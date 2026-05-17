@@ -859,6 +859,27 @@ export type Database = {
           },
         ];
       };
+      dsr_requests: {
+        Row: {
+          created_at: string;
+          id: string;
+          kind: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          kind: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       line_message_logs: {
         Row: {
           body: Json | null;
@@ -1553,6 +1574,8 @@ export type Database = {
         Returns: string;
       };
       current_user_nursery_ids: { Args: never; Returns: string[] };
+      dsr_anonymize_user: { Args: { p_user: string }; Returns: Json };
+      dsr_rate_check: { Args: { p_kind: string }; Returns: boolean };
       mint_batch_code: { Args: never; Returns: string };
       run_d30_dip_alert_scan: {
         Args: { p_nursery_id: string };
