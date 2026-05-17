@@ -62,7 +62,7 @@ insert into public.alerts (nursery_id, sev, title)
   values (:'na', 'high', 'แจ้งเตือน A');
 insert into public.customer_callbacks
     (nursery_id, customer_id, scheduled_for, channel, created_by)
-  values (:'na', :'ca', now() + interval '1 day', 'phone', :'ua');
+  values (:'na', :'ca', now() + interval '1 day', 'line', :'ua');
 insert into public.quotes (nursery_id, customer_id, items)
   values (:'na', :'ca', '[]'::jsonb);
 insert into public.prices (nursery_id, size_label, unit_price)
