@@ -246,6 +246,7 @@ export async function addCustomer(input: AddCustomerInput): Promise<Customer> {
 export type PcrResultInput = { disease: string; status: string };
 
 export type AddBatchInput = Pick<Batch, 'source' | 'plProduced' | 'date'> & {
+  species?: 'vannamei' | 'monodon';
   pcrResults?: PcrResultInput[];
   pcrLab?: string;
   pcrFileUrl?: string;

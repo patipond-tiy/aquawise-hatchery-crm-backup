@@ -198,6 +198,13 @@ Reload — Settings → Billing tab and `BillingGate` redirects react accordingl
 | `STRIPE_WEBHOOK_SECRET`          | live billing                 | verifies `Stripe-Signature` |
 | `STRIPE_PRO_PRICE_ID`            | live billing                 | Pro plan price id |
 | `NEXT_PUBLIC_APP_URL`            | live billing                 | Checkout success/cancel + Portal return URLs |
+| `CRM_JWT_PUBLIC_KEY`             | Epic K (K2/K3/K5)            | ES256 PEM — verifies the line-bot's read/claim bearer (aud `hatchery-crm`) |
+| `CRM_JWT_PRIVATE_KEY`            | Epic K (K2 token-refresh)    | ES256 PEM — signs the read/claim JWT issued by `/api/v1/auth/token` |
+| `CRM_WEBHOOK_JWT_PRIVATE_KEY`    | Epic K (K4)                  | ES256 PEM — signs CRM→bot batch-warning webhooks (aud `line-bot-webhook`, distinct key pair) |
+| `CRM_WEBHOOK_JWT_PUBLIC_KEY`     | Epic K (K4 consumer)         | ES256 PEM — the line-bot verifies webhooks with this |
+| `LINE_BOT_CLIENT_ID/SECRET`      | Epic K (K2 token-refresh)    | client-credentials the bot presents at boot |
+| `LINE_BOT_BASE_URL`              | Epic K (K4)                  | webhook target base (`{base}/api/crm-events/batch-warning`) |
+| `CRON_SECRET`                    | Epic K (K4 cron)             | Bearer secret for `app/api/cron/deliver-crm-events` (timing-safe) |
 
 ## Working with the umbrella
 

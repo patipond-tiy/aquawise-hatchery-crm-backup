@@ -65,5 +65,32 @@
     "pro_features": "Unlimited customers|Unlimited batches|Disease alerts + LINE messaging|PCR certificates + public scorecard|Up to 5 team members",
     "checkout_success": "✓ Subscribed — welcome aboard!",
     "checkout_canceled": "Checkout canceled — you can try again any time"
+  },
+  "batches": {
+    "warning": {
+      "button": "Publish warning",
+      "modal": {
+        "title": "Publish warning for {code}"
+      },
+      "field": {
+        "severity": "Severity",
+        "title": "Title",
+        "body": "Body",
+        "action": "Action"
+      },
+      "severity": {
+        "info": "Info",
+        "warning": "Warning",
+        "critical": "Critical"
+      },
+      "toast": {
+        "published": "Warning for {code} published — affected farms will be notified",
+        "queued": "Warning for {code} queued; system will deliver within a few minutes"
+      }
+    },
+    "species": {
+      "vannamei": "Whiteleg (vannamei)",
+      "monodon": "Black tiger (monodon)"
+    }
   }
 }

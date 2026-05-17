@@ -3,9 +3,12 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { addBatchAction } from '@/app/[locale]/(dashboard)/batches/actions';
 import { useModal } from '@/lib/store/modal';
 import { ModalShell, Field } from './modal-shell';
+
+type Species = 'vannamei' | 'monodon';
 
 const STEPS = ['ข้อมูลล็อต', 'ผลตรวจ PCR', 'ยืนยัน'] as const;
 const SOURCES = [
@@ -22,7 +25,9 @@ type Result = 'negative' | 'positive';
 export function AddBatchModal() {
   const close = useModal((s) => s.close);
   const qc = useQueryClient();
+  const tSpecies = useTranslations('batches.species');
   const [step, setStep] = useState(1);
+  const [species, setSpecies] = useState<Species>('vannamei');
   const [f, setF] = useState({
     source: SOURCES[0],
     plProduced: 2_000_000,
@@ -43,6 +48,7 @@ export function AddBatchModal() {
         source: f.source,
         plProduced: f.plProduced,
         date: f.date,
+        species,
         pcrResults: DISEASES.map((d) => ({
           disease: d,
           status: results[d],
@@ -139,6 +145,16 @@ export function AddBatchModal() {
                   {s}
                 </option>
               ))}
+            </select>
+          </Field>
+          <Field label="ชนิดสัตว์น้ำ">
+            <select
+              className="aw3-input"
+              value={species}
+              onChange={(e) => setSpecies(e.target.value as Species)}
+            >
+              <option value="vannamei">{tSpecies('vannamei')}</option>
+              <option value="monodon">{tSpecies('monodon')}</option>
             </select>
           </Field>
           <Field label="วันที่ลงไข่">

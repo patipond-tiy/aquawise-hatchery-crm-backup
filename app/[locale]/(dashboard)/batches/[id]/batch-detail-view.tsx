@@ -207,6 +207,13 @@ export function BatchDetailView({ id }: { id: string }) {
             </button>
             <button
               type="button"
+              className="aw3-btn aw3-btn-soft"
+              onClick={() => openModal('publishWarning', { batch: b })}
+            >
+              แจ้งเตือนล็อตนี้
+            </button>
+            <button
+              type="button"
               className="aw3-btn aw3-btn-hero"
               onClick={() => openModal('cert', { batch: b })}
             >

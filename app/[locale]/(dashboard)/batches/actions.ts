@@ -1,8 +1,10 @@
 'use server';
 
+import { randomUUID } from 'node:crypto';
 import type { Batch } from '@/lib/types';
 import type { Json } from '@/lib/database.types';
 import type { AddBatchInput } from '@/lib/mock/api';
+import type { BatchWarningEvent } from '@/lib/aquawise-core/contract-types';
 import { isMockMode } from '@/lib/utils/mock-mode';
 import { requireActiveSubscription } from '@/lib/billing/guard';
 import { currentNurseryScope } from '@/lib/auth';
@@ -62,6 +64,7 @@ export async function addBatchAction(input: AddBatchInput): Promise<Batch> {
       pl_produced: input.plProduced,
       date: input.date,
       pcr,
+      species: input.species ?? 'vannamei',
     })
     .select('id, source, pl_produced, pl_sold, date, pcr, mean_d30, dist')
     .single();
@@ -291,4 +294,112 @@ export async function sendCertificateAction(
   );
 
   return { enqueued };
+}
+
+export type WarningSeverity = 'info' | 'warning' | 'critical';
+
+export interface PublishWarningResult {
+  correlationId: string;
+  delivered: boolean;
+}
+
+/**
+ * K4 — publish a batch-warning to the LINE bot (contract §7). Inserts a
+ * `crm_event_log` row (idempotency key = fresh correlation_id, UNIQUE) and,
+ * for `critical`, attempts inline delivery (≤3s) before falling to the retry
+ * cron; `warning`/`info` enqueue only. RBAC: `alert:close` (owner /
+ * counter_staff). Service-role client — `crm_event_log` INSERT is
+ * service-role only (no RLS write policy).
+ */
+export async function publishBatchWarning(
+  batchId: string,
+  severity: WarningSeverity,
+  titleTh: string,
+  bodyTh: string,
+  actionTh: string
+): Promise<PublishWarningResult> {
+  const correlationId = randomUUID();
+
+  if (isMockMode()) {
+    // Mock mode: no real outbound. Caller still gets a correlation id so the
+    // UI flow works in dev click-through.
+    return { correlationId, delivered: false };
+  }
+
+  await requireActiveSubscription();
+
+  const scope = await currentNurseryScope();
+  if (!scope) throw new Error('No nursery scope for current user');
+  if (!can(scope.role, 'alert:close')) {
+    throw new Error('บทบาทของคุณไม่มีสิทธิ์ส่งการแจ้งเตือนล็อต');
+  }
+  if (!titleTh.trim() || !bodyTh.trim() || !actionTh.trim()) {
+    throw new Error('กรุณากรอกหัวข้อ รายละเอียด และคำแนะนำให้ครบ');
+  }
+
+  const { createServiceClient } = await import('@/lib/supabase/server');
+  const supabase = await createServiceClient();
+
+  const { data: batch } = await supabase
+    .from('batches')
+    .select('id, batch_code, nursery_id')
+    .eq('id', batchId)
+    .eq('nursery_id', scope.nurseryId)
+    .maybeSingle();
+  if (!batch) throw new Error('ไม่พบล็อตนี้');
+
+  const postedAt = new Date().toISOString();
+  const payload: BatchWarningEvent = {
+    batch_code: batch.batch_code,
+    severity,
+    title_th: titleTh,
+    body_th: bodyTh,
+    action_th: actionTh,
+    posted_at: postedAt,
+    correlation_id: correlationId,
+  };
+
+  const { error: insErr } = await supabase.from('crm_event_log').insert({
+    correlation_id: correlationId,
+    event_type: 'batch_warning',
+    batch_id: batch.id,
+    severity,
+    payload: payload as unknown as Json,
+    posted_at: postedAt,
+    nursery_id: batch.nursery_id,
+  });
+  if (insErr) throw new Error(insErr.message);
+
+  let delivered = false;
+  if (severity === 'critical') {
+    const { deliverBatchWarning } = await import(
+      '@/lib/line-bot/webhook-client'
+    );
+    const result = await deliverBatchWarning(
+      { correlation_id: correlationId, batch_code: batch.batch_code, severity, payload },
+      3000
+    );
+    if (result.ok) {
+      delivered = true;
+      await supabase
+        .from('crm_event_log')
+        .update({ delivered_at: new Date().toISOString() })
+        .eq('correlation_id', correlationId);
+    } else {
+      await supabase
+        .from('crm_event_log')
+        .update({ attempts: 1, last_error: result.error ?? 'inline-failed' })
+        .eq('correlation_id', correlationId);
+    }
+  }
+
+  await writeAuditLog('batch_warning_published', {
+    batch_id: batch.id,
+    batch_code: batch.batch_code,
+    severity,
+    correlation_id: correlationId,
+    delivered,
+  } as Json);
+
+  return { correlationId, delivered };
 }

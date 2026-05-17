@@ -12,7 +12,8 @@ export type ModalKind =
   | 'invite'
   | 'closeAlert'
   | 'schedule'
-  | 'broadcastConfirm';
+  | 'broadcastConfirm'
+  | 'publishWarning';
 
 export type BroadcastFilterId = 'now' | 'week' | 'month' | 'later';
 
