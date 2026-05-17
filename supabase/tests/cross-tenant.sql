@@ -45,8 +45,11 @@ insert into public.nursery_members (nursery_id, user_id, role) values
 -- one nursery-A row per tenant-scoped table
 insert into public.customers (id, nursery_id, name, farm)
   values (:'ca', :'na', 'ลูกค้า A', 'ฟาร์ม A');
-insert into public.scorecard_settings (nursery_id) values (:'na')
-  on conflict (nursery_id) do nothing;
+-- Seed with public=false so the nurseries_public_scorecard_read policy (028)
+-- does not create a legitimate cross-tenant read path for nursery A.
+-- The isolation test verifies member-scope isolation, not the public-scorecard feature.
+insert into public.scorecard_settings (nursery_id, public) values (:'na', false)
+  on conflict (nursery_id) do update set public = false;
 insert into public.notification_settings (nursery_id) values (:'na')
   on conflict (nursery_id) do nothing;
 insert into public.nursery_brand (nursery_id, display_name_th, display_name_en)
