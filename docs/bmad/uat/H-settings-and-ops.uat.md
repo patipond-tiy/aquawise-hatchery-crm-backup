@@ -356,3 +356,11 @@ Or: Manual — `USE_MOCK=false`.
 **Pass/Fail:** PASS if the action is rejected and the nursery A event is unchanged. FAIL if nursery B owner can modify a nursery A event.
 
 ---
+
+## UAT Run — 2026-05-17 (Block H)
+
+> Executed via Playwright MCP (desktop 1440x900) on live `USE_MOCK=false` (supabase-hatchery), fixture `e2e-test@example.com` (owner) + `qa-uat-probe@gmail.com` (counter_staff), nursery `705cc5e2-423d-4a98-95e8-cdc95c7672f6`. Results: `docs/qa/uat-run/results/nursery-H.json`; screenshots: `docs/qa/uat-run/screenshots/nursery-H/`.
+
+- **38 rows: 34 PASS, 4 BLOCKED-EXTERNAL, 0 FAIL.**
+- All implemented behaviors PASS. BLOCKED-EXTERNAL: US-H3-1b/H3-2b (Stripe Checkout/Portal redirect = documented D-004 residual), US-H3-4 (6 webhook event types need Stripe CLI), US-H3-4c (400-on-bad-sig needs external STRIPE_WEBHOOK_SECRET).
+- Green gate post-fix: `pnpm typecheck` clean, `pnpm lint` clean, `pnpm test` 283 passed (baseline 277, no regression). Fixes shipped in nursery-crm@main (commit 5975053). Seeded DB rows restored to pre-run baseline.

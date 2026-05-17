@@ -215,3 +215,11 @@ Manual — `USE_MOCK=false` (requires the "now" group to genuinely be empty; adj
 **Pass/Fail:** PASS if the toast indicates zero farms and no DB rows are created. FAIL if any `line_outbound_events` row is inserted when the resolved recipient list is empty.
 
 ---
+
+## UAT Run — 2026-05-17 (Block D)
+
+> Executed via Playwright MCP (desktop 1440x900) on live `USE_MOCK=false` (supabase-hatchery), fixture `e2e-test@example.com` (owner) + `qa-uat-probe@gmail.com` (counter_staff), nursery `705cc5e2-423d-4a98-95e8-cdc95c7672f6`. Results: `docs/qa/uat-run/results/nursery-D.json`; screenshots: `docs/qa/uat-run/screenshots/nursery-D/`.
+
+- **27 rows: 26 PASS, 1 BLOCKED-EXTERNAL, 0 FAIL.**
+- US-D2-5 (quote status machine — unimplemented; FIXED: updateQuoteStatus action + Quotes-tab controls + test) and NEG-D3-role (broadcast button rendered for non-owner; FIXED: can(role,broadcast:write) UI gate + test). BLOCKED-EXTERNAL: US-D2-4 (quote Flex render/OA deep-link is the bot-worker cross-service residual).
+- Green gate post-fix: `pnpm typecheck` clean, `pnpm lint` clean, `pnpm test` 283 passed (baseline 277, no regression). Fixes shipped in nursery-crm@main (commit 5975053). Seeded DB rows restored to pre-run baseline.

@@ -212,3 +212,11 @@ Or: Manual (mock mode). Switch mock session role between `counter_staff` and `au
 **Pass/Fail:** PASS if `counter_staff` can enqueue and `auditor` is blocked. FAIL if `auditor` successfully enqueues, or if `counter_staff` is incorrectly blocked.
 
 ---
+
+## UAT Run — 2026-05-17 (Block E)
+
+> Executed via Playwright MCP (desktop 1440x900) on live `USE_MOCK=false` (supabase-hatchery), fixture `e2e-test@example.com` (owner) + `qa-uat-probe@gmail.com` (counter_staff), nursery `705cc5e2-423d-4a98-95e8-cdc95c7672f6`. Results: `docs/qa/uat-run/results/nursery-E.json`; screenshots: `docs/qa/uat-run/screenshots/nursery-E/`.
+
+- **28 rows: 28 PASS, 0 BLOCKED-EXTERNAL, 0 FAIL.**
+- All PASS. D30 dip alerts verified via run_d30_dip_alert_scan (medium/high/severe/dedupe). Close + notify-farms fan-out + idempotency (alert dedupe index) DB-verified.
+- Green gate post-fix: `pnpm typecheck` clean, `pnpm lint` clean, `pnpm test` 283 passed (baseline 277, no regression). Fixes shipped in nursery-crm@main (commit 5975053). Seeded DB rows restored to pre-run baseline.

@@ -257,3 +257,11 @@ Or: Manual.
 **Pass/Fail:** PASS if HTTP 401 is returned without an auth header. FAIL if the endpoint processes any queries without authentication.
 
 ---
+
+## UAT Run — 2026-05-17 (Block G)
+
+> Executed via Playwright MCP (desktop 1440x900) on live `USE_MOCK=false` (supabase-hatchery), fixture `e2e-test@example.com` (owner) + `qa-uat-probe@gmail.com` (counter_staff), nursery `705cc5e2-423d-4a98-95e8-cdc95c7672f6`. Results: `docs/qa/uat-run/results/nursery-G.json`; screenshots: `docs/qa/uat-run/screenshots/nursery-G/`.
+
+- **38 rows: 36 PASS, 2 BLOCKED-EXTERNAL, 0 FAIL.**
+- US-G4-mockmode (cron lacked the story-mandated isMockMode guard; FIXED: guard + skip log + test). BLOCKED-EXTERNAL: US-G3p-2 (co-branded Flex render/delivery) and US-G3p-6 (real inbound LINE reply ingestion) — bot-worker cross-service residuals.
+- Green gate post-fix: `pnpm typecheck` clean, `pnpm lint` clean, `pnpm test` 283 passed (baseline 277, no regression). Fixes shipped in nursery-crm@main (commit 5975053). Seeded DB rows restored to pre-run baseline.
