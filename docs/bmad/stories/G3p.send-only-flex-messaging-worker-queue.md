@@ -205,6 +205,6 @@ pnpm lint
 
 ## Completion
 
-- Status: done · 2026-05-17 · commit `9fabae4`
+- Status: done · 2026-05-17 · commit `7e2018b`
 - Real worker + queue. `lib/line/templates.ts` (typed enum + validatePayload), `lib/line/queue.ts` `enqueueLineEvent()` (single insert path, billing-aware callers, NULL line_id fail-closed, 23505 dedupe) + `drainOutboundQueue()` real status machine (claim→toggle gate→quiet-hours→retry/backoff→dead-letter). `app/api/line/worker/route.ts` CRON_SECRET timing-safe. Activity panel + listLineEvents facade/server-read. The LINE push itself is the ONLY stub (no channel token in nursery-crm — bot-worker delivers); events revert to pending with honest last_error, never faked sent. Live: drained 7 seeded events, all processed (last_error set, status pending, re-processable); 401 unauth.
 - Green: pnpm typecheck + lint clean; pnpm test 177 passed (floor 135, +42, 0 regressions).
