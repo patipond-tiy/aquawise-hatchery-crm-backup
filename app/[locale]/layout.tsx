@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -63,10 +64,18 @@ export default async function LocaleLayout({
   }
   setRequestLocale(locale);
 
+  // Story S4 — read the per-request CSP nonce set by proxy.ts. Next.js
+  // auto-stamps its own framework scripts from the middleware CSP header;
+  // we surface the nonce on <html data-nonce> so any future inline <Script>
+  // / third-party embed in this tree has an explicit, documented source for
+  // `nonce={…}` (script-src is 'nonce-…' 'strict-dynamic', no unsafe-inline).
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
+
   return (
     <html
       lang={locale}
       className={`${inter.variable} ${jakarta.variable} ${noto.variable} ${jetbrains.variable}`}
+      data-nonce={nonce}
       suppressHydrationWarning
     >
       <body

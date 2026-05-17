@@ -1,27 +1,75 @@
 import 'server-only';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
+import {
+  detectImageType,
+  contentTypeFor,
+  sanitizeExtension,
+  hasUnsafeFilename,
+  MAX_LOGO_BYTES,
+} from '@/lib/supabase/file-validation';
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const BUCKET = 'nursery-logos';
 const PCR_BUCKET = 'pcr-certificates';
+
+/**
+ * Stable error codes for the logo upload. The settings UI maps these to
+ * localized strings (Story S3 AC#6). The human-readable strings are also
+ * stable so server logs / tests can assert on them.
+ */
+export type LogoUploadError =
+  | 'too_large'
+  | 'bad_filename'
+  | 'invalid_image';
+
+const ERROR_MESSAGE: Record<LogoUploadError, string> = {
+  too_large: 'File too large',
+  bad_filename: 'Bad filename',
+  invalid_image: 'Invalid image',
+};
 
 export async function uploadNurseryLogo(
   nurseryId: string,
   file: File
-): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return { ok: false, error: `Invalid file type: ${file.type}. Allowed: jpeg, png, webp, gif` };
+): Promise<
+  | { ok: true; url: string }
+  | { ok: false; error: string; code: LogoUploadError }
+> {
+  // Story S3 — all checks run SERVER-SIDE before the upload begins. Client
+  // checks can be bypassed; `file.type` is attacker-controlled and never
+  // trusted (we derive Content-Type from the detected magic bytes instead).
+
+  // AC#3 — size cap (before any byte read / network call)
+  if (file.size > MAX_LOGO_BYTES) {
+    return { ok: false, error: ERROR_MESSAGE.too_large, code: 'too_large' };
+  }
+
+  // AC#2 — reject path-traversal / control-char filenames outright
+  if (hasUnsafeFilename(file.name)) {
+    return { ok: false, error: ERROR_MESSAGE.bad_filename, code: 'bad_filename' };
+  }
+  const safeExt = sanitizeExtension(file.name);
+  if (!safeExt) {
+    return { ok: false, error: ERROR_MESSAGE.bad_filename, code: 'bad_filename' };
+  }
+
+  // AC#1/#4 — magic-byte detection; Content-Type derived from detection,
+  // never from the client-asserted file.type
+  const detected = await detectImageType(file);
+  if (!detected) {
+    return { ok: false, error: ERROR_MESSAGE.invalid_image, code: 'invalid_image' };
   }
 
   const supabase = await createClient();
-  const ext = file.name.split('.').pop() ?? 'jpg';
-  const path = `${nurseryId}/logo.${ext}`;
+  const path = `${nurseryId}/logo.${safeExt}`;
 
   const { error } = await supabase.storage
     .from(BUCKET)
-    .upload(path, file, { upsert: true, contentType: file.type });
+    .upload(path, file, {
+      upsert: true,
+      contentType: contentTypeFor(detected),
+    });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: error.message, code: 'invalid_image' };
 
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
   return { ok: true, url: data.publicUrl };

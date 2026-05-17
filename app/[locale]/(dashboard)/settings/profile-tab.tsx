@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { getNursery } from '@/lib/api';
 import type { Nursery } from '@/lib/types';
 import { V3Card } from '@/components/aw/v3-card';
@@ -26,7 +27,14 @@ export function Profile() {
   );
 }
 
+const UPLOAD_ERROR_KEY: Record<string, string> = {
+  too_large: 'Settings.profile.upload.errors.too_large',
+  bad_filename: 'Settings.profile.upload.errors.bad_filename',
+  invalid_image: 'Settings.profile.upload.errors.invalid_image',
+};
+
 function ProfileForm({ nursery }: { nursery: Nursery | null }) {
+  const t = useTranslations();
   const [name, setName] = useState(nursery?.name ?? '');
   const [nameEn, setNameEn] = useState(nursery?.nameEn ?? '');
   const [location, setLocation] = useState(nursery?.location ?? '');
@@ -56,7 +64,11 @@ function ProfileForm({ nursery }: { nursery: Nursery | null }) {
     if (result.ok) {
       toast.success('บันทึกสำเร็จ');
     } else {
-      toast.error(result.error);
+      // S3 AC#6 — friendly localized message per upload-rejection class.
+      const key = result.uploadCode
+        ? UPLOAD_ERROR_KEY[result.uploadCode]
+        : undefined;
+      toast.error(key ? t(key) : result.error);
     }
   };
 

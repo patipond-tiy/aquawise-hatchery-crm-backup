@@ -3,6 +3,23 @@
     "title": "AquaWise Nursery",
     "tagline": "Nursery management for SEA shrimp & fish farms"
   },
+  "Login": {
+    "captcha": {
+      "label": "Security verification",
+      "required": "Please confirm you are not a bot before continuing"
+    }
+  },
+  "Settings": {
+    "profile": {
+      "upload": {
+        "errors": {
+          "invalid_image": "That file is not a supported image. Please use a JPEG, PNG, WebP or GIF file.",
+          "bad_filename": "The filename is not valid. Please rename the file and try again.",
+          "too_large": "The file is too large. Please use a file smaller than 2 MB."
+        }
+      }
+    }
+  },
   "nav": {
     "dashboard": "Dashboard",
     "customers": "Customers",

@@ -24,7 +24,9 @@ export interface ProfileFields {
 export async function updateProfile(
   fields: Omit<ProfileFields, 'logoFile'>,
   logoFile?: File | null
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<
+  { ok: true } | { ok: false; error: string; uploadCode?: string }
+> {
   if (isMockMode()) {
     return { ok: false, error: 'โหมดเดโม — ยังไม่บันทึกจริง' };
   }
@@ -53,7 +55,11 @@ export async function updateProfile(
   let logo_url: string | undefined;
   if (logoFile && can(role, 'settings:write')) {
     const result = await uploadNurseryLogo(nursery_id, logoFile);
-    if (!result.ok) return { ok: false, error: result.error };
+    if (!result.ok) {
+      // S3 AC#6 — pass the stable validation code through so the settings
+      // UI can surface a localized Thai/English message per rejection class.
+      return { ok: false, error: result.error, uploadCode: result.code };
+    }
     logo_url = result.url;
   }
 

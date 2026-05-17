@@ -25,7 +25,15 @@ function AuthCallbackInner() {
         return;
       }
 
-      // Implicit/hash flow — admin-generated magic links + some OAuth providers
+      // Implicit/hash flow — admin-generated magic links + some OAuth
+      // providers. Story S2 (AC#1/#5): the implicit grant is disabled in the
+      // Supabase Dashboard (PKCE-only). This client-side hash handler is
+      // therefore dormant in production and is gated behind an explicit
+      // opt-in env var so a forged `#access_token=...` fragment can never be
+      // turned into a session unless an operator deliberately re-enables the
+      // implicit grant. Default OFF.
+      const allowImplicit =
+        process.env.NEXT_PUBLIC_ALLOW_IMPLICIT_FLOW === 'true';
       const hash = window.location.hash.startsWith('#')
         ? window.location.hash.slice(1)
         : '';
@@ -33,7 +41,7 @@ function AuthCallbackInner() {
       const access_token = params.get('access_token');
       const refresh_token = params.get('refresh_token');
 
-      if (access_token && refresh_token) {
+      if (allowImplicit && access_token && refresh_token) {
         const supabase = createClient();
         const { error: setErr } = await supabase.auth.setSession({
           access_token,

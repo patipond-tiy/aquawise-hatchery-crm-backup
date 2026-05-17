@@ -16,11 +16,64 @@ function isMockMode(): boolean {
   );
 }
 
+/**
+ * Story S4 — per-request Content-Security-Policy with a fresh nonce +
+ * `strict-dynamic`. Source of truth is `docs/bmad/security.md` §17 (do not
+ * reinvent the string). The nonce is also pushed onto the *request* headers
+ * so server components (`app/[locale]/layout.tsx`) can read it via
+ * `headers().get('x-nonce')` and stamp it on any inline `<Script>`.
+ *
+ * Trade-off (recorded in code-design.md §19): nonces force fully dynamic
+ * rendering — incompatible with PPR / `cacheComponents`. Hash-based CSP is
+ * the migration path if/when PPR becomes worthwhile.
+ */
+function buildCsp(nonce: string): string {
+  const isDev = process.env.NODE_ENV !== 'production';
+  // Next.js HMR / React Refresh needs 'unsafe-eval' in dev only.
+  const scriptSrc = isDev
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval'`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`;
+  return [
+    `default-src 'self'`,
+    scriptSrc,
+    // Tailwind 4 CSS-first tokens load via <link rel=stylesheet>; the nonce
+    // covers any inline <style>. 'unsafe-inline' is intentionally absent.
+    `style-src 'self' 'nonce-${nonce}'`,
+    `connect-src 'self' https://*.supabase.co https://api.stripe.com https://sentry.io https://*.sentry.io https://api.line.me`,
+    `img-src 'self' blob: data: https://*.supabase.co`,
+    `font-src 'self' data:`,
+    `frame-src https://js.stripe.com https://hooks.stripe.com`,
+    `object-src 'none'`,
+    `base-uri 'self'`,
+    `form-action 'self'`,
+    `frame-ancestors 'none'`,
+    `upgrade-insecure-requests`,
+  ].join('; ');
+}
+
+function applySecurityHeaders(res: NextResponse, csp: string): void {
+  res.headers.set('Content-Security-Policy', csp);
+  res.headers.set('X-Content-Type-Options', 'nosniff');
+  res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=()'
+  );
+}
+
 export default async function proxy(req: NextRequest) {
+  // Fresh nonce per request (AC#1). Push it onto the request headers so the
+  // intl rewrite AND downstream RSC see the same value.
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  req.headers.set('x-nonce', nonce);
+  const csp = buildCsp(nonce);
+
   const res = intl(req) ?? NextResponse.next();
   // Make the pathname available to server components (e.g. BillingGate)
   // since layouts don't get the request URL directly.
   res.headers.set('x-pathname', req.nextUrl.pathname);
+  res.headers.set('x-nonce', nonce);
+  applySecurityHeaders(res, csp);
 
   // Story A4 AC#3 — block dashboard access without a valid session so a
   // signed-out user (e.g. on a shared device) cannot reach stale data.
@@ -34,7 +87,7 @@ export default async function proxy(req: NextRequest) {
     !PUBLIC_PATH.test(pathname);
 
   if (needsAuth) {
-    let response = res;
+    const response = res;
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -59,7 +112,10 @@ export default async function proxy(req: NextRequest) {
       const url = req.nextUrl.clone();
       url.pathname = `/${locale}/login`;
       url.search = '';
-      return NextResponse.redirect(url);
+      const redirect = NextResponse.redirect(url);
+      // Carry the security headers onto the redirect response too.
+      applySecurityHeaders(redirect, csp);
+      return redirect;
     }
   }
 

@@ -1805,6 +1805,14 @@ Format:
 - Link: <PR or doc>
 ```
 
+### 2026-05-17 · S4 — Adopted nonce-based CSP (incompatible with PPR)
+
+- Decision: `proxy.ts` emits a fresh per-request nonce + `script-src 'self' 'nonce-…' 'strict-dynamic'` CSP (canonical string = `security.md` §17), plus `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`; HSTS via `next.config.mjs` `headers()` (production only). Nonce pushed onto request headers (`x-nonce`) and surfaced at `<html data-nonce>` for any future inline `<Script>`.
+- Trade-off: nonce-based CSP forces fully dynamic rendering — **incompatible with `cacheComponents: true` / PPR**. Hash-based CSP (experimental `sri` option) is the migration path if/when PPR becomes worthwhile. Until then, do not enable `cacheComponents`.
+- Dev exception: `'unsafe-eval'` is appended to `script-src` only when `NODE_ENV !== 'production'` (Next.js HMR / React Refresh requires it). Never in prod.
+- Owner: Patipond (story S4).
+- Link: this commit.
+
 ### 2026-05-15 · Launch target — first paying tenant within 90 days
 
 - Decision: ship to first paying tenant within 90 days (target ~2026-08-15). The hatchery-crm scaffold is the platform; the first tenant is most likely a nursery using the scaffold (the codebase is "nursery-style CRM scaffolded against hatchery vocabulary" per `CLAUDE.md`). Hatchery proper remains 2027 per `prd.md` §2.
