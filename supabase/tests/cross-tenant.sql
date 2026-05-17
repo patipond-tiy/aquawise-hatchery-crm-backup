@@ -73,7 +73,7 @@ insert into public.line_outbound_events
 insert into public.team_invites
     (nursery_id, email, role, token, created_by)
   values (:'na', 'invitee_a@test.local', 'counter_staff', 'tok_a', :'ua');
-insert into public.audit_log (nursery_id, action, actor_user_id)
+insert into public.audit_log (nursery_id, action, user_id)
   values (:'na', 'test.seed', :'ua');
 -- A6: LINE identity is keyed by user (not nursery); owner_A's identity row
 -- must be invisible to owner_B (RLS: user_id = auth.uid(), no write policy).
