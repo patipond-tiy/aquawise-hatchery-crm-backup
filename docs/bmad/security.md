@@ -415,7 +415,12 @@ The rest of this file is the threat catalog. Each entry has the same shape: what
     const csp = [
       `default-src 'self'`,
       `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
-      `style-src 'self' 'nonce-${nonce}'`,
+      // style-src MUST use 'unsafe-inline', not a nonce: React/Next emit
+      // inline `style=` attributes a nonce can never authorize (CSP3 — a
+      // nonce in style-src also disables implicit unsafe-inline for them).
+      // A nonce here renders the whole app unstyled. Style injection is not
+      // a script-exec vector; this is the Next.js-recommended posture.
+      `style-src 'self' 'unsafe-inline'`,
       `connect-src 'self' https://*.supabase.co https://api.stripe.com https://sentry.io https://*.sentry.io https://api.line.me`,
       `img-src 'self' blob: data: https://*.supabase.co`,
       `font-src 'self' data:`,

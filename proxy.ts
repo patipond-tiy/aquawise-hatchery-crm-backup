@@ -27,7 +27,10 @@ function isMockMode(): boolean {
  * rendering — incompatible with PPR / `cacheComponents`. Hash-based CSP is
  * the migration path if/when PPR becomes worthwhile.
  */
-function buildCsp(nonce: string): string {
+// Exported for the S4 regression test (tests/security/csp.test.ts) — the
+// original S4 ship had an unchecked "zero CSP violations" AC and a nonce
+// style-src that blocked every inline style. Pure function, no side effects.
+export function buildCsp(nonce: string): string {
   const isDev = process.env.NODE_ENV !== 'production';
   // Next.js HMR / React Refresh needs 'unsafe-eval' in dev only.
   const scriptSrc = isDev
@@ -36,9 +39,17 @@ function buildCsp(nonce: string): string {
   return [
     `default-src 'self'`,
     scriptSrc,
-    // Tailwind 4 CSS-first tokens load via <link rel=stylesheet>; the nonce
-    // covers any inline <style>. 'unsafe-inline' is intentionally absent.
-    `style-src 'self' 'nonce-${nonce}'`,
+    // style-src: 'unsafe-inline', NOT a nonce. React 19 / Next.js 16 emit
+    // hundreds of runtime inline `style=` attributes (the <body> font-family
+    // here, component styles, tw-animate-css, next/font's injected block).
+    // A CSP nonce only authorizes <style>/<link> elements — it can never
+    // cover an inline `style=` attribute, and a nonce in style-src also
+    // disables the implicit 'unsafe-inline' for them (CSP3). The result was
+    // every inline style blocked → fully unstyled UI. Style injection is not
+    // a script-execution vector; 'unsafe-inline' on style-src is the
+    // Next.js-recommended posture. The XSS-relevant control (script-src
+    // nonce + 'strict-dynamic') is unchanged.
+    `style-src 'self' 'unsafe-inline'`,
     `connect-src 'self' https://*.supabase.co https://api.stripe.com https://sentry.io https://*.sentry.io https://api.line.me`,
     `img-src 'self' blob: data: https://*.supabase.co`,
     `font-src 'self' data:`,
