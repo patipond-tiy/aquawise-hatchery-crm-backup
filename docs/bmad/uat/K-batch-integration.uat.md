@@ -275,3 +275,14 @@ All of the following before K1–K4 are marked done:
 - [ ] Confused-deputy check: read-side JWT `aud` (`hatchery-crm`) and webhook-side JWT `aud` (`line-bot-webhook`) are distinct and not interchangeable
 - [ ] `pnpm typecheck && pnpm lint && pnpm test` green
 - [ ] P0 cross-tenant SQL test (see `code-design.md` §11) extended to cover `batch_claims` and `crm_event_log` (both carry `nursery_id`)
+
+---
+
+## UAT Run — 2026-05-17 (Block K)
+
+> Executed live `USE_MOCK=false` (supabase-hatchery), nursery `705cc5e2-423d-4a98-95e8-cdc95c7672f6`. API rows: curl with ES256 read/claim + webhook JWTs minted from the dev keypair in `.env.local` + `mcp__supabase-hatchery__execute_sql` DB assertions. UI rows: Playwright MCP (desktop 1440x900) as `e2e-test@example.com` (owner). Results: `docs/qa/uat-run/results/nursery-K.json`; screenshots: `docs/qa/uat-run/screenshots/nursery-K/`.
+
+- **62 rows: 61 PASS, 1 FIX, 0 FAIL, 0 BLOCKED-EXTERNAL.**
+- US-K4c (publish-batch-warning) was a real product FAIL the UAT caught — `createServiceClient()` built the `@supabase/ssr` server client *with the request cookie store*, so from an authenticated dashboard action it adopted the user's `sb-*-auth-token` and ran PostgREST as `authenticated`, not `service_role`; the `crm_event_log` INSERT was RLS-rejected (story marked done in BMAD, broken in reality). FIXED: `createServiceClient()` now uses a plain `@supabase/supabase-js` client (service-role key, no session adoption). Post-fix: publish→`crm_event_log` row + `audit_log` written; critical=inline-attempt, warning=enqueue-only; idempotent retry cron preserves `correlation_id`.
+- K1 schema, K2 read ladder + JWT guards + rate-limit, K3 idempotent claim, K5 list-active, K6 species all PASS via curl + DB. The 2xx-delivered legs of K4d/K4f are constrained only by the absent live LINE bot (`localhost:3100`); the mechanism (attempts++/last_error/delivered_at-on-2xx) is proven.
+- Green gate post-fix: `pnpm typecheck` clean, `pnpm lint` clean, `pnpm test` 291 passed (baseline 283 + 8 new regression tests, no regression). DB seeds restored to pre-run baseline.

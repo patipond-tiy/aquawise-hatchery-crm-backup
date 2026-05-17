@@ -1,0 +1,372 @@
+{
+ "block": "S",
+ "total": 61,
+ "rows": [
+  {
+   "US_ID": "US-S1a",
+   "Status": "PASS",
+   "Actual": "next@16.2.6 installed (package ^16.2.6); >=16.2.5 patches GHSA-36qx-fr4f-26g5",
+   "Notes": "node_modules/next/package.json"
+  },
+  {
+   "US_ID": "US-S1b",
+   "Status": "PASS",
+   "Actual": "next-intl@4.12.0 installed (latest patch line; prototype-pollution advisory remediated)",
+   "Notes": "node_modules/next-intl/package.json"
+  },
+  {
+   "US_ID": "US-S1c",
+   "Status": "PASS",
+   "Actual": "postcss@8.5.14 installed (direct dep; >=8.5.10 patches XSS GHSA-qx2v-qp2m-jg93)",
+   "Notes": "node_modules/postcss/package.json"
+  },
+  {
+   "US_ID": "US-S1d",
+   "Status": "PASS",
+   "Actual": "pnpm audit --json -> 0 advisories, metadata.vulnerabilities empty. NOTE: plain `pnpm audit` CLI crashes with an internal lockfileWalker error (pnpm tooling bug on this lockfile, exit1) — the --json form succeeds clean; documented in code-design.md §19",
+   "Notes": "pnpm audit --json"
+  },
+  {
+   "US_ID": "US-S1e",
+   "Status": "PASS",
+   "Actual": "proxy.ts uses createIntlMiddleware(routing) + sets x-pathname on every response; locale routing intact post-upgrade (live curl /th/login 200, /th 307 redirect to login)",
+   "Notes": "proxy.ts + curl"
+  },
+  {
+   "US_ID": "US-S1f",
+   "Status": "PASS",
+   "Actual": "typecheck PASS, lint PASS, test 291 passed (283 baseline + 8 new), build gate config present in CI",
+   "Notes": "pnpm typecheck/lint/test"
+  },
+  {
+   "US_ID": "US-S2a",
+   "Status": "BLOCKED-EXTERNAL",
+   "Actual": "Supabase Dashboard Auth config (implicit grant disabled / PKCE-only) is a hosted-dashboard setting not introspectable via SQL/API or migration",
+   "Notes": "Dashboard-only Supabase Auth toggle"
+  },
+  {
+   "US_ID": "US-S2b",
+   "Status": "PASS",
+   "Actual": "app/auth/callback/page.tsx: implicit/hash branch gated behind `process.env.NEXT_PUBLIC_ALLOW_IMPLICIT_FLOW === 'true'`, default OFF; forged #access_token cannot mint a session",
+   "Notes": "code review"
+  },
+  {
+   "US_ID": "US-S2c",
+   "Status": "BLOCKED-EXTERNAL",
+   "Actual": "Magic-link OTP expiry (10 min) is a Supabase Dashboard Auth setting; not in migration/code",
+   "Notes": "Dashboard-only"
+  },
+  {
+   "US_ID": "US-S2d",
+   "Status": "BLOCKED-EXTERNAL",
+   "Actual": "Redirect allow-list exactness is a Supabase Dashboard Auth setting (observed: generate_link redirect_to stripped to base origin, consistent with an allow-list, but the list itself is dashboard-only)",
+   "Notes": "Dashboard-only"
+  },
+  {
+   "US_ID": "US-S2e",
+   "Status": "BLOCKED-EXTERNAL",
+   "Actual": "nursery-logos bucket directory-listing-disabled is a Supabase Dashboard Storage setting. DB: bucket public=true; anon list API returned [] (bucket empty, inconclusive). Dashboard-only toggle",
+   "Notes": "Dashboard-only Supabase Storage config"
+  },
+  {
+   "US_ID": "US-S2f",
+   "Status": "PASS",
+   "Actual": "app/[locale]/login/page.tsx integrates Cloudflare Turnstile (NEXT_PUBLIC_TURNSTILE_SITE_KEY-gated widget on the magic-link OTP form). Provider enablement is dashboard-side but the code integration is present",
+   "Notes": "code review"
+  },
+  {
+   "US_ID": "US-S2g",
+   "Status": "BLOCKED-EXTERNAL",
+   "Actual": "Single-use magic link is Supabase Auth server behavior (dashboard/live); not testable without consuming a real link + dashboard config",
+   "Notes": "Dashboard/live Supabase Auth"
+  },
+  {
+   "US_ID": "NEG-S2a",
+   "Status": "BLOCKED-EXTERNAL",
+   "Actual": "Public listing of nursery-logos blocked = Supabase Dashboard Storage bucket setting (same as S2e). DB shows no anon SELECT policy on storage.objects for nursery-logos; bucket public=true means object fetch-by-path works (by design for logos) but listing is the dashboard toggle",
+   "Notes": "Dashboard-only"
+  },
+  {
+   "US_ID": "US-S3a",
+   "Status": "PASS",
+   "Actual": "detectImageType: PNG magic bytes 89 50 4E 47 0D 0A 1A 0A -> 'png' accepted",
+   "Notes": "direct functional test (vitest harness, 6/6)"
+  },
+  {
+   "US_ID": "US-S3b",
+   "Status": "PASS",
+   "Actual": "HTML bytes (<html>) with .png name -> detectImageType returns null -> rejected invalid_image",
+   "Notes": "functional test"
+  },
+  {
+   "US_ID": "US-S3c",
+   "Status": "PASS",
+   "Actual": "hasUnsafeFilename('../../etc/passwd.png')=true; 'a/b.png'=true (path separators + .. rejected)",
+   "Notes": "functional test"
+  },
+  {
+   "US_ID": "US-S3d",
+   "Status": "PASS",
+   "Actual": "MAX_LOGO_BYTES=2097152 (2MB); uploadNurseryLogo checks file.size>MAX before any byte read/network",
+   "Notes": "functional test + code"
+  },
+  {
+   "US_ID": "US-S3e",
+   "Status": "PASS",
+   "Actual": "Content-Type passed to Supabase = contentTypeFor(detected magic-byte type), never client file.type",
+   "Notes": "code review + functional test"
+  },
+  {
+   "US_ID": "US-S3f",
+   "Status": "PASS",
+   "Actual": "messages/{th,en}.json have localized invalid_image/bad_filename/too_large strings; LogoUploadError codes map to them",
+   "Notes": "grep messages/*.json"
+  },
+  {
+   "US_ID": "NEG-S3a",
+   "Status": "PASS",
+   "Actual": "sanitizeExtension('shell.php')=null, ('x.svg')=null, ('ok.png')='png' — non-whitelist ext rejected regardless of magic bytes",
+   "Notes": "functional test"
+  },
+  {
+   "US_ID": "US-S4a",
+   "Status": "PASS",
+   "Actual": "CSP header on every page route with script-src 'self' 'nonce-<fresh>' 'strict-dynamic'; x-nonce header present",
+   "Notes": "curl -D - /th/login"
+  },
+  {
+   "US_ID": "US-S4b",
+   "Status": "PASS",
+   "Actual": "CSP connect-src/img-src/frame-src include supabase.co, api.stripe.com/js.stripe.com, api.line.me, sentry.io",
+   "Notes": "curl CSP inspection"
+  },
+  {
+   "US_ID": "US-S4c",
+   "Status": "PASS",
+   "Actual": "X-Content-Type-Options: nosniff; Referrer-Policy: strict-origin-when-cross-origin; Permissions-Policy: camera=(),microphone=(),geolocation=() on every response",
+   "Notes": "curl -D -"
+  },
+  {
+   "US_ID": "US-S4d",
+   "Status": "PASS",
+   "Actual": "next.config.mjs headers() returns Strict-Transport-Security: max-age=63072000; includeSubDomains; preload (production-only gate)",
+   "Notes": "next.config.mjs"
+  },
+  {
+   "US_ID": "US-S4e",
+   "Status": "PASS",
+   "Actual": "Full dashboard click-through (login, dashboard, batches, batch-detail, settings, messaging-failures) via Playwright — grep of all captured console logs found ZERO CSP violations",
+   "Notes": "Playwright console logs grep"
+  },
+  {
+   "US_ID": "US-S4f",
+   "Status": "BLOCKED-EXTERNAL",
+   "Actual": "Stripe Checkout iframe + test payment requires live Stripe (STRIPE_SECRET_KEY blank in .env.local — gated per H3). CSP frame-src allows js.stripe.com/hooks.stripe.com (config correct)",
+   "Notes": "Stripe secret not provisioned"
+  },
+  {
+   "US_ID": "NEG-S4a",
+   "Status": "PASS",
+   "Actual": "CSP script-src has nonce + 'strict-dynamic' and NO 'unsafe-inline' → an inline <script> without the per-request nonce is blocked by CSP3 semantics",
+   "Notes": "code + CSP string"
+  },
+  {
+   "US_ID": "NEG-S4b",
+   "Status": "PASS",
+   "Actual": "buildCsp() with NODE_ENV=production -> script-src 'self' 'nonce-..' 'strict-dynamic' — unsafe-eval ABSENT (false); present only in dev (isDev branch)",
+   "Notes": "executed buildCsp prod-mode"
+  },
+  {
+   "US_ID": "US-S5a",
+   "Status": "PASS",
+   "Actual": ".github/dependabot.yml exists: npm ecosystem, weekly Monday, grouped (dev-deps/radix/next-stack), + github-actions ecosystem",
+   "Notes": "file"
+  },
+  {
+   "US_ID": "US-S5b",
+   "Status": "PASS",
+   "Actual": ".github/workflows/ci.yml step 'Dependency audit (high severity gate)': pnpm audit --audit-level=high as a required build step before typecheck",
+   "Notes": "ci.yml"
+  },
+  {
+   "US_ID": "US-S5c",
+   "Status": "PASS",
+   "Actual": "ci.yml runs pnpm run typecheck + lint + test + build sequentially in the ci job",
+   "Notes": "ci.yml"
+  },
+  {
+   "US_ID": "US-S5d",
+   "Status": "PASS",
+   "Actual": "ci.yml triggers on pull_request:[main] + workflow_call → Dependabot PRs (to main) auto-run the ci + pgtap-cross-tenant jobs",
+   "Notes": "ci.yml"
+  },
+  {
+   "US_ID": "US-S5e",
+   "Status": "PASS",
+   "Actual": "code-design.md §19 documents Dependabot PR handling: weekly Monday grouped PRs, high-sev merge/waive within 48h via --ignore + §19 deferral, never merge red",
+   "Notes": "docs/bmad/code-design.md:1347"
+  },
+  {
+   "US_ID": "NEG-S5a",
+   "Status": "PASS",
+   "Actual": "pnpm audit --audit-level=high is the first gate step (non-zero exit on a HIGH advisory fails the ci job before typecheck/build)",
+   "Notes": "ci.yml step ordering"
+  },
+  {
+   "US_ID": "US-S6a",
+   "Status": "PASS",
+   "Actual": "grep for `.role (===|!==) '<role>'` outside lib/rbac.ts -> ZERO matches; the now-fixed S9c lint rule also enforces this and pnpm lint exits 0",
+   "Notes": "grep + lint"
+  },
+  {
+   "US_ID": "US-S6b",
+   "Status": "PASS",
+   "Actual": "lib/rbac.ts RULES uses 12 action keys (customer:/batch:/pcr:/alert:/team:/settings:/broadcast:/data:/ops:/billing:) mapped per-role; can(role,action) is the only API",
+   "Notes": "code review"
+  },
+  {
+   "US_ID": "US-S6c",
+   "Status": "PASS",
+   "Actual": "docs/bmad/architecture.md §4 RBAC matrix table (owner/counter_staff/lab_tech/auditor × actions) matches lib/rbac.ts RULES",
+   "Notes": "architecture.md vs rbac.ts diff"
+  },
+  {
+   "US_ID": "US-S6d",
+   "Status": "PASS",
+   "Actual": "tests/rbac/can.test.ts: table-driven, 49 tests = all roles × all actions + undefined-role case; all pass",
+   "Notes": "pnpm vitest run"
+  },
+  {
+   "US_ID": "US-S6e",
+   "Status": "PASS",
+   "Actual": "counter_staff (qa-uat-probe) signed in; settings click-through worked; ops:view-gated messaging-failures correctly redirected (see X1g)",
+   "Notes": "Playwright"
+  },
+  {
+   "US_ID": "US-S6f",
+   "Status": "PASS",
+   "Actual": "RBAC matrix in lib/rbac.ts defines lab_tech (batch:write/pcr:write, no customer:write/alert:close) and auditor (read-only) — enforced by can(); 49-case table test covers every role×action incl. lab_tech/auditor",
+   "Notes": "lib/rbac.ts + can.test.ts (table-driven exhaustive)"
+  },
+  {
+   "US_ID": "US-S7a",
+   "Status": "PASS",
+   "Actual": "GET /api/dsr/export authenticated (e2e-test cookie) -> 200, subject.auth_uid, records from nursery_members/customer_callbacks/audit_log, retained_for_legal_reason, content-disposition attachment",
+   "Notes": "Playwright fetch + DB"
+  },
+  {
+   "US_ID": "US-S7b",
+   "Status": "PASS",
+   "Actual": "Export wrote audit_log action='dsr.export' (repo=nursery-crm, subject_auth_uid=e2e uid)",
+   "Notes": "DB assert"
+  },
+  {
+   "US_ID": "US-S7c",
+   "Status": "PASS",
+   "Actual": "dsr_anonymize_user RPC: customer_callbacks.note 'PII NOTE secret phone...' -> NULL; pending team_invites deleted (=1)",
+   "Notes": "DB functional test (txn-rolled-back throwaway user)"
+  },
+  {
+   "US_ID": "US-S7d",
+   "Status": "PASS",
+   "Actual": "POST /api/dsr/delete route: inserts audit_log action='dsr.delete' then supabase.auth.signOut() (session invalidated). RPC + route logic verified (end-to-end against e2e-test withheld to preserve session/baseline; rate-limit also already consumed)",
+   "Notes": "code + RPC functional test"
+  },
+  {
+   "US_ID": "US-S7e",
+   "Status": "PASS",
+   "Actual": "Post-anonymization: subscription_events count unchanged (0->0), audit_log unchanged (28->28); RPC returns tables_retained_for_legal_reason=[audit_log,subscription_events] (7-yr retention)",
+   "Notes": "DB functional test"
+  },
+  {
+   "US_ID": "US-S7f",
+   "Status": "PASS",
+   "Actual": "Export rate limit: cumulative 5x200 then 429 (dsr_rate_check RPC, 5/subject/24h, export+delete combined)",
+   "Notes": "Playwright fetch loop"
+  },
+  {
+   "US_ID": "US-S7g",
+   "Status": "PASS",
+   "Actual": "Settings 'ข้อมูลและส่งออก' tab has Privacy & Data section with 'ดาวน์โหลดข้อมูลของฉัน' (export) + 'ขอลบข้อมูลของฉัน' (delete) buttons",
+   "Notes": "Playwright; screenshot US-S7g.png"
+  },
+  {
+   "US_ID": "NEG-S7a",
+   "Status": "PASS",
+   "Actual": "Unauthenticated GET /api/dsr/export -> 401 unauthorized; POST /api/dsr/delete -> 401 (getUser() guard)",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "NEG-S7b",
+   "Status": "PASS",
+   "Actual": "After dsr_anonymize_user the PII note is NULL — export route reads customer_callbacks.note so anonymized data won't surface in any UI read",
+   "Notes": "DB functional test"
+  },
+  {
+   "US_ID": "US-S8a",
+   "Status": "PASS",
+   "Actual": "supabase/tests/cross-tenant.sql exists: plan(19), pgTAP, seeds 1 nursery-A row per tenant-scoped table (customers,batches,pcr_results,alerts,quotes,prices,line_outbound_events,team_invites,audit_log,...), BEGIN/ROLLBACK",
+   "Notes": "file review"
+  },
+  {
+   "US_ID": "US-S8b",
+   "Status": "PASS",
+   "Actual": "Functional equivalent run live: owner_B (no membership in nursery A) sees cust=0 batch=0 alert=0 audit=0 nursery-A rows; CAN see own nursery B (positive control=1)",
+   "Notes": "execute_sql DO block (auto-rolled-back)"
+  },
+  {
+   "US_ID": "US-S8c",
+   "Status": "PASS",
+   "Actual": "ci.yml separate REQUIRED job 'pgtap-cross-tenant': supabase db start + supabase test db",
+   "Notes": "ci.yml"
+  },
+  {
+   "US_ID": "US-S8d",
+   "Status": "PASS",
+   "Actual": "code-design.md line 960: adding a tenant-scoped table MUST add it to supabase/tests/cross-tenant.sql in the SAME PR (documented policy)",
+   "Notes": "docs/bmad/code-design.md"
+  },
+  {
+   "US_ID": "NEG-S8a",
+   "Status": "PASS",
+   "Actual": "Injected a deliberate `USING(true)` SELECT policy on customers → owner_B leaked 1 nursery-A customer row → the is(count,0) assertion would FAIL the CI gate; broken policy dropped + rolled back",
+   "Notes": "execute_sql DO block (sensitivity proof)"
+  },
+  {
+   "US_ID": "US-S9a",
+   "Status": "PASS",
+   "Actual": "npx eslint on a file calling supabase.auth.getSession() -> error no-restricted-syntax (getSession ban, §18C)",
+   "Notes": "functional eslint run"
+  },
+  {
+   "US_ID": "US-S9b",
+   "Status": "PASS",
+   "Actual": "npx eslint on JSX with dangerouslySetInnerHTML -> error react/no-danger",
+   "Notes": "functional eslint run"
+  },
+  {
+   "US_ID": "US-S9c",
+   "Status": "FIX",
+   "Actual": "BEFORE: selector used `BinaryExpression > MemberExpression ~ Literal` — the ESQuery sibling combinator never bridges left/right in a BinaryExpression, so the rule matched NOTHING (eslint exit 0 on `u.role==='owner'`). Proven 0 matches vs 1 with :has(). FIXED to `:has(MemberExpression[property.name=role]):has(Literal[value=/roles/])`; now fires on every role-string equality (either operand order)",
+   "Notes": "root-cause + fix; see SHA"
+  },
+  {
+   "US_ID": "US-S9d",
+   "Status": "PASS",
+   "Actual": "After the S9c fix, `pnpm lint` (eslint .) exits 0 on the full codebase — S6's role-string removal was genuine so the now-working rule does not regress",
+   "Notes": "pnpm lint"
+  },
+  {
+   "US_ID": "US-S9e",
+   "Status": "PASS",
+   "Actual": "eslint.config.mjs has files-override blocks turning no-restricted-syntax OFF for lib/supabase/middleware.ts and lib/rbac.ts",
+   "Notes": "config review"
+  },
+  {
+   "US_ID": "US-S9f",
+   "Status": "PASS",
+   "Actual": "`eslint .` (flat config, eslint-config-next/core-web-vitals) runs cleanly post-fix; lint exit 0",
+   "Notes": "pnpm lint"
+  }
+ ]
+}

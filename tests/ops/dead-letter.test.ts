@@ -99,11 +99,17 @@ function makeQuery(table: string) {
   return builder;
 }
 
+// X1 dead-letter actions MUST use the SERVICE-ROLE client: line_outbound_events
+// has no nursery-staff UPDATE RLS policy (migration 006), so the user-scoped
+// client's status UPDATE is silently RLS-denied. The query stub is therefore
+// wired to createServiceClient; createClient is left a bare vi.fn() so any
+// regression that reverts an action back to the user client fails here
+// (undefined.from(...) throws → tests red).
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => ({
+  createServiceClient: vi.fn(async () => ({
     from: (t: string) => makeQuery(t),
   })),
-  createServiceClient: vi.fn(),
+  createClient: vi.fn(),
 }));
 
 import {

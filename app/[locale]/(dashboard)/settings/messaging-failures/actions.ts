@@ -9,10 +9,22 @@ import { writeAuditLog } from '@/lib/audit';
 /**
  * Story X1 — dead-letter retry / edit-retry / resolve / bulk-retry.
  *
- * Every action: owner-only (`ops:view`), tenant-scoped (RLS at the DB layer
- * + an explicit application-layer nursery check), writes an audit_log row.
- * Retrying flips a `dead` event back to `pending` so the bot worker picks
- * it up again (delivery itself is the separate worker repo — documented).
+ * Every action: owner-only (`ops:view`), tenant-scoped via an explicit
+ * application-layer `nursery_id = scope.nurseryId` filter, writes an
+ * audit_log row. Retrying flips a `dead` event back to `pending` so the
+ * bot worker picks it up again (delivery itself is the separate worker
+ * repo — documented).
+ *
+ * Status transitions use the SERVICE-ROLE client by design:
+ * `line_outbound_events` has only SELECT + INSERT RLS policies (migration
+ * 006 — "status transitions … happen via service-role from the bot
+ * worker"). There is deliberately NO nursery-staff UPDATE policy, so the
+ * user-scoped client's UPDATE is silently denied by RLS (0 rows, no
+ * error) — the dead-letter actions would write the audit row and toast
+ * success while never actually changing status. The owner-only `guard()`
+ * (`ops:view`) + the explicit `.eq('nursery_id', scope.nurseryId)` filter
+ * are the trust boundary here; service-role keeps the RLS write surface
+ * for `authenticated` closed.
  */
 
 type ActionResult = { ok: true } | { ok: false; error: string };
@@ -31,8 +43,8 @@ export async function retryDeadEvent(eventId: string): Promise<ActionResult> {
   const g = await guard();
   if (!g.ok) return { ok: false, error: g.error };
 
-  const { createClient } = await import('@/lib/supabase/server');
-  const supabase = await createClient();
+  const { createServiceClient } = await import('@/lib/supabase/server');
+  const supabase = await createServiceClient();
 
   // Application-layer tenant check (RLS also enforces this at the DB).
   const { data: ev } = await supabase
@@ -72,8 +84,8 @@ export async function editAndRetryEvent(
     return { ok: false, error: 'invalid_json' };
   }
 
-  const { createClient } = await import('@/lib/supabase/server');
-  const supabase = await createClient();
+  const { createServiceClient } = await import('@/lib/supabase/server');
+  const supabase = await createServiceClient();
 
   const { data: ev } = await supabase
     .from('line_outbound_events')
@@ -107,8 +119,8 @@ export async function resolveDeadEvent(
   const g = await guard();
   if (!g.ok) return { ok: false, error: g.error };
 
-  const { createClient } = await import('@/lib/supabase/server');
-  const supabase = await createClient();
+  const { createServiceClient } = await import('@/lib/supabase/server');
+  const supabase = await createServiceClient();
 
   const { data: ev } = await supabase
     .from('line_outbound_events')
@@ -137,8 +149,8 @@ export async function retryDeadEventsBulk(
   if (!g.ok) return { ok: false, error: g.error };
   if (eventIds.length === 0) return { ok: true, count: 0 };
 
-  const { createClient } = await import('@/lib/supabase/server');
-  const supabase = await createClient();
+  const { createServiceClient } = await import('@/lib/supabase/server');
+  const supabase = await createServiceClient();
 
   // Only events that belong to this nursery AND are still dead.
   const { data: owned } = await supabase

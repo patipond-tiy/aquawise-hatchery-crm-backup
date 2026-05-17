@@ -1,0 +1,66 @@
+{
+ "block": "X",
+ "total": 10,
+ "rows": [
+  {
+   "US_ID": "US-X1a",
+   "Status": "FIX",
+   "Actual": "Dead-letter list /th/settings/messaging-failures shows the owner's nursery dead events (3 seeded: restock_reminder/quote/pcr_certificate) with retry/edit-retry/resolve actions. (Functional only after the X1 service-client fix — see X1b)",
+   "Notes": "Playwright; screenshot US-X1a.png"
+  },
+  {
+   "US_ID": "US-X1b",
+   "Status": "FIX",
+   "Actual": "BEFORE: retryDeadEvent used the user-scoped createClient(); line_outbound_events has only SELECT+INSERT RLS policies (no nursery-staff UPDATE policy, migration 006), so the UPDATE was silently RLS-denied (0 rows, no error) — audit row written + success toast but status NEVER changed. AFTER fix (createServiceClient): retry flips dead->pending, attempts 12->13, dead_letter_retry audit row written",
+   "Notes": "Playwright + DB assert; root-cause + fix below"
+  },
+  {
+   "US_ID": "US-X1c",
+   "Status": "FIX",
+   "Actual": "Edit & Retry opens a payload-editor textarea pre-filled with the event JSON; saving edited payload persists (payload updated to edited JSON incl. uat_edited:true), status dead->pending, attempts->13, dead_letter_edit_retry audit row. (Functional after fix)",
+   "Notes": "Playwright + DB assert"
+  },
+  {
+   "US_ID": "US-X1d",
+   "Status": "FIX",
+   "Actual": "Mark Resolved ('ปิดเคส') sets status='resolved' (removed from active dead list) + dead_letter_resolved audit row. (Functional after fix)",
+   "Notes": "Playwright + DB assert"
+  },
+  {
+   "US_ID": "US-X1e",
+   "Status": "FIX",
+   "Actual": "Bulk retry: select 3 via checkboxes -> 'ลองใหม่ที่เลือก (3)' -> confirm dialog -> all 3 dead->pending attempts->13 AND exactly 3 separate dead_letter_retry audit rows (one per event, bulk:true) — X1 AC#6. (Functional after fix)",
+   "Notes": "Playwright + DB assert; screenshot US-X1e.png"
+  },
+  {
+   "US_ID": "US-X1f",
+   "Status": "PASS",
+   "Actual": "POST /api/cron/daily (CRON_SECRET) -> {digests:1}; created dead_letter_digest audit row for the nursery with >=1 dead event (nursery 99999999, digest_date=2026-05-17, count=1); idempotent per nursery/day (migration 030 index)",
+   "Notes": "curl + DB assert"
+  },
+  {
+   "US_ID": "US-X1g",
+   "Status": "PASS",
+   "Actual": "counter_staff (qa-uat-probe) navigating to /th/settings/messaging-failures is redirected to /th/settings (owner-only ops:view guard in page.tsx)",
+   "Notes": "Playwright (final URL=/th/settings); screenshot US-X1g.png"
+  },
+  {
+   "US_ID": "US-X1h",
+   "Status": "PASS",
+   "Actual": "lib/rbac.ts RULES['ops:view']=['owner'] — owner-only, distinct from billing:manage; counter_staff/lab_tech/auditor excluded",
+   "Notes": "code review + table-driven can.test.ts"
+  },
+  {
+   "US_ID": "NEG-X1a",
+   "Status": "PASS",
+   "Actual": "retryDeadEvent's `.select/.update where id=eventId AND nursery_id=scope.nurseryId`: a different nursery's dead event (dead0000-...) is invisible to owner of nursery 705cc5e2 (count=0) → action returns not_found, NO update; other event stays dead/attempts=12",
+   "Notes": "DB assert of the action's tenant-filter query"
+  },
+  {
+   "US_ID": "NEG-X1b",
+   "Status": "PASS",
+   "Actual": "Dead-letter list for e2e-test (nursery 705cc5e2) shows ONLY its 3 dead events; the other nursery's dead event payload {\"x\":1}/Uotheruser/'other-nursery dead' does NOT appear (RLS SELECT scoping + app-layer filter)",
+   "Notes": "Playwright DOM assert"
+  }
+ ]
+}

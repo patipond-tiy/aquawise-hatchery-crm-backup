@@ -2,6 +2,20 @@
 
 > Consolidated record of the 2026-05-15 doc-hardening session. One scannable index of *what changed, why, and what's still open*. Authoritative for "what state are the docs in?"; per-PR detail is in git history; durable rationale is in `code-design.md` §19 and `decisions-2026-05-15-fix-review.md`.
 
+## UAT Run — 2026-05-17 (Blocks K, S, X)
+
+> 133 rows executed live (`USE_MOCK=false`, supabase-hatchery, nursery `705cc5e2-…`). K/S API+DB via curl(ES256 JWT)+`execute_sql`; UI via Playwright MCP 1440x900 (`e2e-test@example.com` owner, `qa-uat-probe@gmail.com` counter_staff). Results JSON in `docs/qa/uat-run/results/nursery-{K,S,X}.json`; screenshots in `docs/qa/uat-run/screenshots/nursery-{K,S,X}/`. Block K also recorded in `bmad/uat/K-batch-integration.uat.md`; S/X have no `uat/` gate file (security + dead-letter live in `stories/S*.md` / `stories/X1.*.md`).
+
+- **K: 62 rows — 61 PASS, 1 FIX, 0 FAIL.** S: **61 — 53 PASS, 7 BLOCKED-EXTERNAL, 1 FIX, 0 FAIL.** X: **10 — 5 PASS, 5 FIX, 0 FAIL.** Totals: 133 → 119 PASS, 7 BLOCKED-EXTERNAL, 7 FIX, **0 FAIL**.
+- 3 real product defects the UAT caught (stories marked done in BMAD, broken in reality), all fixed conformance-compliant + regression-tested:
+  - **K4c** `createServiceClient()` adopted the request user cookie under `@supabase/ssr` → ran as `authenticated` not `service_role` → RLS-blocked `crm_event_log` INSERT (publish-batch-warning fully broken). Fix: plain `@supabase/supabase-js` service client, no session adoption.
+  - **X1a–e** dead-letter retry/edit/resolve/bulk used the user-scoped client to UPDATE `line_outbound_events`, which has no nursery-staff UPDATE RLS policy (migration 006) → silent 0-row updates while toasting success. Fix: actions use the service client (matches the documented "status transitions via service-role" design; app-layer `ops:view` + `nursery_id` filter remain the trust boundary).
+  - **S9c** the role-string `no-restricted-syntax` selector used the ESQuery sibling combinator inside a `BinaryExpression` (never matches) → the lint rule was inert. Fix: `:has():has()` selector; now fires, codebase still lint-clean.
+- BLOCKED-EXTERNAL (7, all S): S2a/S2c/S2d/S2e/S2g/NEG-S2a (Supabase Dashboard Auth/Storage toggles) + S4f (live Stripe Checkout — secret not provisioned).
+- Green gate post-fix: `pnpm typecheck` clean, `pnpm lint` clean, `pnpm test` **291 passed** (baseline 283 + 8 new regression tests, no regression). DB seeds restored to pre-run baseline (batches 4 / claims 0 / crm_event_log 0 / line_outbound_events 7-pending / audit_log 6).
+
+---
+
 ## For developers picking this up
 
 > Scannable state-of-the-world. Detail for each item is in the sections below; rationale lives in `code-design.md` §19.

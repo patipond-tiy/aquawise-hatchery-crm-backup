@@ -1,0 +1,378 @@
+{
+ "block": "K",
+ "total": 62,
+ "rows": [
+  {
+   "US_ID": "US-K1a",
+   "Status": "PASS",
+   "Actual": "batches.batch_code text NOT NULL DEFAULT mint_batch_code()",
+   "Notes": "DB introspection information_schema.columns; default = mint_batch_code()"
+  },
+  {
+   "US_ID": "US-K1b",
+   "Status": "PASS",
+   "Actual": "valid_until timestamptz NOT NULL DEFAULT now()+30d; CHECK valid_until<=created_at+90d",
+   "Notes": "pg_constraint batches_valid_until_cap_chk present"
+  },
+  {
+   "US_ID": "US-K1c",
+   "Status": "PASS",
+   "Actual": "published_at timestamptz NULL; nursery_contact_snapshot jsonb NULL",
+   "Notes": "columns present"
+  },
+  {
+   "US_ID": "US-K1d",
+   "Status": "PASS",
+   "Actual": "first_claimed_at timestamptz NULL present",
+   "Notes": "column present; set on first claim (K3h)"
+  },
+  {
+   "US_ID": "US-K1e",
+   "Status": "PASS",
+   "Actual": "batch_claims PK (batch_id,line_user_id); cols batch_id,line_user_id,claimed_at,line_profile,pond_id,correlation_id,nursery_id; FKs to batches & nurseries ON DELETE CASCADE",
+   "Notes": "pg_constraint + columns verified"
+  },
+  {
+   "US_ID": "US-K1f",
+   "Status": "PASS",
+   "Actual": "crm_event_log: id PK, correlation_id UNIQUE, event_type,batch_id FK,severity CHECK(info/warning/critical),payload,posted_at,delivered_at,attempts,last_error,nursery_id,last_attempt_at",
+   "Notes": "schema verified incl. 031 last_attempt_at"
+  },
+  {
+   "US_ID": "US-K1g",
+   "Status": "PASS",
+   "Actual": "policy batch_claims_select_own SELECT to authenticated USING nursery_id IN current_user_nursery_ids()",
+   "Notes": "pg_policies"
+  },
+  {
+   "US_ID": "US-K1h",
+   "Status": "PASS",
+   "Actual": "policy crm_event_log_select_own SELECT to authenticated USING nursery_id IN current_user_nursery_ids()",
+   "Notes": "pg_policies"
+  },
+  {
+   "US_ID": "US-K1i",
+   "Status": "PASS",
+   "Actual": "20/20 mint_batch_code() outputs match ^B-[A-CDEFGHJKMNPQRSTUVWXYZ23456789]{6}$, all distinct",
+   "Notes": "SELECT generate_series(1,20); collision retry loop in fn body (<=5)"
+  },
+  {
+   "US_ID": "US-K1j",
+   "Status": "PASS",
+   "Actual": "indexes present: batch_claims_batch_id/line_user/nursery_id_idx; crm_event_log_batch_sev/undelivered(partial)/nursery_id_idx; batches_batch_code_key UNIQUE",
+   "Notes": "pg_indexes"
+  },
+  {
+   "US_ID": "US-K1k",
+   "Status": "PASS",
+   "Actual": "database.types.ts contains batch_claims, crm_event_log, and all new cols (batch_code,valid_until,published_at,nursery_contact_snapshot,first_claimed_at,species,line_oa_id,contact_phone_public)",
+   "Notes": "grep lib/database.types.ts"
+  },
+  {
+   "US_ID": "US-K1l",
+   "Status": "PASS",
+   "Actual": "nurseries.line_oa_id (CHECK ^@..) + contact_phone_public (CHECK ^0[0-9]{9}$) present",
+   "Notes": "information_schema + pg_constraint"
+  },
+  {
+   "US_ID": "NEG-K1a",
+   "Status": "PASS",
+   "Actual": "anon INSERT into batch_claims -> ERROR 42501 row-level security policy",
+   "Notes": "SET ROLE anon; INSERT rejected"
+  },
+  {
+   "US_ID": "US-K2a",
+   "Status": "PASS",
+   "Actual": "GET /api/v1/batches/B-RX2AF8 -> 200 full payload {batch_code,hatchery_id,hatchery_name,hatchery_contact,species,pl_grade,pcr{...,summary},pcr_certificate_url,valid_until,first_claimed_at,claimed_by_other}",
+   "Notes": "curl w/ ES256 read-claim JWT"
+  },
+  {
+   "US_ID": "US-K2b",
+   "Status": "PASS",
+   "Actual": "no Authorization -> 401 {error:unauthorized}, x-correlation-id present",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K2c",
+   "Status": "PASS",
+   "Actual": "tampered signature -> 401 unauthorized",
+   "Notes": "curl badsig token"
+  },
+  {
+   "US_ID": "US-K2d",
+   "Status": "PASS",
+   "Actual": "expired JWT -> 401 + header www-authenticate: Bearer error=\"token_expired\"",
+   "Notes": "curl expired token, -D -"
+  },
+  {
+   "US_ID": "US-K2e",
+   "Status": "PASS",
+   "Actual": "code INVALID -> 400 {error:invalid_code_format}",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K2f",
+   "Status": "PASS",
+   "Actual": "well-formed unknown B-ZZZZZZ -> 404 {error:batch_not_found}",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K2g",
+   "Status": "PASS",
+   "Actual": "unpublished B-BC3SG6 -> 404 batch_not_found (identical to unknown, no draft leak)",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K2h",
+   "Status": "PASS",
+   "Actual": "expired batch B-KTQKN5 -> 410 {error:batch_expired,expired_at}",
+   "Notes": "curl after seeding valid_until in past"
+  },
+  {
+   "US_ID": "US-K2i",
+   "Status": "PASS",
+   "Actual": "after claim, GET B-TBBD3V -> claimed_by_other=true",
+   "Notes": "curl + prior K3a claim"
+  },
+  {
+   "US_ID": "US-K2j",
+   "Status": "PASS",
+   "Actual": "40 parallel reqs -> 18x200 / 22x429 (token bucket cap10 refill10/s per iss)",
+   "Notes": "parallel curl"
+  },
+  {
+   "US_ID": "US-K2k",
+   "Status": "PASS",
+   "Actual": "x-correlation-id echoed when sent (uat-corr-123) and generated UUID when absent",
+   "Notes": "curl -D -"
+  },
+  {
+   "US_ID": "US-K2l",
+   "Status": "PASS",
+   "Actual": "POST /api/v1/auth/token valid client creds -> 200 {access_token(ES256),token_type:Bearer,expires_in:900}",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "NEG-K2a",
+   "Status": "PASS",
+   "Actual": "wrong client_secret -> 401 {error:invalid_client}",
+   "Notes": "curl; constant-time compare in route"
+  },
+  {
+   "US_ID": "NEG-K2b",
+   "Status": "PASS",
+   "Actual": "pcr_certificate_url is a Supabase storage /object/sign/...?token=... signed URL (not /object/public/)",
+   "Notes": "K2a payload inspection; getSignedPcrCertUrl createSignedUrl"
+  },
+  {
+   "US_ID": "US-K3a",
+   "Status": "PASS",
+   "Actual": "POST claim B-TBBD3V valid body -> 200 {ok:true,batch_code,claimed_at}",
+   "Notes": "curl; line_profile requires display_name+picture_url, line_user_id ^U[0-9a-f]{32}$"
+  },
+  {
+   "US_ID": "US-K3b",
+   "Status": "PASS",
+   "Actual": "re-claim same correlation_id -> 200 same claimed_at (2026-05-17T12:02:45Z) ; DB shows 1 row, audit batch_claim_repeat",
+   "Notes": "curl + DB assert"
+  },
+  {
+   "US_ID": "US-K3c",
+   "Status": "PASS",
+   "Actual": "re-claim diff correlation_id same user -> 200 original claimed_at preserved; DB pond_id stayed 'pond-1' (NOT overwritten by pond-CHANGED), original correlation_id kept",
+   "Notes": "curl + DB assert batch_claims"
+  },
+  {
+   "US_ID": "US-K3d",
+   "Status": "PASS",
+   "Actual": "different line_user_id -> 409 {error:claimed_by_other} no PII in body",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K3e",
+   "Status": "PASS",
+   "Actual": "missing pond_id -> 400 {error:invalid_body,field:pond_id}; bad line_user_id -> field:line_user_id (deterministic first-offending field)",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K3f",
+   "Status": "PASS",
+   "Actual": "expired batch claim -> 410 {error:batch_expired,expired_at}",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K3g",
+   "Status": "PASS",
+   "Actual": "unpublished batch claim -> 404 {error:batch_not_found}",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K3h",
+   "Status": "PASS",
+   "Actual": "batches.first_claimed_at = first claim claimed_at (2026-05-17T12:02:45.103627+00) after K3a",
+   "Notes": "DB assert"
+  },
+  {
+   "US_ID": "US-K3i",
+   "Status": "PASS",
+   "Actual": "40 parallel claim reqs -> 12x200 / 28x429 (rate limit per iss)",
+   "Notes": "parallel curl"
+  },
+  {
+   "US_ID": "NEG-K3a",
+   "Status": "PASS",
+   "Actual": "missing JWT on claim -> 401 {error:unauthorized}",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K4a",
+   "Status": "PASS",
+   "Actual": "Publish-warning modal opens from batch detail for owner (e2e-test owner). RBAC alert:close=['owner','counter_staff'] gates it",
+   "Notes": "Playwright + lib/rbac.ts; screenshot US-K4a.png"
+  },
+  {
+   "US_ID": "US-K4b",
+   "Status": "PASS",
+   "Actual": "Modal collects severity (ข้อมูลทั่วไป/คำเตือน/ฉุกเฉิน = info/warning/critical), หัวข้อ(title), รายละเอียด(body), คำแนะนำ(action); submit disabled until complete",
+   "Notes": "Playwright; screenshot US-K4b.png"
+  },
+  {
+   "US_ID": "US-K4c",
+   "Status": "FIX",
+   "Actual": "After service-client fix: publishBatchWarning inserted crm_event_log row corr=561ea0f2-... severity=warning + audit_log batch_warning_published; returns correlationId",
+   "Notes": "Was FAIL (RLS blocked). Root cause + fix below. Playwright + DB assert"
+  },
+  {
+   "US_ID": "US-K4d",
+   "Status": "PASS",
+   "Actual": "critical severity -> inline delivery attempted (<=3s timeout): row corr=9533cf04-... attempts=1 last_error='fetch failed' delivered_at=null (LINE bot :3100 offline). Inline-attempt+timeout+fallback mechanism verified; 2xx-delivered leg BLOCKED-EXTERNAL (no live bot)",
+   "Notes": "Playwright + DB assert; screenshot US-K4d.png"
+  },
+  {
+   "US_ID": "US-K4e",
+   "Status": "PASS",
+   "Actual": "warning severity -> enqueue only: row inserted attempts=0 delivered_at=null, NO inline deliverBatchWarning call (code: only severity==='critical' delivers)",
+   "Notes": "DB assert (UAT K4 retest row attempts=0) + code"
+  },
+  {
+   "US_ID": "US-K4f",
+   "Status": "PASS",
+   "Actual": "cron/deliver-crm-events selects delivered_at IS NULL AND attempts<12; on failure attempts++ & last_error set (verified live: corr aaaaaaaa-..001 0->1 'fetch failed'). delivered_at-on-2xx is the result.ok branch (code-verified; 2xx leg BLOCKED-EXTERNAL no live bot)",
+   "Notes": "curl cron + DB assert"
+  },
+  {
+   "US_ID": "US-K4g",
+   "Status": "PASS",
+   "Actual": "seeded row attempts=12 NOT selected by cron (scanned=1, only attempts=0 row); .lt('attempts',12)",
+   "Notes": "curl cron + DB assert (had_attempt=false on the 12 row)"
+  },
+  {
+   "US_ID": "US-K4h",
+   "Status": "PASS",
+   "Actual": "cron no secret -> 401; wrong secret -> 401; valid CRON_SECRET -> 200 (timingSafeEqual)",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K4i",
+   "Status": "PASS",
+   "Actual": "webhook-client signs iss=hatchery-crm aud=line-bot-webhook (FLOW_AUD.webhook) via CRM_WEBHOOK_JWT_PRIVATE_KEY — distinct key pair/aud from read-side (aud=hatchery-crm)",
+   "Notes": "code: lib/line-bot/webhook-client.ts + lib/aquawise-core/jwt.ts"
+  },
+  {
+   "US_ID": "US-K4j",
+   "Status": "PASS",
+   "Actual": "On successful publish the modal closes (error path keeps modal open w/ error — proven by pre-fix attempt). DB write+audit confirm success path. Toast (sonner) auto-dismissed before screenshot",
+   "Notes": "Playwright + DB; screenshot US-K4j.png"
+  },
+  {
+   "US_ID": "US-K4k",
+   "Status": "PASS",
+   "Actual": "Mock-mode: isMockMode() returns {correlationId,delivered:false} BEFORE any outbound; but live path inserts crm_event_log. (live USE_MOCK=false here; mock-skip is code-verified branch at actions.ts top of publishBatchWarning)",
+   "Notes": "code review; live env is non-mock so insert occurs (K4c)"
+  },
+  {
+   "US_ID": "NEG-K4a",
+   "Status": "PASS",
+   "Actual": "lab_tech & auditor excluded from alert:close (RULES['alert:close']=['owner','counter_staff']); publishBatchWarning throws 'บทบาทของคุณไม่มีสิทธิ์' for them",
+   "Notes": "lib/rbac.ts + actions.ts can() guard"
+  },
+  {
+   "US_ID": "NEG-K4b",
+   "Status": "PASS",
+   "Actual": "retry cron passes row.correlation_id from DB into deliverBatchWarning — never regenerates. Live: corr aaaaaaaa-..001 unchanged after retry (attempts 0->1)",
+   "Notes": "code + DB assert"
+  },
+  {
+   "US_ID": "US-K5a",
+   "Status": "PASS",
+   "Actual": "GET /api/v1/batches?active=true -> 200 {batches:[{batch_code,valid_until}...]} only published & valid_until>now",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K5b",
+   "Status": "PASS",
+   "Actual": "empty active set -> 200 {batches:[]}",
+   "Notes": "curl after temporarily unpublishing all (restored)"
+  },
+  {
+   "US_ID": "US-K5c",
+   "Status": "PASS",
+   "Actual": "missing JWT -> 401 unauthorized",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K5d",
+   "Status": "PASS",
+   "Actual": "?active=true&foo=1 -> 400 unsupported_query; ?bogus=1 -> 400 (params.size!==1 || active!='true')",
+   "Notes": "curl"
+  },
+  {
+   "US_ID": "US-K5e",
+   "Status": "PASS",
+   "Actual": "40 parallel -> 5x200 / 35x429 rate limited per iss",
+   "Notes": "parallel curl"
+  },
+  {
+   "US_ID": "US-K5f",
+   "Status": "PASS",
+   "Actual": "payload keys per item exactly ['batch_code','valid_until'] — no nursery PII/commercial data",
+   "Notes": "curl + key inspection"
+  },
+  {
+   "US_ID": "US-K5g",
+   "Status": "PASS",
+   "Actual": "server log: '[v0] K5 list-active correlation_id=<uuid> count=<n> status=<s> latency_ms=<n>'",
+   "Notes": "/tmp/nursery-dev.log grep"
+  },
+  {
+   "US_ID": "US-K6a",
+   "Status": "PASS",
+   "Actual": "batches.species text NOT NULL DEFAULT 'vannamei'; CHECK species IN ('vannamei','monodon')",
+   "Notes": "pg_constraint batches_species_chk + column_default"
+  },
+  {
+   "US_ID": "NEG-K6a",
+   "Status": "PASS",
+   "Actual": "UPDATE species='tilapia' -> ERROR 23514 violates batches_species_chk",
+   "Notes": "execute_sql rejected"
+  },
+  {
+   "US_ID": "US-K6b",
+   "Status": "PASS",
+   "Actual": "database.types.ts includes species on batches (count 3 occurrences incl batches Row/Insert/Update)",
+   "Notes": "grep"
+  },
+  {
+   "US_ID": "US-K6c",
+   "Status": "PASS",
+   "Actual": "K2 read response includes species:'vannamei'",
+   "Notes": "K2a payload"
+  },
+  {
+   "US_ID": "US-K6d",
+   "Status": "PASS",
+   "Actual": "Add-batch modal has 'ชนิดสัตว์น้ำ' species selector options [vannamei,monodon], default value=vannamei",
+   "Notes": "Playwright DOM inspect; screenshot US-K6d.png"
+  }
+ ]
+}

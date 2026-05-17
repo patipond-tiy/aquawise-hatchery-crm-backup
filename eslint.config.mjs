@@ -43,9 +43,14 @@ const config = [
         {
           // §18(B) — no role-string branching; use can(role, action).
           // Matches `<x>.role === 'owner'` / `!==` for any of the 4 roles
-          // (either operand order).
+          // (either operand order). NOTE: `left ~ right` is NOT a valid
+          // ESQuery relationship inside a BinaryExpression (the sibling
+          // combinator does not bridge the left/right child slots), so the
+          // previous selector silently matched nothing. `:has(...):has(...)`
+          // is the correct form — it fires whenever the comparison touches a
+          // `.role` member and a role-name literal in either operand order.
           selector:
-            "BinaryExpression[operator=/^(===|!==)$/] > MemberExpression[property.name='role'] ~ Literal[value=/^(owner|counter_staff|lab_tech|auditor)$/]",
+            "BinaryExpression[operator=/^(===|!==)$/]:has(MemberExpression[property.name='role']):has(Literal[value=/^(owner|counter_staff|lab_tech|auditor)$/])",
           message:
             "Do not branch on role strings. Use can(role, action) from lib/rbac. See code-design.md §9 and §18(B).",
         },
