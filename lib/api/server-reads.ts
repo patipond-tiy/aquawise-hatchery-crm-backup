@@ -560,12 +560,18 @@ export async function getCurrentUserServer(): Promise<CurrentUser | null> {
 }
 
 export async function listTeamServer(): Promise<TeamMember[]> {
-  const { listTeam } = await import('@/lib/api/supabase');
   if (mockActive()) {
     const { listTeam: mockListTeam } = await import('@/lib/mock/api');
     return mockListTeam();
   }
-  return listTeam();
+  // Real roster (MOCK-TO-PROD §3). `fetchTeam()` already role-gates via
+  // currentNurseryScope() before touching the service-role admin client;
+  // calling it directly here keeps the RSC path off the browser facade
+  // (MOCK-TO-PROD §7).
+  const { fetchTeam } = await import(
+    '@/app/[locale]/(dashboard)/settings/team/actions'
+  );
+  return fetchTeam();
 }
 
 export async function getScorecardSettingsServer(): Promise<ScorecardSettings> {

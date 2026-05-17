@@ -30,7 +30,7 @@ import type {
   QuoteStatus,
 } from '@/lib/types';
 import type { AddBatchInput, AddCustomerInput } from '@/lib/mock/api';
-import { PRICES, TEAM, NURSERY } from '@/lib/mock/data';
+import { PRICES, NURSERY } from '@/lib/mock/data';
 
 function rowToCustomer(
   row: {
@@ -521,8 +521,17 @@ export async function getPrices(): Promise<Prices> {
 }
 
 export async function listTeam(): Promise<TeamMember[]> {
-  // Team queries auth.users which is restricted; surface via a server action when ready.
-  return TEAM;
+  // Real team roster (MOCK-TO-PROD §3 RESOLVED). `auth.users` is restricted
+  // to PostgREST, so the member→identity join needs the service-role admin
+  // API — which must stay server-side and role-gated (conformance-gate §3 +
+  // D-007 / SF-010). This browser-facade method therefore delegates to the
+  // `fetchTeam()` server action (server actions are callable from the
+  // client and run on the server), scoped to the caller's nursery. No
+  // static `TEAM` const remains.
+  const { fetchTeam } = await import(
+    '@/app/[locale]/(dashboard)/settings/team/actions'
+  );
+  return fetchTeam();
 }
 
 export async function getScorecardSettings(): Promise<ScorecardSettings> {
