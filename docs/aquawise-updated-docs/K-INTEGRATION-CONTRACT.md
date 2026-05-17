@@ -96,4 +96,25 @@ Diff the §3 audiences / §4 regex / §5 response / §6 claim / §7 payload stat
 
 ---
 
-*End of contract. Implementations conform; they do not reinterpret. Contract changes go to the umbrella source, then re-mirror — never edited locally.*
+## Ratified
+
+**Status: RATIFIED — 2026-05-17** (live cross-process e2e green; both products conform).
+
+- **Verified by:** autonomous WS4 (deep-executor, Opus 4.7 1M) — live producer↔consumer handshake against dev infra (nursery-crm `:3000` + live `supabase-hatchery`; line-bot `:3100` + live `supabase-linebot-staging`).
+- **Evidence:** `aquawise-ecosystem/docs/temp-docs/epic-k-e2e-evidence.md` (step-by-step request/response, status codes, correlation ids, dedup proof, confused-deputy live reject, both-DB restore).
+- **Commit SHAs at ratification:**
+  - nursery-crm `main` — producer side baseline `162362a` (Epic K K1–K6 producer); contract-ratification commit appended on `main`.
+  - line-bot `launch-prep` — consumer side baseline `bb85874` (Epic K K1–K13 consumer); contract-ratification + e2e WebSocket-polyfill wiring fix committed on `launch-prep`.
+- **What was proven live (contract sections):**
+  - §3 JWT model — token-refresh mint (`iss=line-bot aud=hatchery-crm` ES256 ≤900s); webhook (`iss=hatchery-crm aud=line-bot-webhook` ES256 ≤300s). **Confused-deputy: a read-side `aud=hatchery-crm` token presented to the webhook endpoint is rejected 401 — proven live both by signature (`bad_signature`) and, in isolation, by audience (`bad_audience`).** `alg:none` rejected (`bad_alg`).
+  - §4/§5 read API — regex 400, 401, 404 (unknown == unpublished, no draft leak), 410 `batch_expired`, 200 `BatchReadResponse` (frozen `hatchery_*`, `species`, `pcr`, signed `pcr_certificate_url`), `x-correlation-id` observability.
+  - §6 claim — 200 happy, idempotent (same/diff correlation_id → original `claimed_at` preserved, never overwritten), 409 `claimed_by_other` (no PII), 400 `invalid_body{field}`.
+  - §7 webhook — 200 accept + fan-out invocation (recipient resolution `batches→pond_batches→ponds→line_users` resolved live), `crm_event_log.correlation_id` UNIQUE idempotent redelivery (200 `duplicate`, no second row, no re-fan-out).
+  - §8 list-active — `?active=true` 200 (published & unexpired only), `?other` 400 `unsupported_query`.
+  - Consumer path — the real line-bot `claimBatchForPondFlow` drove the full live chain (CRM token → `getBatch` → local `claim_batch_for_pond` RPC → CRM `claim` → K7 PCR Flex), persisting consistent rows in **both** live databases.
+- **ADR-018:** already reconciled/superseded to §3 (line-bot `docs/bmad/architecture.md` ADR-018 header dated 2026-05-15 marks it SUPERSEDED; §2 states the two-keypair/two-audience model; the single `"both services trust the same key"` occurrence is the sentence declaring it superseded — contract §10 grep satisfied). No further supersede edit required.
+- **Residual (not contract defects):** actual LINE `pushMessage` delivery to staging test users returns HTTP 400 (users not subscribed to the staging channel) — the producer→consumer handshake, fan-out resolution, and idempotency are fully proven; only the terminal LINE platform delivery to unsubscribed test accounts is unexercised (external platform constraint, matches the documented honest-stub posture).
+
+---
+
+*End of contract. Implementations conform; they do not reinterpret. Contract changes go to the umbrella source, then re-mirror — never edited locally. The `## Ratified` section records cross-product e2e sign-off and is appended in-place per the WS4 mandate (the umbrella `aquawise-docs/K-INTEGRATION-CONTRACT.md` source file does not exist; the two in-repo mirrors are byte-identical and are the operative copies).*
