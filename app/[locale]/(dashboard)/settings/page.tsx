@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Profile } from './profile-tab';
 import { Notifications } from './notifications-tab';
 import { RestockThresholds } from './restock-thresholds-tab';
@@ -94,6 +95,36 @@ export default function SettingsPage() {
       {tab === 'team' && <Team />}
       {tab === 'data' && <DataExport />}
       {tab === 'billing' && <Billing />}
+
+      {/* Story X1 — Operations: dead-letter / failed-message ops. The
+          target page enforces the owner-only `ops:view` guard server-side
+          (non-owners are redirected back here). */}
+      <div
+        style={{
+          marginTop: 32,
+          paddingTop: 20,
+          borderTop: '1px solid var(--color-line)',
+        }}
+      >
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            color: 'var(--color-ink-4)',
+            textTransform: 'uppercase',
+            marginBottom: 10,
+          }}
+        >
+          Operations
+        </div>
+        <Link
+          href="/th/settings/messaging-failures"
+          className="aw3-btn aw3-btn-ghost"
+        >
+          ข้อความที่ส่งไม่สำเร็จ
+        </Link>
+      </div>
     </div>
   );
 }

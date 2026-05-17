@@ -46,6 +46,37 @@
       }
     }
   },
+  "settings": {
+    "messagingFailures": {
+      "title": "Failed Messages",
+      "subtitle": "Messages that failed after all retries — retry, edit, or resolve them",
+      "empty": "No failed messages",
+      "unknown_customer": "Unknown customer",
+      "error": "Something went wrong. Please try again.",
+      "invalid_json": "The payload is not valid JSON",
+      "back": "Back to settings",
+      "columns": {
+        "customer": "Customer",
+        "template": "Template",
+        "preview": "Preview",
+        "error": "Error",
+        "attempts": "Attempts",
+        "failed_at": "Failed at"
+      },
+      "actions": {
+        "retry": "Retry",
+        "edit_retry": "Edit & retry",
+        "save_retry": "Save & retry",
+        "resolve": "Mark resolved",
+        "cancel": "Cancel",
+        "retry_selected": "Retry selected ({count})"
+      },
+      "confirm_bulk_retry": "Retry {count} messages?",
+      "retry_success": "Added back to queue",
+      "resolve_success": "Marked as resolved",
+      "digest_message": "{count} messages need attention"
+    }
+  },
   "nav": {
     "dashboard": "Dashboard",
     "customers": "Customers",

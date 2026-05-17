@@ -46,6 +46,37 @@
       }
     }
   },
+  "settings": {
+    "messagingFailures": {
+      "title": "ข้อความที่ส่งไม่สำเร็จ",
+      "subtitle": "ข้อความที่ส่งไม่สำเร็จหลังลองครบทุกครั้ง เลือกลองใหม่ แก้ไข หรือปิดเคส",
+      "empty": "ไม่มีข้อความที่ค้างอยู่",
+      "unknown_customer": "ไม่ทราบลูกค้า",
+      "error": "เกิดข้อผิดพลาด กรุณาลองใหม่",
+      "invalid_json": "รูปแบบข้อมูล JSON ไม่ถูกต้อง",
+      "back": "กลับไปหน้าตั้งค่า",
+      "columns": {
+        "customer": "ลูกค้า",
+        "template": "รูปแบบ",
+        "preview": "ตัวอย่าง",
+        "error": "ข้อผิดพลาด",
+        "attempts": "ครั้งที่ลอง",
+        "failed_at": "วันที่ล้มเหลว"
+      },
+      "actions": {
+        "retry": "ลองใหม่",
+        "edit_retry": "แก้ไขแล้วส่งใหม่",
+        "save_retry": "บันทึกแล้วส่งใหม่",
+        "resolve": "ปิดเคส",
+        "cancel": "ยกเลิก",
+        "retry_selected": "ลองใหม่ที่เลือก ({count})"
+      },
+      "confirm_bulk_retry": "ยืนยันการส่งใหม่ {count} ข้อความ?",
+      "retry_success": "เพิ่มในคิวส่งใหม่แล้ว",
+      "resolve_success": "ปิดเคสแล้ว",
+      "digest_message": "{count} ข้อความรอการแก้ไข"
+    }
+  },
   "nav": {
     "dashboard": "หน้าหลัก",
     "customers": "ลูกค้า",

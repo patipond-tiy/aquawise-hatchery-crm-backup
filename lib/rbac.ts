@@ -13,6 +13,7 @@ type Action =
   | 'settings:write'
   | 'broadcast:write'
   | 'data:export'
+  | 'ops:view'
   | 'billing:manage';
 
 // Roles per docs/product-spec/08-roles-and-rls.md:
@@ -33,6 +34,10 @@ const RULES: Record<Action, Role[]> = {
   'settings:write':  ['owner'],
   'broadcast:write': ['owner'],
   'data:export':     ['owner', 'counter_staff', 'auditor'],
+  // ops:view — "can view operational internals" (dead-letter / messaging
+  // failures, X1). Owner-only; distinct from billing:manage. counter_staff,
+  // lab_tech, auditor do NOT have it.
+  'ops:view':        ['owner'],
   'billing:manage':  ['owner'],
 };
 

@@ -1591,7 +1591,13 @@ export type Database = {
         | "concern"
         | "quiet";
       line_event_kind: "template_push" | "chat_nudge";
-      line_event_status: "pending" | "sending" | "sent" | "failed" | "dead";
+      line_event_status:
+        | "pending"
+        | "sending"
+        | "sent"
+        | "failed"
+        | "dead"
+        | "resolved";
       nursery_role: "owner" | "counter_staff" | "lab_tech" | "auditor";
       pcr_status: "clean" | "flagged" | "pending";
     };

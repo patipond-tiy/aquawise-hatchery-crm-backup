@@ -18,6 +18,7 @@ const EXPECTED: Record<string, Record<Role, boolean>> = {
   'settings:write':  { owner: true,  counter_staff: false, lab_tech: false, auditor: false },
   'broadcast:write': { owner: true,  counter_staff: false, lab_tech: false, auditor: false },
   'data:export':     { owner: true,  counter_staff: true,  lab_tech: false, auditor: true  },
+  'ops:view':        { owner: true,  counter_staff: false, lab_tech: false, auditor: false },
   'billing:manage':  { owner: true,  counter_staff: false, lab_tech: false, auditor: false },
 };
 

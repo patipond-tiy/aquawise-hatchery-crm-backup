@@ -313,6 +313,80 @@ export async function listLineEventsServer(
   }));
 }
 
+export type DeadEvent = {
+  id: string;
+  customerId: string | null;
+  customerName: string | null;
+  template: string;
+  payload: unknown;
+  payloadPreview: string;
+  lastError: string | null;
+  attempts: number;
+  firstFailedAt: string;
+};
+
+/**
+ * Story X1 — list `line_outbound_events` stuck in `dead` (exhausted retries)
+ * for the caller's nursery. RLS scopes the rows to the caller's
+ * `nursery_id` (no cross-tenant leak); we join `customers` for the display
+ * name. Server cookie-scoped client (RSC page, MOCK-TO-PROD §7). Mock mode
+ * returns a small seed so the dev click-through works.
+ */
+export async function listDeadEventsServer(): Promise<DeadEvent[]> {
+  if (mockActive()) {
+    return [
+      {
+        id: 'dead-mock-1',
+        customerId: 'cust-mock-1',
+        customerName: 'พี่ชาติ ฟาร์มทดสอบ',
+        template: 'restock_reminder',
+        payload: { cycle_id: 'C-MOCK', size: 'PL12' },
+        payloadPreview: '{"cycle_id":"C-MOCK","size":"PL12"}',
+        lastError: 'LINE push failed: 429 rate limited',
+        attempts: 5,
+        firstFailedAt: new Date(Date.now() - 86_400_000).toISOString(),
+      },
+    ];
+  }
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('line_outbound_events')
+    .select(
+      'id, customer_id, template, payload, last_error, attempts, created_at, customers(name)'
+    )
+    .eq('status', 'dead')
+    .order('created_at', { ascending: false });
+  type Row = {
+    id: string;
+    customer_id: string | null;
+    template: string;
+    payload: unknown;
+    last_error: string | null;
+    attempts: number;
+    created_at: string;
+    customers: { name: string | null } | { name: string | null }[] | null;
+  };
+  return ((data as Row[] | null) ?? []).map((r) => {
+    const cust = Array.isArray(r.customers) ? r.customers[0] : r.customers;
+    const payloadStr = JSON.stringify(r.payload ?? {});
+    return {
+      id: r.id,
+      customerId: r.customer_id,
+      customerName: cust?.name ?? null,
+      template: r.template,
+      payload: r.payload,
+      payloadPreview:
+        payloadStr.length > 120
+          ? `${payloadStr.slice(0, 120)}…`
+          : payloadStr,
+      lastError: r.last_error,
+      attempts: r.attempts,
+      firstFailedAt: r.created_at,
+    };
+  });
+}
+
 export async function getBatchServer(
   id: string
 ): Promise<BatchDetail | null> {

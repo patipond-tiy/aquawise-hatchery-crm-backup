@@ -59,8 +59,63 @@ async function handle(req: NextRequest) {
     }
   }
 
+  // Story X1 AC#7 — once-daily dead-letter digest. For every nursery with
+  // ≥1 `dead` event, enqueue one `dead_letter_digest` event. Idempotent per
+  // nursery per calendar day via the partial unique index on
+  // (nursery_id, payload->>'digest_date') (migration 030) — a second run the
+  // same day hits 23505 and is skipped.
+  let digests = 0;
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const { data: deadRows } = await supabase
+    .from('line_outbound_events')
+    .select('nursery_id')
+    .eq('status', 'dead');
+  const countByNursery = new Map<string, number>();
+  for (const row of deadRows ?? []) {
+    countByNursery.set(
+      row.nursery_id,
+      (countByNursery.get(row.nursery_id) ?? 0) + 1
+    );
+  }
+  for (const [nurseryId, count] of countByNursery) {
+    // Respect the nursery notification preference (reuse the restock flag
+    // as the ops-notification gate — no dedicated dead-letter toggle, and
+    // restock is the closest ops-relevant preference).
+    const { data: ns } = await supabase
+      .from('notification_settings')
+      .select('restock')
+      .eq('nursery_id', nurseryId)
+      .maybeSingle();
+    if (ns && ns.restock === false) continue;
+
+    // Idempotent per nursery per calendar day — skip if a digest audit row
+    // already exists for this nursery + digest_date (index-backed check,
+    // migration 030).
+    const { count: existing } = await supabase
+      .from('audit_log')
+      .select('id', { count: 'exact', head: true })
+      .eq('nursery_id', nurseryId)
+      .eq('action', 'dead_letter_digest')
+      .eq('payload->>digest_date', today);
+    if ((existing ?? 0) > 0) continue;
+
+    const { error } = await supabase.from('audit_log').insert({
+      nursery_id: nurseryId,
+      user_id: null,
+      action: 'dead_letter_digest',
+      payload: { count, digest_date: today } as Json,
+    });
+    if (!error) digests += 1;
+    else
+      console.error(
+        '[v0] dead-letter digest error',
+        nurseryId,
+        error.message
+      );
+  }
+
   console.log(
-    `[v0] cron/daily evaluated=${queued.length} enqueued=${enqueued} deduped=${deduped}`
+    `[v0] cron/daily evaluated=${queued.length} enqueued=${enqueued} deduped=${deduped} digests=${digests}`
   );
 
   return NextResponse.json({
@@ -68,6 +123,7 @@ async function handle(req: NextRequest) {
     evaluated: queued.length,
     enqueued,
     deduped,
+    digests,
   });
 }
 
